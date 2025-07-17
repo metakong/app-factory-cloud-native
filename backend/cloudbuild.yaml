@@ -8,3 +8,5 @@ steps:
       - '--project=app-factory-v2'
       - '--region=us-central1'
     dir: 'backend'
+options:
+  logging: CLOUD_LOGGING_ONLY

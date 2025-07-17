@@ -6,7 +6,6 @@ steps:
       - 'run'
       - 'compose'
       - 'up'
-      - '--file=compose.yaml'
       - '--project=app-factory-v2'
       - '--region=us-central1'
     dir: 'backend'

@@ -1,0 +1,10 @@
+steps:
+  - name: 'gcr.io/google.com/cloudsdktool/google-cloud-cli'
+    entrypoint: 'gcloud'
+    args:
+      - 'run'
+      - 'compose'
+      - 'up'
+      - '--project=app-factory-v2'
+      - '--region=us-central1'
+    dir: 'backend'

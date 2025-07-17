@@ -1,0 +1,50 @@
+services:
+  mcp-gateway:
+    image: docker/mcp-gateway:latest
+    ports:
+      - "8811:8811"
+    command:
+      - "--transport=sse"
+      - "--servers=github-tool,web-scraper-tool,play-publisher-tool"
+  discovery-cycle-service:
+    build:
+      context: ./services/discovery_cycle
+    env_file:
+      - ./.env
+  cso-vetting-service:
+    build:
+      context: ./services/cso_vetting
+    env_file:
+      - ./.env
+  cpo-analysis-service:
+    build:
+      context: ./services/cpo_analysis
+    env_file:
+      - ./.env
+  ai-developer-agent-service:
+    build:
+      context: ./services/ai_developer
+    env_file:
+      - ./.env
+  cmo-publishing-agent:
+    build:
+      context: ./services/cmo_publishing
+    env_file:
+      - ./.env
+  github-tool:
+    image: ghcr.io/github/github-mcp-server:latest
+    env_file:
+      - ./.env
+  web-scraper-tool:
+    build:
+      context: ./tools/robust_web_scraper
+    env_file:
+      - ./.env
+    x-google-run-job:
+      tasks: 1
+      timeout: 3600s
+  play-publisher-tool:
+    build:
+      context: ./tools/google_play_publisher
+    env_file:
+      - ./.env

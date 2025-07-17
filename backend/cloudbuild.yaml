@@ -1,13 +1,9 @@
 steps:
   - name: 'gcr.io/google.com/cloudsdktool/google-cloud-cli'
-    entrypoint: 'gcloud'
+    entrypoint: 'bash'
     args:
-      - 'alpha'
-      - 'run'
-      - 'compose'
-      - 'up'
-      - '--project=app-factory-v2'
-      - '--region=us-central1'
+      - '-c'
+      - 'apt-get update && apt-get install -y google-cloud-cli-run-compose && gcloud alpha run compose up --project=app-factory-v2 --region=us-central1'
     dir: 'backend'
 options:
   logging: CLOUD_LOGGING_ONLY

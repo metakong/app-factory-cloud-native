@@ -2,6 +2,7 @@ steps:
   - name: 'gcr.io/google.com/cloudsdktool/google-cloud-cli'
     entrypoint: 'gcloud'
     args:
+      - 'alpha'
       - 'run'
       - 'compose'
       - 'up'

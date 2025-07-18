@@ -1,15 +1,4 @@
 steps:
-# Step 1: Build all container images defined in compose.yaml
-- name: 'gcr.io/cloud-builders/docker'
-  args: ['compose', '-f', 'compose.yaml', 'build']
-  dir: 'backend'
-
-# Step 2: Push the built images to Google Artifact Registry
-- name: 'gcr.io/cloud-builders/docker'
-  args: ['compose', '-f', 'compose.yaml', 'push']
-  dir: 'backend'
-
-# Step 3: Install the 'run-compose' component and then deploy the services
 - name: 'gcr.io/google.com/cloudsdktool/google-cloud-cli'
   entrypoint: 'bash'
   args:

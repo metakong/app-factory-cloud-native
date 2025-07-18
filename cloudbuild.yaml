@@ -13,11 +13,12 @@ steps:
 - name: 'gcr.io/google.com/cloudsdktool/google-cloud-cli'
   entrypoint: 'gcloud'
   args:
-    # CORRECTED COMMAND: Added 'alpha' to the command track
     - 'alpha'
     - 'run'
     - 'compose'
     - 'up'
+    # FINAL FIX: Explicitly set the deployment region
+    - '--region=us-central1'
   dir: 'backend'
 
 options:

@@ -9,16 +9,12 @@ steps:
   args: ['compose', '-f', 'compose.yaml', 'push']
   dir: 'backend'
 
-# Step 3: Deploy all services and jobs to Cloud Run using the compose file
+# Step 3: Install the 'run-compose' component and then deploy the services
 - name: 'gcr.io/google.com/cloudsdktool/google-cloud-cli'
-  entrypoint: 'gcloud'
+  entrypoint: 'bash'
   args:
-    - 'alpha'
-    - 'run'
-    - 'compose'
-    - 'up'
-    # FINAL FIX: Explicitly set the deployment region
-    - '--region=us-central1'
+    - '-c'
+    - 'apt-get update && apt-get install -y google-cloud-cli-run-compose && gcloud alpha run compose up --region=us-central1'
   dir: 'backend'
 
 options:

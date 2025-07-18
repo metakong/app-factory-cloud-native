@@ -1,19 +1,23 @@
 steps:
+# Step 1: Build all container images defined in compose.yaml
 - name: 'gcr.io/cloud-builders/docker'
   args: ['compose', '-f', 'compose.yaml', 'build']
   dir: 'backend'
+
+# Step 2: Push the built images to Google Artifact Registry
 - name: 'gcr.io/cloud-builders/docker'
   args: ['compose', '-f', 'compose.yaml', 'push']
   dir: 'backend'
-- name: 'google/cloud-sdk:latest'
+
+# Step 3: Deploy all services and jobs to Cloud Run using the compose file
+- name: 'gcr.io/google.com/cloudsdktool/google-cloud-cli'
   entrypoint: 'gcloud'
   args:
-    - 'alpha'
     - 'run'
     - 'compose'
     - 'up'
-    - '--project=app-factory-v2'
-    - '--region=us-central1'
+    # No --file argument is needed when 'dir' is set correctly
   dir: 'backend'
+
 options:
   logging: CLOUD_LOGGING_ONLY

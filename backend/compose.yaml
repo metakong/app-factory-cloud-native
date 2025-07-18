@@ -9,21 +9,36 @@ services:
   discovery-cycle-service:
     build:
       context: ./services/discovery_cycle
+    x-google-run-service:
+      service-account: discovery-cycle-sa@app-factory-v2.iam.gserviceaccount.com
+      ingress: internal-and-cloud-load-balancing
   cso-vetting-service:
     build:
       context: ./services/cso_vetting
+    x-google-run-service:
+      service-account: cso-vetting-sa@app-factory-v2.iam.gserviceaccount.com
+      ingress: internal-and-cloud-load-balancing
   cpo-analysis-service:
     build:
       context: ./services/cpo_analysis
+    x-google-run-service:
+      service-account: cpo-analysis-sa@app-factory-v2.iam.gserviceaccount.com
+      ingress: internal-and-cloud-load-balancing
   ai-developer-agent-service:
     build:
       context: ./services/ai_developer
+    x-google-run-service:
+      service-account: ai-developer-agent-sa@app-factory-v2.iam.gserviceaccount.com
+      ingress: internal-and-cloud-load-balancing
     x-google-secrets:
       - secret: gemini-api-key
         env: GEMINI_API_KEY
   cmo-publishing-agent:
     build:
       context: ./services/cmo_publishing
+    x-google-run-service:
+      service-account: cmo-publishing-agent-sa@app-factory-v2.iam.gserviceaccount.com
+      ingress: internal-and-cloud-load-balancing
     x-google-secrets:
       - secret: google-play-api-key
         env: GOOGLE_PLAY_API_KEY
@@ -41,3 +56,6 @@ services:
   play-publisher-tool:
     build:
       context: ./tools/google_play_publisher
+    x-google-run-job:
+      tasks: 1
+      timeout: 3600s

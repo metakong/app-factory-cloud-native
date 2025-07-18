@@ -1,1 +1,2 @@
-# Placeholder for scraping libraries like playwright, beautifulsoup4, etc.
+google-cloud-firestore==2.16.0
+google-cloud-secret-manager==2.19.0

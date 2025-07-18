@@ -13,10 +13,11 @@ steps:
 - name: 'gcr.io/google.com/cloudsdktool/google-cloud-cli'
   entrypoint: 'gcloud'
   args:
+    # CORRECTED COMMAND: Added 'alpha' to the command track
+    - 'alpha'
     - 'run'
     - 'compose'
     - 'up'
-    # No --file argument is needed when 'dir' is set correctly
   dir: 'backend'
 
 options:

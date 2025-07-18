@@ -1,9 +1,9 @@
 steps:
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['compose', '-f', 'backend/compose.yaml', 'build']
+  args: ['compose', '-f', 'compose.yaml', 'build']
   dir: 'backend'
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['compose', '-f', 'backend/compose.yaml', 'push']
+  args: ['compose', '-f', 'compose.yaml', 'push']
   dir: 'backend'
 - name: 'google/cloud-sdk:latest'
   entrypoint: 'gcloud'
@@ -12,7 +12,7 @@ steps:
     - 'run'
     - 'compose'
     - 'up'
-    - '--file=backend/compose.yaml'
+    - '--file=compose.yaml'
     - '--project=app-factory-v2'
     - '--region=us-central1'
   dir: 'backend'

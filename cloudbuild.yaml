@@ -1,9 +1,23 @@
 steps:
+# Step 1: Build all container images locally in the build worker.
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['compose', '-f', 'compose.yaml', 'build']
+  dir: 'backend'
+
+# Step 2: Push the built images to Artifact Registry.
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['compose', '-f', 'compose.yaml', 'push']
+  dir: 'backend'
+
+# Step 3: Deploy the pre-built images from the registry to Cloud Run.
 - name: 'gcr.io/google.com/cloudsdktool/google-cloud-cli'
-  entrypoint: 'bash'
+  entrypoint: 'gcloud'
   args:
-    - '-c'
-    - 'apt-get update && apt-get install -y google-cloud-cli-run-compose && gcloud alpha run compose up --region=us-central1'
+    - 'alpha'
+    - 'run'
+    - 'compose'
+    - 'up'
+    - '--region=us-central1'
   dir: 'backend'
 
 options:

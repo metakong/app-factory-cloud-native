@@ -49,10 +49,17 @@ SERVICE_ACCOUNTS=(
     "cmo-publishing-agent-sa"
 )
 
+echo "Creating service accounts if they do not exist..."
+for SA_NAME in "${SERVICE_ACCOUNTS[@]}"; do
+    gcloud iam service-accounts create $SA_NAME \
+        --display-name="$SA_NAME" \
+        --project=$PROJECT_ID || echo "Service account $SA_NAME already exists."
+done
+
 # Grant common permissions
 for SA_NAME in "${SERVICE_ACCOUNTS[@]}"; do
     SA_EMAIL="$SA_NAME@$PROJECT_ID.iam.gserviceaccount.com"
-    echo "Granting base permissions to $SA_EMAIL..."
+    echo "Granting permissions to $SA_EMAIL..."
 
     # Permission to access secrets
     gcloud projects add-iam-policy-binding $PROJECT_ID --member="serviceAccount:$SA_EMAIL" --role="roles/secretmanager.secretAccessor" --condition=None

@@ -9,7 +9,14 @@ steps:
   args: ['compose', '-f', 'compose.yaml', 'push']
   dir: 'backend'
 
-# Step 3: Deploy the now-existing images from the registry to Cloud Run.
+# Step 3: Install the run-compose component.
+- name: 'google/cloud-sdk:latest'
+  entrypoint: 'bash'
+  args:
+  - '-c'
+  - 'apt-get update && apt-get install -y google-cloud-cli-run-compose'
+
+# Step 4: Deploy the now-existing images from the registry to Cloud Run.
 - name: 'google/cloud-sdk:latest'
   entrypoint: 'gcloud'
   args:

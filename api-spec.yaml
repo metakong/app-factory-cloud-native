@@ -1,0 +1,108 @@
+# openapi2-gateway.yaml
+swagger: '2.0'
+info:
+  title: app-factory-gateway
+  description: API Gateway for the App Factory CEO Dashboard
+  version: 1.0.0
+schemes:
+  - https
+produces:
+  - application/json
+
+securityDefinitions:
+  api_key:
+    type: "apiKey"
+    name: "x-api-key"
+    in: "header"
+
+paths:
+  /vetted-ideas:
+    get:
+      summary: Get app ideas that are ready for CEO review
+      operationId: getVettedIdeas
+      security:
+        - api_key: []
+      x-google-backend:
+        address: https://discovery-cycle-service-dev-515413116650.us-central1.run.app/vetted-ideas
+      responses:
+        '200': { description: A list of app ideas. }
+    options:
+      summary: CORS support
+      operationId: corsVettedIdeas
+      responses:
+        '204': { description: No Content response. }
+  /approve-idea:
+    post:
+      summary: Approve an idea for development
+      operationId: approveIdea
+      security:
+        - api_key: []
+      x-google-backend:
+        address: https://cpo-analysis-service-dev-515413116650.us-central1.run.app/analyze
+      responses:
+        '200': { description: Idea approved. }
+    options:
+      summary: CORS support
+      operationId: corsApproveIdea
+      responses:
+        '204': { description: No Content response. }
+  /reject-idea:
+    post:
+      summary: Reject an idea
+      operationId: rejectIdea
+      security:
+        - api_key: []
+      x-google-backend:
+        address: https://discovery-cycle-service-dev-515413116650.us-central1.run.app/reject-idea
+      responses:
+        '200': { description: Idea rejected. }
+    options:
+      summary: CORS support
+      operationId: corsRejectIdea
+      responses:
+        '204': { description: No Content response. }
+  /developed-apks:
+    get:
+      summary: Get developed APKs ready for review
+      operationId: getDevelopedApks
+      security:
+        - api_key: []
+      x-google-backend:
+        address: https://ai-developer-agent-service-dev-515413116650.us-central1.run.app/developed-apks
+      responses:
+        '200': { description: A list of developed APKs. }
+    options:
+      summary: CORS support
+      operationId: corsDevelopedApks
+      responses:
+        '204': { description: No Content response. }
+  /publish-app:
+    post:
+      summary: Publish an app
+      operationId: publishApp
+      security:
+        - api_key: []
+      x-google-backend:
+        address: https://cmo-publishing-agent-dev-515413116650.us-central1.run.app/publish
+      responses:
+        '200': { description: App sent for publishing. }
+    options:
+      summary: CORS support
+      operationId: corsPublishApp
+      responses:
+        '204': { description: No Content response. }
+  /revise-apk:
+    post:
+      summary: Request revision for an APK
+      operationId: reviseApk
+      security:
+        - api_key: []
+      x-google-backend:
+        address: https://ai-developer-agent-service-dev-515413116650.us-central1.run.app/revise
+      responses:
+        '200': { description: Revision requested. }
+    options:
+      summary: CORS support
+      operationId: corsReviseApk
+      responses:
+        '204': { description: No Content response. }

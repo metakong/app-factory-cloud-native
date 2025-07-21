@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CEO Dashboard - App Factory</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>App Factory - CEO Dashboard</h1>
+
+        <div class="config-section">
+            <h2>Configuration</h2>
+            <div class="config-inputs">
+                <input type="text" id="api-gateway-url" placeholder="API Gateway URL (e.g., https://my-gateway-xxxx.a.run.app)">
+                <input type="password" id="api-key" placeholder="API Key">
+                <button id="load-data-btn">Load Data</button>
+            </div>
+             <p class="status-message" id="status-message"></p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-link active" onclick="openTab(event, 'idea-review')">Idea Review</button>
+            <button class="tab-link" onclick="openTab(event, 'apk-review')">APK Review</button>
+        </div>
+
+        <!-- Idea Review Tab -->
+        <div id="idea-review" class="tab-content" style="display: block;">
+            <h2>Ideas Awaiting Approval</h2>
+            <table id="ideas-table">
+                <thead>
+                    <tr>
+                        <th>Idea ID</th>
+                        <th>Description</th>
+                        <th>Created At</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Idea rows will be inserted here by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- APK Review Tab -->
+        <div id="apk-review" class="tab-content">
+            <h2>APKs Awaiting Review</h2>
+            <table id="apks-table">
+                <thead>
+                    <tr>
+                        <th>Idea ID</th>
+                        <th>CEO Feedback</th>
+                        <th>Download</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- APK rows will be inserted here by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+

@@ -1,26 +1,22 @@
 import os
 from flask import Flask, request, jsonify
 from shared.utils import get_logger
-from shared.gcp_client import get_from_firestore, save_to_firestore, make_internal_request, get_secret
+from shared.gcp_client import get_from_firestore, save_to_firestore, make_internal_request
 import google.generativeai as genai
 
 app = Flask(__name__)
+logger = get_logger(__name__)
+
+# The URLs for downstream services are provided by Cloud Run
+AI_DEVELOPER_AGENT_SERVICE_URL = os.environ.get("AI_DEVELOPER_AGENT_SERVICE_URL")
+
+# Configure the Gemini API client (will use Application Default Credentials)
+genai.configure()
+
 @app.route("/")
 def health_check():
     """Provides a simple health check endpoint."""
     return "OK", 200
-
-logger = get_logger(__name__)
-
-AI_DEVELOPER_AGENT_SERVICE_URL = os.environ.get("AI_DEVELOPER_AGENT_SERVICE_URL")
-
-# Configure the Gemini API client by securely fetching the key from Secret Manager
-try:
-    api_key = get_secret("gemini-api-key")
-    if api_key:
-        genai.configure(api_key=api_key)
-except Exception as e:
-    logger.error(f"Failed to configure Gemini API client: {e}")
 
 @app.route('/analyze', methods=['POST'])
 def analyze_idea():
@@ -52,7 +48,7 @@ def analyze_idea():
         The spec should include:
         1. A target user persona.
         2. A list of core features (MVP).
-        3. A proposed technology stack (e.g., Flutter with Riverpod for state management).
+        3. A proposed technology stack (Flutter with Riverpod for state management).
         4. A monetization strategy.
 
         App Idea: "{app_idea.get('description')}"

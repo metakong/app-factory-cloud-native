@@ -1,4 +1,8 @@
 services:
+  ceo-dashboard:
+    build:
+      context: ../frontend
+    image: us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/ceo-dashboard
   mcp-gateway:
     image: docker/mcp-gateway:latest
     ports:

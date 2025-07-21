@@ -47,6 +47,7 @@ SERVICE_ACCOUNTS=(
     "cpo-analysis-sa"
     "ai-developer-agent-sa"
     "cmo-publishing-agent-sa"
+    "mcp-gateway-sa"
 )
 
 echo "Creating service accounts if they do not exist..."

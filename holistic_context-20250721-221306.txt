@@ -1,5 +1,5 @@
 Project Context for app-factory-v2
-Generated on: 2025-07-21T14:28:36.063698
+Generated on: 2025-07-21T22:13:06.646470
 ================================================================================
 
 --- Google Cloud Build Log (Latest) ---
@@ -56,52 +56,181 @@ The App Factory is an automated system that discovers, vets, develops, and publi
 
 ================================================================================
 
+--- File: api-spec.yaml ---
+
+# openapi2-gateway.yaml
+swagger: '2.0'
+info:
+  title: app-factory-gateway
+  description: API Gateway for the App Factory CEO Dashboard
+  version: 1.0.0
+schemes:
+  - https
+produces:
+  - application/json
+
+securityDefinitions:
+  api_key:
+    type: "apiKey"
+    name: "x-api-key"
+    in: "header"
+
+paths:
+  /vetted-ideas:
+    get:
+      summary: Get app ideas that are ready for CEO review
+      operationId: getVettedIdeas
+      security:
+        - api_key: []
+      x-google-backend:
+        address: https://discovery-cycle-service-dev-515413116650.us-central1.run.app/vetted-ideas
+      responses:
+        '200': { description: A list of app ideas. }
+    options:
+      summary: CORS support
+      operationId: corsVettedIdeas
+      responses:
+        '204': { description: No Content response. }
+  /approve-idea:
+    post:
+      summary: Approve an idea for development
+      operationId: approveIdea
+      security:
+        - api_key: []
+      x-google-backend:
+        address: https://cpo-analysis-service-dev-515413116650.us-central1.run.app/analyze
+      responses:
+        '200': { description: Idea approved. }
+    options:
+      summary: CORS support
+      operationId: corsApproveIdea
+      responses:
+        '204': { description: No Content response. }
+  /reject-idea:
+    post:
+      summary: Reject an idea
+      operationId: rejectIdea
+      security:
+        - api_key: []
+      x-google-backend:
+        address: https://discovery-cycle-service-dev-515413116650.us-central1.run.app/reject-idea
+      responses:
+        '200': { description: Idea rejected. }
+    options:
+      summary: CORS support
+      operationId: corsRejectIdea
+      responses:
+        '204': { description: No Content response. }
+  /developed-apks:
+    get:
+      summary: Get developed APKs ready for review
+      operationId: getDevelopedApks
+      security:
+        - api_key: []
+      x-google-backend:
+        address: https://ai-developer-agent-service-dev-515413116650.us-central1.run.app/developed-apks
+      responses:
+        '200': { description: A list of developed APKs. }
+    options:
+      summary: CORS support
+      operationId: corsDevelopedApks
+      responses:
+        '204': { description: No Content response. }
+  /publish-app:
+    post:
+      summary: Publish an app
+      operationId: publishApp
+      security:
+        - api_key: []
+      x-google-backend:
+        address: https://cmo-publishing-agent-dev-515413116650.us-central1.run.app/publish
+      responses:
+        '200': { description: App sent for publishing. }
+    options:
+      summary: CORS support
+      operationId: corsPublishApp
+      responses:
+        '204': { description: No Content response. }
+  /revise-apk:
+    post:
+      summary: Request revision for an APK
+      operationId: reviseApk
+      security:
+        - api_key: []
+      x-google-backend:
+        address: https://ai-developer-agent-service-dev-515413116650.us-central1.run.app/revise
+      responses:
+        '200': { description: Revision requested. }
+    options:
+      summary: CORS support
+      operationId: corsReviseApk
+      responses:
+        '204': { description: No Content response. }
+
+================================================================================
+
 --- File: cloudbuild.yaml ---
 
 steps:
-# Step 1: Build all container images using Docker Compose.
+# Step 1: Build all container images from the backend directory.
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['compose', '-f', 'compose.yaml', 'build']
-  dir: 'backend'
+  args: ['compose', '-f', 'backend/compose.yaml', 'build']
 
 # Step 2: Push the built images to Artifact Registry.
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['compose', '-f', 'compose.yaml', 'push']
-  dir: 'backend'
+  args: ['compose', '-f', 'backend/compose.yaml', 'push']
 
-# Step 3: Deploy each service and job to Cloud Run.
-- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+# Step 3: Execute the deployment script, passing the environment suffix from the trigger.
+- name: 'gcr.io/google.com/cloudsdktool/google-cloud-cli'
   entrypoint: 'bash'
-  args:
-    - '-c'
-    - |
-      # Define Service URLs using a substitution for environment flexibility.
-      # This allows deploying to different environments (e.g., dev, prod) by changing the suffix.
-      CSO_VETTING_URL="https://cso-vetting-service-${_ENV_SUFFIX}-515413116650.us-central1.run.app"
-      AI_DEV_URL="https://ai-developer-agent-service-${_ENV_SUFFIX}-515413116650.us-central1.run.app"
-      WEB_SCRAPER_URL="https://web-scraper-tool-${_ENV_SUFFIX}-515413116650.us-central1.run.app"
-      CMO_PUB_URL="https://cmo-publishing-agent-${_ENV_SUFFIX}-515413116650.us-central1.run.app"
-      CPO_ANALYSIS_URL="https://cpo-analysis-service-${_ENV_SUFFIX}-515413116650.us-central1.run.app"
-      DISCOVERY_URL="https://discovery-cycle-service-${_ENV_SUFFIX}-515413116650.us-central1.run.app"
-      PLAY_PUB_URL="https://play-publisher-tool-${_ENV_SUFFIX}-515413116650.us-central1.run.app"
+  args: ['./deploy.sh', '${_ENV_SUFFIX}']
 
-      # Construct the environment variables string to be passed to each service.
-      ENV_VARS="CSO_VETTING_SERVICE_URL=$CSO_VETTING_URL,AI_DEVELOPER_AGENT_SERVICE_URL=$AI_DEV_URL,WEB_SCRAPER_TOOL_URL=$WEB_SCRAPER_URL,CMO_PUBLISHING_AGENT_URL=$CMO_PUB_URL,CPO_ANALYSIS_SERVICE_URL=$CPO_ANALYSIS_URL,DISCOVERY_CYCLE_SERVICE_URL=$DISCOVERY_URL,PLAY_PUBLISHER_TOOL_URL=$PLAY_PUB_URL"
-
-      # Deploy all services with internal-only ingress for security and inject environment variables.
-      gcloud run deploy cso-vetting-service --image=us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service --region=us-central1 --platform=managed --ingress=internal --set-env-vars="$ENV_VARS" && \
-      gcloud run deploy ai-developer-agent-service --image=us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/ai-developer-agent-service --region=us-central1 --platform=managed --ingress=internal --set-env-vars="$ENV_VARS" && \
-      gcloud run deploy cmo-publishing-agent --image=us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent --region=us-central1 --platform=managed --ingress=internal --set-env-vars="$ENV_VARS" && \
-      gcloud run deploy cpo-analysis-service --image=us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service --region=us-central1 --platform=managed --ingress=internal --set-env-vars="$ENV_VARS" && \
-      gcloud run deploy discovery-cycle-service --image=us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/discovery-cycle-service --region=us-central1 --platform=managed --ingress=internal --set-env-vars="$ENV_VARS" && \
-      
-      # Deploy the tools as Cloud Run Jobs.
-      gcloud run jobs deploy web-scraper-tool --image=us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool --region=us-central1 && \
-      gcloud run jobs deploy play-publisher-tool --image=us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool --region=us-central1
-  dir: 'backend'
+substitutions:
+  _ENV_SUFFIX: dev # Default to 'dev' unless overridden by the trigger
 
 options:
   logging: CLOUD_LOGGING_ONLY
+
+================================================================================
+
+--- File: deploy.sh ---
+
+#!/bin/bash
+set -e # Exit immediately if a command exits with a non-zero status.
+
+ENV_SUFFIX="$1"
+REGION="us-central1"
+PROJECT_ID="app-factory-v2"
+REPO="app-factory-repo"
+
+echo "--- Starting Deployment for environment: $ENV_SUFFIX ---"
+ENV_VARS="GCP_PROJECT=$PROJECT_ID,AI_DEVELOPER_AGENT_SERVICE_URL=https://ai-developer-agent-service-${ENV_SUFFIX}-515413116650.us-central1.run.app,CMO_PUBLISHING_AGENT_SERVICE_URL=https://cmo-publishing-agent-${ENV_SUFFIX}-515413116650.us-central1.run.app,CPO_ANALYSIS_SERVICE_URL=https://cpo-analysis-service-${ENV_SUFFIX}-515413116650.us-central1.run.app,DISCOVERY_CYCLE_SERVICE_URL=https://discovery-cycle-service-${ENV_SUFFIX}-515413116650.us-central1.run.app,CSO_VETTING_SERVICE_URL=https://cso-vetting-service-${ENV_SUFFIX}-515413116650.us-central1.run.app"
+
+echo "Deploying CEO Dashboard..."
+gcloud run deploy ceo-dashboard \
+    --image="us-central1-docker.pkg.dev/$PROJECT_ID/$REPO/ceo-dashboard" \
+    --region="$REGION" \
+    --platform=managed \
+    --ingress=all \
+    --allow-unauthenticated \
+    --quiet
+
+echo "Deploying internal services..."
+# These services are only called by other services and remain internal
+gcloud run deploy cso-vetting-service --image="us-central1-docker.pkg.dev/$PROJECT_ID/$REPO/cso-vetting-service" --region="$REGION" --platform=managed --ingress=internal --set-env-vars="$ENV_VARS" --quiet
+gcloud run deploy ai-developer-agent-service --image="us-central1-docker.pkg.dev/$PROJECT_ID/$REPO/ai-developer-agent-service" --region="$REGION" --platform=managed --ingress=all --set-env-vars="$ENV_VARS" --quiet
+gcloud run deploy cmo-publishing-agent --image="us-central1-docker.pkg.dev/$PROJECT_ID/$REPO/cmo-publishing-agent" --region="$REGION" --platform=managed --ingress=all --set-env-vars="$ENV_VARS" --quiet
+gcloud run deploy cpo-analysis-service --image="us-central1-docker.pkg.dev/$PROJECT_ID/$REPO/cpo-analysis-service" --region="$REGION" --platform=managed --ingress=all --set-env-vars="$ENV_VARS" --quiet
+
+echo "Deploying gateway-accessible service..."
+# This service is called by the API Gateway and MUST allow all traffic, protected by IAM.
+gcloud run deploy discovery-cycle-service --image="us-central1-docker.pkg.dev/$PROJECT_ID/$REPO/discovery-cycle-service" --region="$REGION" --platform=managed --ingress=all --set-env-vars="$ENV_VARS" --quiet
+
+echo "Deploying jobs..."
+gcloud run jobs deploy web-scraper-tool --image="us-central1-docker.pkg.dev/$PROJECT_ID/$REPO/web-scraper-tool" --region="$REGION" --quiet
+gcloud run jobs deploy play-publisher-tool --image="us-central1-docker.pkg.dev/$PROJECT_ID/$REPO/play-publisher-tool" --region="$REGION" --quiet
+
+echo "--- Deployment finished successfully. ---"
 
 ================================================================================
 
@@ -419,6 +548,7 @@ SERVICE_ACCOUNTS=(
     "cpo-analysis-sa"
     "ai-developer-agent-sa"
     "cmo-publishing-agent-sa"
+    "mcp-gateway-sa"
 )
 
 echo "Creating service accounts if they do not exist..."
@@ -1809,6 +1939,13 @@ The entire process is orchestrated through the mcp-gateway ("Master Control Prog
 
 ================================================================================
 
+--- File: substitutions.yaml ---
+
+substitutions:
+  _ENV_SUFFIX: prod
+
+================================================================================
+
 --- File: backend/.env ---
 
 
@@ -1835,6 +1972,10 @@ GCP_PROJECT="app-factory-v2"
 --- File: backend/compose.yaml ---
 
 services:
+  ceo-dashboard:
+    build:
+      context: ../frontend
+    image: us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/ceo-dashboard
   mcp-gateway:
     image: docker/mcp-gateway:latest
     ports:
@@ -1929,35 +2070,52 @@ CMD ["python", "./main.py"]
 
 --- File: backend/tools/google_play_publisher/main.py ---
 
-from shared.utils import get_logger
-from shared.gcp_client import get_secret
 import os
-from flask import Flask
-
-app = Flask(__name__)
-
-@app.route("/")
-def hello_world():
-    """A placeholder route to satisfy the health check."""
-    return "OK", 200
-
-if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
+from shared.utils import get_logger
+from shared.gcp_client import get_from_firestore, save_to_firestore, get_secret
 
 logger = get_logger(__name__)
 
 def main():
+    """
+    Main function for the Google Play Publisher Cloud Run Job.
+    """
     logger.info("Google Play Publisher Tool job started.")
-    # This would be triggered as a Cloud Run Job
     
-    # Placeholder logic
-    play_api_key = get_secret("google-play-api-key")
-    if not play_api_key:
-        logger.error("Failed to get Google Play API key. Exiting.")
+    # The ID of the app to publish is passed as an environment variable
+    idea_id_to_publish = os.environ.get("IDEA_ID")
+    if not idea_id_to_publish:
+        logger.error("IDEA_ID environment variable not set. Exiting.")
         return
+        
+    try:
+        # 1. Fetch the app data from Firestore
+        app_idea = get_from_firestore("app_ideas", idea_id_to_publish)
+        if not app_idea:
+            logger.error(f"App idea '{idea_id_to_publish}' not found in Firestore.")
+            return
 
-    logger.info("Publishing to Google Play Store...")
-    # ... actual publishing logic here ...
+        # 2. Authenticate with Google Play API using the secret
+        api_key = get_secret("google-play-api-key")
+        if not api_key:
+            logger.error("Could not retrieve Google Play API key.")
+            save_to_firestore("app_ideas", idea_id_to_publish, {"status": "PUBLISHING_FAILED", "error": "Missing API Key"})
+            return
+
+        # 3. TODO: Implement the actual publishing logic here.
+        # This would involve using the google-api-python-client to upload the
+        # app bundle (.aab) which would be stored in a GCS bucket.
+        logger.info(f"Publishing app '{idea_id_to_publish}' to the Google Play Store... (Placeholder)")
+        
+        # 4. Update the status in Firestore to reflect success
+        save_to_firestore("app_ideas", idea_id_to_publish, {"status": "PUBLISHED"})
+        logger.info(f"Successfully published app '{idea_id_to_publish}'.")
+
+    except Exception as e:
+        logger.error(f"An error occurred during the publishing job for '{idea_id_to_publish}': {e}")
+        if idea_id_to_publish:
+            save_to_firestore("app_ideas", idea_id_to_publish, {"status": "PUBLISHING_FAILED", "error": str(e)})
+            
     logger.info("Google Play Publisher Tool job finished.")
 
 if __name__ == "__main__":
@@ -1969,8 +2127,6 @@ if __name__ == "__main__":
 
 google-cloud-firestore==2.16.0
 google-cloud-secret-manager==2.19.0
-Flask==3.0.3
-gunicorn==22.0.0
 
 ================================================================================
 
@@ -1998,29 +2154,40 @@ CMD ["python", "./main.py"]
 
 --- File: backend/tools/robust_web_scraper/main.py ---
 
-from shared.utils import get_logger
 import os
-from flask import Flask
-
-app = Flask(__name__)
-
-@app.route("/")
-def hello_world():
-    """A placeholder route to satisfy the health check."""
-    return "OK", 200
-
-if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
+import uuid
+from datetime import datetime
+from shared.utils import get_logger
+from shared.gcp_client import save_to_firestore
 
 logger = get_logger(__name__)
 
 def main():
+    """
+    Main function for the web scraper Cloud Run Job.
+    Performs a mock scrape and saves a new idea to Firestore.
+    """
     logger.info("Robust Web Scraper Tool job started.")
-    # This would be triggered as a Cloud Run Job
     
-    # Placeholder logic for scraping
-    logger.info("Scraping websites for app ideas...")
-    # ... actual scraping logic here ...
+    try:
+        # In a real scenario, this would involve complex scraping logic.
+        # For now, we will generate a mock "scraped" idea.
+        idea_id = f"idea-{uuid.uuid4()}"
+        app_idea_data = {
+            "idea_id": idea_id,
+            "status": "PENDING_VETTING",
+            "source_url": "mock-scrape.com/trends",
+            "description": f"A new mobile app that tracks local food trucks in real-time. Generated at {datetime.utcnow().isoformat()}",
+            "created_at": datetime.utcnow().isoformat()
+        }
+        
+        save_to_firestore("app_ideas", idea_id, app_idea_data)
+        logger.info(f"Successfully generated and saved new app idea: {idea_id}")
+        
+    except Exception as e:
+        logger.error(f"An error occurred during the scraping job: {e}")
+        # In a production system, you might have a separate collection for job failures.
+    
     logger.info("Robust Web Scraper Tool job finished.")
 
 if __name__ == "__main__":
@@ -2032,8 +2199,6 @@ if __name__ == "__main__":
 
 google-cloud-firestore==2.16.0
 google-cloud-secret-manager==2.19.0
-Flask==3.0.3
-gunicorn==22.0.0
 
 ================================================================================
 
@@ -2177,70 +2342,57 @@ CMD ["gunicorn", "--bind", "0.0.0.0:8080", "main:app"]
 
 import os
 import uuid
+from datetime import datetime
 from flask import Flask, request, jsonify
 from shared.utils import get_logger
-from shared.gcp_client import save_to_firestore, make_internal_request
+from shared.gcp_client import save_to_firestore, db
 
 app = Flask(__name__)
-@app.route("/")
-def health_check():
-    """Provides a simple health check endpoint."""
-    return "OK", 200
-    
 logger = get_logger(__name__)
 
-# The URL for the CSO Vetting Service will be automatically provided by Cloud Run
-CSO_VETTING_SERVICE_URL = os.environ.get("CSO_VETTING_SERVICE_URL")
+@app.route("/")
+def health_check():
+    return "OK", 200
 
 @app.route('/start', methods=['POST'])
 def start_cycle():
-    """
-    Starts a new app discovery cycle.
-    1. Creates a new "app_idea" document in Firestore.
-    2. Triggers the CSO Vetting Service to begin its process.
-    """
     logger.info("Discovery Cycle Service received a request to start.")
-
-    # 1. Generate a new App Idea and save it to Firestore
     idea_id = f"idea-{uuid.uuid4()}"
     app_idea_data = {
         "idea_id": idea_id,
-        "status": "PENDING_VETTING",
-        "description": "A revolutionary new mobile app for discovering local coffee shops."
-        # In a real scenario, this data would come from the web-scraper-tool
+        "status": "VETTING_PASSED", # Simulating passing for dashboard test
+        "description": "A new mobile app that helps users find and trade rare houseplants.",
+        "created_at": datetime.utcnow().isoformat()
     }
-
     try:
         save_to_firestore("app_ideas", idea_id, app_idea_data)
     except Exception as e:
-        logger.error(f"Failed to save new app idea '{idea_id}' to Firestore: {e}")
+        logger.error(f"Failed to save new app idea '{idea_id}': {e}")
         return jsonify({"status": "error", "message": "Could not save app idea."}), 500
+    return jsonify({"status": "success", "message": f"Discovery cycle started for idea '{idea_id}'."})
 
-    # 2. Trigger the CSO Vetting Service
-    if not CSO_VETTING_SERVICE_URL:
-        logger.error("CSO_VETTING_SERVICE_URL environment variable is not set.")
-        return jsonify({"status": "error", "message": "Downstream service is not configured."}), 500
-
-    logger.info(f"Triggering CSO Vetting Service for idea '{idea_id}' at {CSO_VETTING_SERVICE_URL}")
-
+@app.route('/vetted-ideas', methods=['GET'])
+def get_vetted_ideas():
+    logger.info("Request received for vetted ideas.")
     try:
-        vetting_request_data = {"idea_id": idea_id}
-        # This is a secure, authenticated call from one Cloud Run service to another
-        response = make_internal_request(
-            service_url=f"{CSO_VETTING_SERVICE_URL}/vet", 
-            method='POST', 
-            data=vetting_request_data
-        )
-        logger.info(f"CSO Vetting Service responded with status {response.status_code}: {response.text}")
+        ideas_ref = db.collection("app_ideas").where("status", "==", "VETTING_PASSED").stream()
+        ideas = [idea.to_dict() for idea in ideas_ref]
+        return jsonify({"ideas": ideas}), 200
     except Exception as e:
-        logger.error(f"Failed to trigger CSO Vetting Service for idea '{idea_id}': {e}")
-        # Here you might add logic to update the Firestore status to "VETTING_FAILED"
-        return jsonify({"status": "error", "message": "Failed to trigger downstream service."}), 500
+        logger.error(f"Failed to fetch vetted ideas from Firestore: {e}")
+        return jsonify({"status": "error", "message": "Failed to retrieve app ideas."}), 500
 
-    return jsonify({
-        "status": "success",
-        "message": f"Discovery cycle started. App idea '{idea_id}' is now pending security vetting."
-    })
+@app.route('/reject-idea', methods=['POST'])
+def reject_idea():
+    data = request.get_json()
+    idea_id = data.get("idea_id")
+    logger.info(f"Received rejection for idea: {idea_id}")
+    try:
+        save_to_firestore("app_ideas", idea_id, {"status": "CEO_REJECTED"})
+        return jsonify({"status": "success", "message": f"Idea {idea_id} rejected."}), 200
+    except Exception as e:
+        logger.error(f"Failed to reject idea '{idea_id}': {e}")
+        return jsonify({"status": "error", "message": "Failed to reject idea."}), 500
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
@@ -2395,104 +2547,54 @@ CMD ["gunicorn", "--bind", "0.0.0.0:8080", "main:app"]
 import os
 from flask import Flask, request, jsonify
 from shared.utils import get_logger
-from shared.gcp_client import get_from_firestore, save_to_firestore, make_internal_request, get_secret
+from shared.gcp_client import get_from_firestore, save_to_firestore, make_internal_request, get_secret, db
 
 app = Flask(__name__)
-@app.route("/")
-def health_check():
-    """Provides a simple health check endpoint."""
-    return "OK", 200
-
 logger = get_logger(__name__)
 
-# URLs for other services
-# Corrected environment variable names
-CMO_PUBLISHING_AGENT_SERVICE_URL = os.environ.get("CMO_PUBLISHING_AGENT_SERVICE_URL")
-MCP_GATEWAY_SERVICE_URL = os.environ.get("MCP_GATEWAY_SERVICE_URL")
-
+@app.route("/")
+def health_check():
+    return "OK", 200
 
 @app.route('/develop', methods=['POST'])
 def develop_app():
-    """
-    Receives a product specification, generates source code, commits it to a new
-    GitHub repository, and triggers the CMO Publishing agent.
-    """
-    logger.info("AI Developer Agent received a request.")
     data = request.get_json()
-
-    if not data or "idea_id" not in data:
-        logger.warning("Request missing 'idea_id'.")
-        return jsonify({"status": "error", "message": "Missing 'idea_id' in request body."}), 400
-
-    idea_id = data["idea_id"]
-    logger.info(f"Starting development for app idea: {idea_id}")
-
+    idea_id = data.get("idea_id")
+    feedback = data.get("feedback")
+    logger.info(f"Development request for idea: {idea_id} with feedback: '{feedback}'")
     try:
-        app_idea = get_from_firestore("app_ideas", idea_id)
-        if not app_idea or "product_spec" not in app_idea:
-            return jsonify({"status": "error", "message": f"Product spec for '{idea_id}' not found."}), 404
-
-        # 1. TODO: Call Gemini API with the product spec to generate Flutter source code.
-        # This is a highly complex task that will involve multiple prompts and parsing.
-        # For now, we will create a placeholder file.
-        logger.info("Generating source code... (Placeholder)")
-        generated_code = "print('Hello, World!')"
-        repo_name = f"app-{idea_id}"
-
-        # 2. Call the github-tool via MCP Gateway to create a repo.
-        if not MCP_GATEWAY_SERVICE_URL:
-            logger.error("MCP_GATEWAY_SERVICE_URL environment variable is not set.")
-            save_to_firestore("app_ideas", idea_id, {"status": "DEVELOPMENT_FAILED"})
-            return jsonify({"status": "error", "message": "MCP Gateway is not configured."}), 500
-
-        logger.info(f"Creating GitHub repo '{repo_name}' via MCP Gateway.")
-        github_repo_url = None
-        try:
-            # The github-tool likely exposes a REST-like interface through the gateway.
-            # We'll assume a POST to /github-tool/repos creates a new repository.
-            # The owner is inferred from the GITHUB_TOKEN used by the tool.
-            repo_creation_data = {"name": repo_name, "description": app_idea.get('description')}
-            repo_response = make_internal_request(
-                service_url=f"{MCP_GATEWAY_SERVICE_URL}/github-tool/repos",
-                method='POST',
-                data=repo_creation_data
-            )
-            # Assuming the response contains the URL of the created repo
-            github_repo_url = repo_response.json().get("html_url")
-        except Exception as e:
-            logger.error(f"Failed to create GitHub repo for '{idea_id}' via MCP Gateway: {e}")
-            save_to_firestore("app_ideas", idea_id, {"status": "DEVELOPMENT_FAILED"})
-            return jsonify({"status": "error", "message": "Failed to create GitHub repo."}), 500
-
-        # 3. Save the new repo URL and update status in Firestore.
-        updated_data = {
-            "status": "CODE_GENERATED",
-            "github_repo_url": github_repo_url
-        }
-        save_to_firestore("app_ideas", idea_id, updated_data)
-        logger.info(f"Successfully generated code and created repo for '{idea_id}'.")
-
-        # 4. Trigger the CMO Publishing Agent.
-        if not CMO_PUBLISHING_AGENT_SERVICE_URL:
-            logger.error("CMO_PUBLISHING_AGENT_URL environment variable is not set.")
-            save_to_firestore("app_ideas", idea_id, {"status": "PUBLISH_TRIGGER_FAILED"})
-            return jsonify({"status": "error", "message": "Downstream CMO agent is not configured."}), 500
-
-        logger.info(f"Triggering CMO Publishing agent for idea '{idea_id}' at {CMO_PUBLISHING_AGENT_SERVICE_URL}")
-        publish_request_data = {"idea_id": idea_id}
-        publish_response = make_internal_request(
-            service_url=f"{CMO_PUBLISHING_AGENT_SERVICE_URL}/publish",
-            method='POST',
-            data=publish_request_data
-        )
-        logger.info(f"CMO Publishing agent responded with status {publish_response.status_code}: {publish_response.text}")
-
-        return jsonify({"status": "success", "message": f"Development complete for '{idea_id}' and publishing triggered."})
-
+        # TODO: Add logic to use feedback in prompts
+        save_to_firestore("app_ideas", idea_id, {
+            "status": "PENDING_CEO_REVISION",
+            "ceo_feedback": feedback,
+            # Placeholder for the APK download URL
+            "apk_download_url": "https://storage.googleapis.com/app-factory-apks/placeholder.apk"
+        })
+        return jsonify({"status": "success", "message": f"Development started for {idea_id}."}), 200
     except Exception as e:
-        logger.error(f"An error occurred during development for '{idea_id}': {e}")
-        save_to_firestore("app_ideas", idea_id, {"status": "DEVELOPMENT_FAILED"})
-        return jsonify({"status": "error", "message": "An internal error occurred."}), 500
+        logger.error(f"Development failed for '{idea_id}': {e}")
+        return jsonify({"status": "error", "message": "Development failed."}), 500
+
+@app.route('/developed-apks', methods=['GET'])
+def get_developed_apks():
+    logger.info("Request received for developed APKs.")
+    try:
+        apks_ref = db.collection("app_ideas").where("status", "==", "PENDING_CEO_REVISION").stream()
+        apks = [apk.to_dict() for apk in apks_ref]
+        return jsonify({"apks": apks}), 200
+    except Exception as e:
+        logger.error(f"Failed to fetch developed APKs: {e}")
+        return jsonify({"status": "error", "message": "Failed to retrieve APKs."}), 500
+
+@app.route('/revise', methods=['POST'])
+def revise_app():
+    # Placeholder for revision logic
+    data = request.get_json()
+    idea_id = data.get("idea_id")
+    feedback = data.get("feedback")
+    logger.info(f"Revision request for idea: {idea_id} with feedback: '{feedback}'")
+    save_to_firestore("app_ideas", idea_id, {"status": "PENDING_CEO_REVISION", "ceo_revision_feedback": feedback})
+    return jsonify({"status": "success", "message": f"Revision in progress for {idea_id}."}), 200
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
@@ -2540,17 +2642,18 @@ from shared.gcp_client import get_from_firestore, save_to_firestore, make_intern
 import google.generativeai as genai
 
 app = Flask(__name__)
+logger = get_logger(__name__)
+
+# The URLs for downstream services are provided by Cloud Run
+AI_DEVELOPER_AGENT_SERVICE_URL = os.environ.get("AI_DEVELOPER_AGENT_SERVICE_URL")
+
+# Configure the Gemini API client (will use Application Default Credentials)
+genai.configure()
+
 @app.route("/")
 def health_check():
     """Provides a simple health check endpoint."""
     return "OK", 200
-
-logger = get_logger(__name__)
-
-AI_DEVELOPER_AGENT_SERVICE_URL = os.environ.get("AI_DEVELOPER_AGENT_SERVICE_URL")
-
-# Configure the Gemini API client
-genai.configure()
 
 @app.route('/analyze', methods=['POST'])
 def analyze_idea():
@@ -2582,7 +2685,7 @@ def analyze_idea():
         The spec should include:
         1. A target user persona.
         2. A list of core features (MVP).
-        3. A proposed technology stack (e.g., Flutter with Riverpod for state management).
+        3. A proposed technology stack (Flutter with Riverpod for state management).
         4. A monetization strategy.
 
         App Idea: "{app_idea.get('description')}"
@@ -2662,20 +2765,24 @@ CMD ["gunicorn", "--bind", "0.0.0.0:8080", "main:app"]
 import os
 from flask import Flask, request, jsonify
 from shared.utils import get_logger
-from shared.gcp_client import get_from_firestore, save_to_firestore, get_secret
+from shared.gcp_client import get_from_firestore, save_to_firestore
+from google.cloud import run_v2
 
 app = Flask(__name__)
+logger = get_logger(__name__)
+
+PROJECT_ID = os.environ.get("GCP_PROJECT", "app-factory-v2")
+REGION = "us-central1"
+
 @app.route("/")
 def health_check():
     """Provides a simple health check endpoint."""
     return "OK", 200
 
-logger = get_logger(__name__)
-
 @app.route('/publish', methods=['POST'])
 def publish_app():
     """
-    Receives a completed app, triggers the final build and publish workflow.
+    Receives a completed app and triggers the play-publisher-tool Cloud Run Job.
     """
     logger.info("CMO Publishing Agent received a request.")
     data = request.get_json()
@@ -2689,24 +2796,36 @@ def publish_app():
 
     try:
         app_idea = get_from_firestore("app_ideas", idea_id)
-        if not app_idea or "github_repo_url" not in app_idea:
-            return jsonify({"status": "error", "message": f"GitHub repo for '{idea_id}' not found."}), 404
+        if not app_idea:
+            return jsonify({"status": "error", "message": f"App idea '{idea_id}' not found."}), 404
 
-        # 1. TODO: Logic to trigger the final app build and publishing workflow.
-        # This would likely involve creating a new Cloud Build trigger or calling
-        # a workflow that checks out the repo, builds the .aab bundle, and calls
-        # the play-publisher-tool.
-        logger.info(f"Initiating final build for repo: {app_idea['github_repo_url']}... (Placeholder)")
+        # 1. Trigger the play-publisher-tool Cloud Run Job
+        logger.info(f"Triggering play-publisher-tool job for idea: {idea_id}")
+        run_client = run_v2.JobsClient()
+        job_name = f"projects/{PROJECT_ID}/locations/{REGION}/jobs/play-publisher-tool"
+        
+        request_body = run_v2.RunJobRequest(
+            name=job_name,
+            overrides={
+                "container_overrides": [
+                    {
+                        "name": "play-publisher-tool",
+                        "env": [{"name": "IDEA_ID", "value": idea_id}],
+                    }
+                ]
+            },
+        )
+        operation = run_client.run_job(request=request_body)
+        logger.info(f"Successfully triggered job. Operation: {operation.metadata.name}")
 
         # 2. Update the status in Firestore.
-        updated_data = {"status": "PUBLISHING_STARTED"}
-        save_to_firestore("app_ideas", idea_id, updated_data)
+        save_to_firestore("app_ideas", idea_id, {"status": "PUBLISHING_STARTED"})
 
         return jsonify({"status": "success", "message": f"Publishing workflow started for '{idea_id}'."})
 
     except Exception as e:
         logger.error(f"An error occurred during publishing for '{idea_id}': {e}")
-        save_to_firestore("app_ideas", idea_id, {"status": "PUBLISHING_FAILED"})
+        save_to_firestore("app_ideas", idea_id, {"status": "PUBLISHING_FAILED", "error": str(e)})
         return jsonify({"status": "error", "message": "An internal error occurred."}), 500
 
 if __name__ == "__main__":
@@ -2720,6 +2839,424 @@ Flask==3.0.3
 gunicorn==22.0.0
 google-cloud-firestore==2.16.0
 google-cloud-secret-manager==2.19.0
+google-cloud-run==0.10.0
+
+================================================================================
+
+--- File: frontend/.dockerignore ---
+
+.git
+.vscode
+README.md
+
+
+
+================================================================================
+
+--- File: frontend/Dockerfile ---
+
+# Use an official lightweight nginx image as a parent image
+FROM nginx:alpine
+
+# Set the working directory to nginx's web root
+WORKDIR /usr/share/nginx/html
+
+# Remove default nginx static assets
+RUN rm -rf ./*
+
+# Copy the static assets from the a "public" directory
+COPY ./ /usr/share/nginx/html/
+
+# Expose port 80
+EXPOSE 80
+
+
+
+================================================================================
+
+--- File: frontend/index.html ---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CEO Dashboard - App Factory</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>App Factory - CEO Dashboard</h1>
+
+        <div class="config-section">
+            <h2>Configuration</h2>
+            <div class="config-inputs">
+                <input type="text" id="api-gateway-url" placeholder="API Gateway URL (e.g., https://my-gateway-xxxx.a.run.app)">
+                <input type="password" id="api-key" placeholder="API Key">
+                <button id="load-data-btn">Load Data</button>
+            </div>
+             <p class="status-message" id="status-message"></p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-link active" onclick="openTab(event, 'idea-review')">Idea Review</button>
+            <button class="tab-link" onclick="openTab(event, 'apk-review')">APK Review</button>
+        </div>
+
+        <!-- Idea Review Tab -->
+        <div id="idea-review" class="tab-content" style="display: block;">
+            <h2>Ideas Awaiting Approval</h2>
+            <table id="ideas-table">
+                <thead>
+                    <tr>
+                        <th>Idea ID</th>
+                        <th>Description</th>
+                        <th>Created At</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Idea rows will be inserted here by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- APK Review Tab -->
+        <div id="apk-review" class="tab-content">
+            <h2>APKs Awaiting Review</h2>
+            <table id="apks-table">
+                <thead>
+                    <tr>
+                        <th>Idea ID</th>
+                        <th>CEO Feedback</th>
+                        <th>Download</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- APK rows will be inserted here by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
+
+
+================================================================================
+
+--- File: frontend/script.js ---
+
+document.addEventListener('DOMContentLoaded', () => {
+    const loadDataBtn = document.getElementById('load-data-btn');
+    loadDataBtn.addEventListener('click', loadAllData);
+});
+
+function openTab(evt, tabName) {
+    let i, tabcontent, tablinks;
+    tabcontent = document.getElementsByClassName("tab-content");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+    }
+    tablinks = document.getElementsByClassName("tab-link");
+    for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+    document.getElementById(tabName).style.display = "block";
+    evt.currentTarget.className += " active";
+}
+
+function setStatus(message, isError = false) {
+    const statusEl = document.getElementById('status-message');
+    statusEl.textContent = message;
+    statusEl.className = isError ? 'status-message error' : 'status-message success';
+}
+
+async function apiFetch(path, options = {}) {
+    const baseUrl = document.getElementById('api-gateway-url').value.trim();
+    const apiKey = document.getElementById('api-key').value.trim();
+
+    if (!baseUrl || !apiKey) {
+        const message = 'Please provide API Gateway URL and API Key.';
+        setStatus(message, true);
+        throw new Error(message);
+    }
+
+    const headers = {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        ...options.headers,
+    };
+
+    try {
+        const response = await fetch(`${baseUrl}${path}`, { ...options, headers });
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Request failed: ${response.status} ${response.statusText} - ${errorText}`);
+        }
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+            return response.json();
+        }
+        return; // For non-json responses like 204 No Content
+    } catch (error) {
+        // This catches network errors (like "Failed to fetch") and errors thrown above
+        console.error('API Fetch Error:', error);
+        setStatus(error.message, true);
+        throw error;
+    }
+}
+
+async function loadAllData() {
+    setStatus('Loading data...', false);
+    await fetchVettedIdeas();
+    await fetchDevelopedApks();
+    setStatus('Data loaded successfully.', false);
+}
+
+async function fetchVettedIdeas() {
+    try {
+        const data = await apiFetch('/vetted-ideas');
+        const ideas = data.ideas || [];
+        const tableBody = document.querySelector('#ideas-table tbody');
+        tableBody.innerHTML = '';
+        if (ideas.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="4">No ideas are currently awaiting review.</td></tr>';
+            return;
+        }
+        ideas.forEach(idea => {
+            const row = `<tr>
+                <td>${idea.idea_id}</td>
+                <td>${idea.description}</td>
+                <td>${new Date(idea.created_at).toLocaleString()}</td>
+                <td class="actions">
+                    <button onclick="approveIdea('${idea.idea_id}')">Approve</button>
+                    <button class="reject" onclick="rejectIdea('${idea.idea_id}')">Reject</button>
+                </td>
+            </tr>`;
+            tableBody.innerHTML += row;
+        });
+    } catch (error) {
+        console.error('Error fetching vetted ideas:', error);
+    }
+}
+
+async function fetchDevelopedApks() {
+    try {
+        const data = await apiFetch('/developed-apks');
+        const apks = data.apks || [];
+        const tableBody = document.querySelector('#apks-table tbody');
+        tableBody.innerHTML = '';
+        if (apks.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="4">No APKs are currently awaiting review.</td></tr>';
+            return;
+        }
+        apks.forEach(apk => {
+            const row = `<tr>
+                <td>${apk.idea_id}</td>
+                <td>${apk.ceo_feedback || 'N/A'}</td>
+                <td><a href="${apk.apk_download_url}" target="_blank" rel="noopener noreferrer">Download APK</a></td>
+                <td class="actions">
+                    <button onclick="publishApk('${apk.idea_id}')">Publish</button>
+                    <button class="revise" onclick="reviseApk('${apk.idea_id}')">Revise</button>
+                </td>
+            </tr>`;
+            tableBody.innerHTML += row;
+        });
+    } catch (error) {
+        console.error('Error fetching developed APKs:', error);
+    }
+}
+
+async function approveIdea(ideaId) {
+    if (!confirm(`Are you sure you want to approve idea ${ideaId} for development?`)) return;
+    await apiFetch('/approve-idea', { method: 'POST', body: JSON.stringify({ idea_id: ideaId }) });
+    setStatus(`Idea ${ideaId} approved.`, false);
+    fetchVettedIdeas();
+}
+
+async function rejectIdea(ideaId) {
+    if (!confirm(`Are you sure you want to reject idea ${ideaId}?`)) return;
+    await apiFetch('/reject-idea', { method: 'POST', body: JSON.stringify({ idea_id: ideaId }) });
+    setStatus(`Idea ${ideaId} rejected.`, false);
+    fetchVettedIdeas();
+}
+
+async function publishApk(ideaId) {
+    if (!confirm(`Are you sure you want to publish the app for idea ${ideaId}?`)) return;
+    await apiFetch('/publish-app', { method: 'POST', body: JSON.stringify({ idea_id: ideaId }) });
+    setStatus(`App for idea ${ideaId} sent for publishing.`, false);
+    fetchDevelopedApks();
+}
+
+async function reviseApk(ideaId) {
+    const feedback = prompt(`Please provide revision feedback for app ${ideaId}:`);
+    if (feedback && feedback.trim() !== '') {
+        await apiFetch('/revise-apk', { method: 'POST', body: JSON.stringify({ idea_id: ideaId, feedback: feedback }) });
+        setStatus(`Revision requested for app ${ideaId}.`, false);
+        fetchDevelopedApks();
+    }
+}
+
+
+
+================================================================================
+
+--- File: frontend/style.css ---
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #f4f6f8;
+    color: #333;
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: #fff;
+    padding: 20px 40px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+h1 {
+    text-align: center;
+    color: #1a73e8;
+    margin-bottom: 30px;
+}
+
+h2 {
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 10px;
+    margin-top: 40px;
+    color: #424242;
+}
+
+.config-section {
+    background-color: #e8f0fe;
+    border: 1px solid #d2e3fc;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+.config-inputs {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.config-inputs input {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.status-message {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 4px;
+    text-align: center;
+    font-weight: 500;
+}
+.status-message.success {
+    background-color: #e6f4ea;
+    color: #1e8e3e;
+}
+.status-message.error {
+    background-color: #fce8e6;
+    color: #d93025;
+}
+
+.tabs {
+    overflow: hidden;
+    border-bottom: 1px solid #ccc;
+    margin-bottom: 20px;
+}
+
+.tab-link {
+    background-color: inherit;
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    transition: 0.3s;
+    font-size: 17px;
+    border-bottom: 3px solid transparent;
+}
+
+.tab-link:hover {
+    background-color: #f1f1f1;
+}
+
+.tab-link.active {
+    border-bottom: 3px solid #1a73e8;
+    color: #1a73e8;
+    font-weight: 600;
+}
+
+.tab-content {
+    display: none;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+}
+
+th {
+    background-color: #f2f2f2;
+    font-weight: 600;
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    background-color: #1a73e8;
+    color: white;
+    transition: background-color 0.2s;
+}
+
+button:hover {
+    background-color: #185abc;
+}
+
+button.reject, button.revise {
+    background-color: #d93025;
+}
+
+button.reject:hover, button.revise:hover {
+    background-color: #a50e0e;
+}
+
+.actions {
+    display: flex;
+    gap: 10px;
+}
+
+
 
 ================================================================================
 

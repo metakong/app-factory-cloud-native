@@ -9,13 +9,14 @@ steps:
   args: ['compose', '-f', 'compose.yaml', 'push']
   dir: 'backend'
 
-# Step 3: Install the component and deploy to Cloud Run in a single step.
+# Step 3: Install component, modify compose file, and deploy.
 - name: 'google/cloud-sdk:latest'
   entrypoint: 'bash'
   args:
     - '-c'
     - |
       apt-get update && apt-get install -y google-cloud-cli-run-compose && \
+      sed -i '/build:/,+2 d' compose.yaml && \
       gcloud alpha run compose up --region=us-central1
   dir: 'backend'
 

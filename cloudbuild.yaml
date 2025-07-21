@@ -1,44 +1,20 @@
 steps:
-# Step 1: Build all container images using Docker Compose.
+# Step 1: Build all container images.
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['compose', '-f', 'compose.yaml', 'build']
-  dir: 'backend'
+  args: ['compose', '-f', 'backend/compose.yaml', 'build']
 
-# Step 2: Push the built images to Artifact Registry.
+# Step 2: Push the images to Artifact Registry.
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['compose', '-f', 'compose.yaml', 'push']
-  dir: 'backend'
+  args: ['compose', '-f', 'backend/compose.yaml', 'push']
 
-# Step 3: Deploy each service and job individually.
-- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+# Step 3: Execute the deployment script, passing the substitution variable.
+- name: 'gcr.io/google.com/cloudsdktool/google-cloud-cli'
   entrypoint: 'bash'
-  args:
-    - '-c'
-    - |
-      # Define Service URLs using a substitution for environment flexibility.
-      # This allows deploying to different environments (e.g., dev, prod) by changing the suffix.
-      CSO_VETTING_URL="https://cso-vetting-service-${_ENV_SUFFIX}-515413116650.us-central1.run.app"
-      AI_DEV_URL="https://ai-developer-agent-service-${_ENV_SUFFIX}-515413116650.us-central1.run.app"
-      WEB_SCRAPER_URL="https://web-scraper-tool-${_ENV_SUFFIX}-515413116650.us-central1.run.app"
-      CMO_PUB_URL="https://cmo-publishing-agent-${_ENV_SUFFIX}-515413116650.us-central1.run.app"
-      CPO_ANALYSIS_URL="https://cpo-analysis-service-${_ENV_SUFFIX}-515413116650.us-central1.run.app"
-      DISCOVERY_URL="https://discovery-cycle-service-${_ENV_SUFFIX}-515413116650.us-central1.run.app"
-      PLAY_PUB_URL="https://play-publisher-tool-${_ENV_SUFFIX}-515413116650.us-central1.run.app"
+  args: ['./deploy.sh', '${_ENV_SUFFIX}']
 
-      # Construct the environment variables string to be passed to each service.
-      ENV_VARS="CSO_VETTING_SERVICE_URL=$CSO_VETTING_URL,AI_DEVELOPER_AGENT_SERVICE_URL=$AI_DEV_URL,WEB_SCRAPER_TOOL_URL=$WEB_SCRAPER_URL,CMO_PUBLISHING_AGENT_URL=$CMO_PUB_URL,CPO_ANALYSIS_SERVICE_URL=$CPO_ANALYSIS_URL,DISCOVERY_CYCLE_SERVICE_URL=$DISCOVERY_URL,PLAY_PUBLISHER_TOOL_URL=$PLAY_PUB_URL"
-
-      # Deploy all services with internal-only ingress for security and inject environment variables.
-      gcloud run deploy cso-vetting-service --image=us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service --region=us-central1 --platform=managed --ingress=internal --set-env-vars="$ENV_VARS" --quiet && \
-      gcloud run deploy ai-developer-agent-service --image=us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/ai-developer-agent-service --region=us-central1 --platform=managed --ingress=internal --set-env-vars="$ENV_VARS" --quiet && \
-      gcloud run deploy cmo-publishing-agent --image=us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent --region=us-central1 --platform=managed --ingress=internal --set-env-vars="$ENV_VARS" --quiet && \
-      gcloud run deploy cpo-analysis-service --image=us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service --region=us-central1 --platform=managed --ingress=internal --set-env-vars="$ENV_VARS" --quiet && \
-      gcloud run deploy discovery-cycle-service --image=us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/discovery-cycle-service --region=us-central1 --platform=managed --ingress=internal --set-env-vars="$ENV_VARS" --quiet && \
-      
-      # Deploy the tools as Cloud Run Jobs.
-      gcloud run jobs deploy web-scraper-tool --image=us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool --region=us-central1 --quiet && \
-      gcloud run jobs deploy play-publisher-tool --image=us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool --region=us-central1 --quiet
-  dir: 'backend'
+# Define the substitution variable with a default value.
+substitutions:
+  _ENV_SUFFIX: dev
 
 options:
   logging: CLOUD_LOGGING_ONLY

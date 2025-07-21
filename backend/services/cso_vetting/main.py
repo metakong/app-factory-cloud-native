@@ -1,10 +1,13 @@
 import os
 from flask import Flask, request, jsonify
 from shared.utils import get_logger
-from shared.gcp_client import get_from_firestore, save_to_firestore
+from shared.gcp_client import get_from_firestore, save_to_firestore, make_internal_request
 
 app = Flask(__name__)
 logger = get_logger(__name__)
+
+# The URL for the CPO Analysis Service
+CPO_ANALYSIS_SERVICE_URL = os.environ.get("CPO_ANALYSIS_SERVICE_URL")
 
 @app.route('/vet', methods=['POST'])
 def vet_idea():
@@ -30,13 +33,34 @@ def vet_idea():
         # 2. Perform mock vetting logic
         logger.info(f"Performing security checks on: {app_idea.get('description')}")
         # ... In a real scenario, complex security checks would happen here ...
-        
+
         # 3. Update the status in Firestore
         updated_data = {"status": "VETTING_PASSED"}
         save_to_firestore("app_ideas", idea_id, updated_data)
 
-        logger.info(f"Security vetting for '{idea_id}' passed.")
-        return jsonify({"status": "success", "message": f"Vetting passed for '{idea_id}'."})
+        logger.info(f"Security vetting for '{idea_id}' passed. Triggering CPO Analysis.")
+
+        # 4. Trigger the next service in the chain
+        if not CPO_ANALYSIS_SERVICE_URL:
+            logger.error("CPO_ANALYSIS_SERVICE_URL environment variable is not set.")
+            # Update status to reflect the error
+            save_to_firestore("app_ideas", idea_id, {"status": "ANALYSIS_TRIGGER_FAILED"})
+            return jsonify({"status": "error", "message": "Downstream service (CPO) is not configured."}), 500
+
+        try:
+            analysis_request_data = {"idea_id": idea_id}
+            response = make_internal_request(
+                service_url=f"{CPO_ANALYSIS_SERVICE_URL}/analyze",
+                method='POST',
+                data=analysis_request_data
+            )
+            logger.info(f"CPO Analysis Service responded with status {response.status_code}: {response.text}")
+        except Exception as e:
+            logger.error(f"Failed to trigger CPO Analysis Service for idea '{idea_id}': {e}")
+            save_to_firestore("app_ideas", idea_id, {"status": "ANALYSIS_TRIGGER_FAILED"})
+            return jsonify({"status": "error", "message": "Failed to trigger downstream CPO service."}), 500
+
+        return jsonify({"status": "success", "message": f"Vetting passed for '{idea_id}' and analysis triggered."})
 
     except Exception as e:
         logger.error(f"An error occurred during vetting for '{idea_id}': {e}")

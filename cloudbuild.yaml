@@ -1,5 +1,5 @@
 steps:
-# Step 1: Build all container images.
+# Step 1: Build all container images using the standard compose file.
 - name: 'gcr.io/cloud-builders/docker'
   args: ['compose', '-f', 'compose.yaml', 'build']
   dir: 'backend'
@@ -9,15 +9,22 @@ steps:
   args: ['compose', '-f', 'compose.yaml', 'push']
   dir: 'backend'
 
-# Step 3: Install component, modify compose file, and deploy.
+# Step 3: Create a deployment-specific compose file and deploy.
 - name: 'google/cloud-sdk:latest'
   entrypoint: 'bash'
   args:
     - '-c'
     - |
-      apt-get update && apt-get install -y google-cloud-cli-run-compose && \
-      sed -i '/build:/,+2 d' compose.yaml && \
-      gcloud alpha run compose up --region=us-central1
+      # Install the gcloud run-compose component
+      apt-get update && apt-get install -y google-cloud-cli-run-compose
+      
+      # Create a new compose file for deployment that ONLY contains image directives.
+      # This finds lines with 'build:' and deletes that line and the next two lines,
+      # outputting the result to a new file.
+      sed '/build:/,+2 d' compose.yaml > compose.deploy.yaml
+      
+      # Deploy using the new, deployment-specific compose file.
+      gcloud alpha run compose up -f compose.deploy.yaml --region=us-central1
   dir: 'backend'
 
 options:

@@ -11,12 +11,13 @@ steps:
 
 # Step 3: Deploy the now-existing images from the registry to Cloud Run.
 - name: 'google/cloud-sdk:latest'
-  entrypoint: 'bash'
+  entrypoint: 'gcloud'
   args:
-    - '-c'
-    - |
-      apt-get update && apt-get install -y google-cloud-cli-run-compose && \
-      gcloud alpha run compose up --region=us-central1 --no-build
+    - 'alpha'
+    - 'run'
+    - 'compose'
+    - 'up'
+    - '--region=us-central1'
   dir: 'backend'
 
 options:

@@ -1,6 +1,5 @@
 #!/bin/bash
 # This script sets up the necessary IAM permissions for the App Factory services.
-
 set -e # Exit immediately if a command exits with a non-zero status.
 set -u # Treat unset variables as an error.
 
@@ -15,6 +14,7 @@ gcloud services enable \
     secretmanager.googleapis.com \
     firestore.googleapis.com \
     artifactregistry.googleapis.com \
+    aiplatform.googleapis.com \
     --project=$PROJECT_ID
 
 echo "Creating Artifact Registry repository 'app-factory-repo'..."
@@ -49,24 +49,24 @@ SERVICE_ACCOUNTS=(
     "cmo-publishing-agent-sa"
 )
 
-echo "Creating service accounts if they do not exist..."
-for SA_NAME in "${SERVICE_ACCOUNTS[@]}"; do
-    gcloud iam service-accounts create $SA_NAME \
-        --display-name="$SA_NAME" \
-        --project=$PROJECT_ID || echo "Service account $SA_NAME already exists."
-done
-
-# Grant permissions to all service accounts
+# Grant common permissions
 for SA_NAME in "${SERVICE_ACCOUNTS[@]}"; do
     SA_EMAIL="$SA_NAME@$PROJECT_ID.iam.gserviceaccount.com"
-    echo "Granting permissions to $SA_EMAIL..."
+    echo "Granting base permissions to $SA_EMAIL..."
 
     # Permission to access secrets
-    gcloud projects add-iam-policy-binding $PROJECT_ID --member="serviceAccount:$SA_EMAIL" --role="roles/secretmanager.secretAccessor"
+    gcloud projects add-iam-policy-binding $PROJECT_ID --member="serviceAccount:$SA_EMAIL" --role="roles/secretmanager.secretAccessor" --condition=None
     # Permission to read/write to Firestore
-    gcloud projects add-iam-policy-binding $PROJECT_ID --member="serviceAccount:$SA_EMAIL" --role="roles/datastore.user"
-    # Permission to be invoked by other Cloud Run services
-    gcloud projects add-iam-policy-binding $PROJECT_ID --member="serviceAccount:$SA_EMAIL" --role="roles/run.invoker"
+    gcloud projects add-iam-policy-binding $PROJECT_ID --member="serviceAccount:$SA_EMAIL" --role="roles/datastore.user" --condition=None
 done
+
+# Grant specific permissions for services that use the Gemini API
+echo "Granting AI Platform User role to CPO and AI Developer services..."
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+    --member="serviceAccount:cpo-analysis-sa@$PROJECT_ID.iam.gserviceaccount.com" \
+    --role="roles/aiplatform.user" --condition=None
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+    --member="serviceAccount:ai-developer-agent-sa@$PROJECT_ID.iam.gserviceaccount.com" \
+    --role="roles/aiplatform.user" --condition=None
 
 echo "IAM setup complete."

@@ -7,8 +7,9 @@ app = Flask(__name__)
 logger = get_logger(__name__)
 
 # URLs for other services
-CMO_PUBLISHING_AGENT_URL = os.environ.get("CMO_PUBLISHING_AGENT_URL")
-MCP_GATEWAY_URL = os.environ.get("MCP_GATEWAY_URL")
+# Corrected environment variable names
+CMO_PUBLISHING_AGENT_SERVICE_URL = os.environ.get("CMO_PUBLISHING_AGENT_SERVICE_URL")
+MCP_GATEWAY_SERVICE_URL = os.environ.get("MCP_GATEWAY_SERVICE_URL")
 
 
 @app.route('/develop', methods=['POST'])
@@ -40,8 +41,8 @@ def develop_app():
         repo_name = f"app-{idea_id}"
 
         # 2. Call the github-tool via MCP Gateway to create a repo.
-        if not MCP_GATEWAY_URL:
-            logger.error("MCP_GATEWAY_URL environment variable is not set.")
+        if not MCP_GATEWAY_SERVICE_URL:
+            logger.error("MCP_GATEWAY_SERVICE_URL environment variable is not set.")
             save_to_firestore("app_ideas", idea_id, {"status": "DEVELOPMENT_FAILED"})
             return jsonify({"status": "error", "message": "MCP Gateway is not configured."}), 500
 
@@ -53,33 +54,35 @@ def develop_app():
             # The owner is inferred from the GITHUB_TOKEN used by the tool.
             repo_creation_data = {"name": repo_name, "description": app_idea.get('description')}
             repo_response = make_internal_request(
-                service_url=f"{MCP_GATEWAY_URL}/github-tool/repos",
+                service_url=f"{MCP_GATEWAY_SERVICE_URL}/github-tool/repos",
                 method='POST',
                 data=repo_creation_data
             )
+            # Assuming the response contains the URL of the created repo
             github_repo_url = repo_response.json().get("html_url")
-            if not github_repo_url:
-                raise ValueError("Response from repo creation did not contain 'html_url'.")
-            logger.info(f"Successfully created GitHub repo: {github_repo_url}")
         except Exception as e:
-            logger.error(f"Failed to create GitHub repo for idea '{idea_id}': {e}")
-            save_to_firestore("app_ideas", idea_id, {"status": "REPO_CREATION_FAILED"})
-            return jsonify({"status": "error", "message": "Failed to create GitHub repository."}), 500
+            logger.error(f"Failed to create GitHub repo for '{idea_id}' via MCP Gateway: {e}")
+            save_to_firestore("app_ideas", idea_id, {"status": "DEVELOPMENT_FAILED"})
+            return jsonify({"status": "error", "message": "Failed to create GitHub repo."}), 500
 
         # 3. Save the new repo URL and update status in Firestore.
-        updated_data = {"status": "CODE_GENERATED", "github_repo_url": github_repo_url}
+        updated_data = {
+            "status": "CODE_GENERATED",
+            "github_repo_url": github_repo_url
+        }
         save_to_firestore("app_ideas", idea_id, updated_data)
+        logger.info(f"Successfully generated code and created repo for '{idea_id}'.")
 
         # 4. Trigger the CMO Publishing Agent.
-        if not CMO_PUBLISHING_AGENT_URL:
+        if not CMO_PUBLISHING_AGENT_SERVICE_URL:
             logger.error("CMO_PUBLISHING_AGENT_URL environment variable is not set.")
             save_to_firestore("app_ideas", idea_id, {"status": "PUBLISH_TRIGGER_FAILED"})
             return jsonify({"status": "error", "message": "Downstream CMO agent is not configured."}), 500
 
-        logger.info(f"Triggering CMO Publishing agent for idea '{idea_id}' at {CMO_PUBLISHING_AGENT_URL}")
+        logger.info(f"Triggering CMO Publishing agent for idea '{idea_id}' at {CMO_PUBLISHING_AGENT_SERVICE_URL}")
         publish_request_data = {"idea_id": idea_id}
         publish_response = make_internal_request(
-            service_url=f"{CMO_PUBLISHING_AGENT_URL}/publish",
+            service_url=f"{CMO_PUBLISHING_AGENT_SERVICE_URL}/publish",
             method='POST',
             data=publish_request_data
         )

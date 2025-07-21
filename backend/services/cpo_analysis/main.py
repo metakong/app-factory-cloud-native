@@ -8,6 +8,7 @@ app = Flask(__name__)
 logger = get_logger(__name__)
 
 # The URLs for downstream services are provided by Cloud Run
+# Corrected environment variable name
 AI_DEVELOPER_AGENT_SERVICE_URL = os.environ.get("AI_DEVELOPER_AGENT_SERVICE_URL")
 
 # Configure the Gemini API client (will use Application Default Credentials)

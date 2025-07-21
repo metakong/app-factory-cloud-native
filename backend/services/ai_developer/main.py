@@ -4,6 +4,11 @@ from shared.utils import get_logger
 from shared.gcp_client import get_from_firestore, save_to_firestore, make_internal_request, get_secret
 
 app = Flask(__name__)
+@app.route("/")
+def health_check():
+    """Provides a simple health check endpoint."""
+    return "OK", 200
+
 logger = get_logger(__name__)
 
 # URLs for other services

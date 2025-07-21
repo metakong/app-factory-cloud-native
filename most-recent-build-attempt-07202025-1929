@@ -1,0 +1,1321 @@
+starting build "59247551-fdb0-49a7-85b0-1add1767d03a"
+FETCHSOURCE
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: is subject to change. To configure the initial branch name to use in all
+hint: of your new repositories, which will suppress this warning, call:
+hint:
+hint: 	git config --global init.defaultBranch <name>
+hint:
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint:
+hint: 	git branch -m <name>
+Initialized empty Git repository in /workspace/.git/
+From https://github.com/metakong/app-factory-cloud-native
+ * branch            f3a866fc7255a87ea89dbefb5b083c8c2848caf0 -> FETCH_HEAD
+HEAD is now at f3a866f feat(services): implement inter-service workflow logic
+GitCommit:
+f3a866fc7255a87ea89dbefb5b083c8c2848caf0
+BUILD
+Starting Step #0
+Already have image (with digest): gcr.io/cloud-builders/docker
+Compose can now delegate builds to bake for better performance.
+ To do so, set COMPOSE_BAKE=true.
+#0 building with "default" instance using docker driver
+#1 [ai-developer-agent-service internal] load build definition from Dockerfile
+#1 transferring dockerfile: 226B done
+#1 DONE 0.0s
+#2 [discovery-cycle-service internal] load build definition from Dockerfile
+#2 transferring dockerfile: 495B done
+#2 DONE 0.0s
+#3 [cso-vetting-service internal] load build definition from Dockerfile
+#3 transferring dockerfile: 226B done
+#3 DONE 0.0s
+#4 [cmo-publishing-agent internal] load build definition from Dockerfile
+#4 transferring dockerfile: 226B done
+#4 DONE 0.0s
+#5 [play-publisher-tool internal] load build definition from Dockerfile
+#5 transferring dockerfile: 197B done
+#5 DONE 0.0s
+#6 [cpo-analysis-service internal] load build definition from Dockerfile
+#6 transferring dockerfile: 226B done
+#6 DONE 0.0s
+#7 [web-scraper-tool internal] load build definition from Dockerfile
+#7 transferring dockerfile: 197B done
+#7 DONE 0.0s
+#8 [ai-developer-agent-service internal] load .dockerignore
+#8 transferring context: 32B
+#8 transferring context: 84B done
+#8 DONE 0.1s
+#9 [discovery-cycle-service internal] load .dockerignore
+#9 transferring context: 84B done
+#9 DONE 0.0s
+#10 [play-publisher-tool internal] load .dockerignore
+#10 transferring context: 84B done
+#10 DONE 0.0s
+#11 [cso-vetting-service internal] load .dockerignore
+#11 transferring context: 84B done
+#11 DONE 0.0s
+#12 [cmo-publishing-agent internal] load .dockerignore
+#12 transferring context: 84B done
+#12 DONE 0.0s
+#13 [cpo-analysis-service internal] load .dockerignore
+#13 transferring context: 84B done
+#13 DONE 0.0s
+#14 [web-scraper-tool internal] load .dockerignore
+#14 transferring context: 84B 0.0s done
+#14 DONE 0.0s
+#15 [discovery-cycle-service internal] load metadata for docker.io/library/python:3.9-slim
+#15 DONE 3.5s
+#16 [web-scraper-tool internal] load build context
+#16 transferring context: 564B 0.0s done
+#16 DONE 0.0s
+#17 [play-publisher-tool internal] load build context
+#17 transferring context: 762B 0.0s done
+#17 DONE 0.1s
+#18 [cmo-publishing-agent internal] load build context
+#18 transferring context: 2.21kB 0.0s done
+#18 DONE 0.1s
+#19 [cso-vetting-service internal] load build context
+#19 transferring context: 3.37kB done
+#19 DONE 0.1s
+#20 [web-scraper-tool 1/5] FROM docker.io/library/python:3.9-slim@sha256:c2a0feb07dedbf91498883c2f8e1e5201e95c91d413e21c3bea780c8aad8e6a7
+#20 resolve docker.io/library/python:3.9-slim@sha256:c2a0feb07dedbf91498883c2f8e1e5201e95c91d413e21c3bea780c8aad8e6a7 0.1s done
+#20 ...
+#21 [cpo-analysis-service internal] load build context
+#21 transferring context: 3.96kB done
+#21 DONE 0.1s
+#22 [discovery-cycle-service internal] load build context
+#22 transferring context: 2.83kB done
+#22 DONE 0.1s
+#23 [ai-developer-agent-service internal] load build context
+#23 transferring context: 4.99kB done
+#23 DONE 0.1s
+#20 [web-scraper-tool 1/5] FROM docker.io/library/python:3.9-slim@sha256:c2a0feb07dedbf91498883c2f8e1e5201e95c91d413e21c3bea780c8aad8e6a7
+#20 sha256:ae17c88c7d53cc98a779a4016294a41ea8252aeda7313b2626e3e0d710eab6b1 0B / 3.51MB 0.2s
+#20 sha256:08ebcf91c6203262d7c7664ec69e4291568a7140d510c3d76772cb8f070e9644 0B / 14.94MB 0.2s
+#20 sha256:9f1673b825005e922db77ccb96cb55009a79969d17899da0716a092959560ef2 0B / 249B 0.2s
+#20 sha256:c2a0feb07dedbf91498883c2f8e1e5201e95c91d413e21c3bea780c8aad8e6a7 10.41kB / 10.41kB done
+#20 sha256:079a8733419ba08acb5412c676b314f50e65efccd1d2cd5010e5050565ab5999 1.75kB / 1.75kB done
+#20 sha256:a1ec6a2ef1646c17f14444fbf70e0fd5b431aadda725a574ab2460d790d82be4 5.29kB / 5.29kB done
+#20 sha256:ae17c88c7d53cc98a779a4016294a41ea8252aeda7313b2626e3e0d710eab6b1 1.05MB / 3.51MB 0.6s
+#20 sha256:ae17c88c7d53cc98a779a4016294a41ea8252aeda7313b2626e3e0d710eab6b1 3.51MB / 3.51MB 0.6s done
+#20 extracting sha256:ae17c88c7d53cc98a779a4016294a41ea8252aeda7313b2626e3e0d710eab6b1 0.1s
+#20 sha256:08ebcf91c6203262d7c7664ec69e4291568a7140d510c3d76772cb8f070e9644 3.15MB / 14.94MB 0.8s
+#20 sha256:08ebcf91c6203262d7c7664ec69e4291568a7140d510c3d76772cb8f070e9644 11.53MB / 14.94MB 0.9s
+#20 sha256:9f1673b825005e922db77ccb96cb55009a79969d17899da0716a092959560ef2 249B / 249B 0.8s done
+#20 sha256:08ebcf91c6203262d7c7664ec69e4291568a7140d510c3d76772cb8f070e9644 14.94MB / 14.94MB 1.0s
+#20 extracting sha256:ae17c88c7d53cc98a779a4016294a41ea8252aeda7313b2626e3e0d710eab6b1 0.4s done
+#20 extracting sha256:08ebcf91c6203262d7c7664ec69e4291568a7140d510c3d76772cb8f070e9644
+#20 sha256:08ebcf91c6203262d7c7664ec69e4291568a7140d510c3d76772cb8f070e9644 14.94MB / 14.94MB 1.0s done
+#20 extracting sha256:08ebcf91c6203262d7c7664ec69e4291568a7140d510c3d76772cb8f070e9644 0.9s done
+#20 extracting sha256:9f1673b825005e922db77ccb96cb55009a79969d17899da0716a092959560ef2
+#20 extracting sha256:9f1673b825005e922db77ccb96cb55009a79969d17899da0716a092959560ef2 done
+#20 DONE 2.5s
+#24 [ai-developer-agent-service 2/5] WORKDIR /usr/src/app
+#24 DONE 0.4s
+#25 [web-scraper-tool 3/5] COPY requirements.txt ./
+#25 DONE 0.1s
+#26 [discovery-cycle-service 3/5] COPY requirements.txt ./
+#26 DONE 0.1s
+#27 [ai-developer-agent-service 3/5] COPY requirements.txt ./
+#27 DONE 0.1s
+#28 [web-scraper-tool 4/5] RUN pip install --no-cache-dir -r requirements.txt
+#28 ...
+#29 [discovery-cycle-service 4/5] RUN pip install --no-cache-dir -r requirements.txt
+#29 7.341 Collecting Flask==3.0.3
+#29 7.476   Downloading flask-3.0.3-py3-none-any.whl (101 kB)
+#29 7.527      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 101.7/101.7 kB 3.3 MB/s eta 0:00:00
+#29 7.642 Collecting gunicorn==22.0.0
+#29 7.662   Downloading gunicorn-22.0.0-py3-none-any.whl (84 kB)
+#29 7.690      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 84.4/84.4 kB 12.5 MB/s eta 0:00:00
+#29 ...
+#28 [web-scraper-tool 4/5] RUN pip install --no-cache-dir -r requirements.txt
+#28 7.559 Collecting google-cloud-firestore==2.16.0
+#28 7.701   Downloading google_cloud_firestore-2.16.0-py2.py3-none-any.whl (317 kB)
+#28 7.768      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 317.4/317.4 kB 6.2 MB/s eta 0:00:00
+#28 7.931 Collecting google-cloud-secret-manager==2.19.0
+#28 7.951   Downloading google_cloud_secret_manager-2.19.0-py2.py3-none-any.whl (178 kB)
+#28 7.968      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 178.7/178.7 kB 14.4 MB/s eta 0:00:00
+#28 8.409 Collecting google-auth!=2.24.0,!=2.25.0,<3.0.0dev,>=2.14.1
+#28 8.425   Downloading google_auth-2.40.3-py2.py3-none-any.whl (216 kB)
+#28 8.457      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 216.1/216.1 kB 10.3 MB/s eta 0:00:00
+#28 8.576 Collecting proto-plus<2.0.0dev,>=1.22.0
+#28 8.593   Downloading proto_plus-1.26.1-py3-none-any.whl (50 kB)
+#28 8.600      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 50.2/50.2 kB 86.0 MB/s eta 0:00:00
+#28 ...
+#30 [ai-developer-agent-service 4/5] RUN pip install --no-cache-dir -r requirements.txt
+#30 7.440 Collecting Flask==3.0.3
+#30 7.564   Downloading flask-3.0.3-py3-none-any.whl (101 kB)
+#30 7.607      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 101.7/101.7 kB 3.1 MB/s eta 0:00:00
+#30 7.714 Collecting gunicorn==22.0.0
+#30 7.732   Downloading gunicorn-22.0.0-py3-none-any.whl (84 kB)
+#30 7.746      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 84.4/84.4 kB 12.2 MB/s eta 0:00:00
+#30 7.890 Collecting google-cloud-firestore==2.16.0
+#30 7.911   Downloading google_cloud_firestore-2.16.0-py2.py3-none-any.whl (317 kB)
+#30 7.948      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 317.4/317.4 kB 13.1 MB/s eta 0:00:00
+#30 8.097 Collecting google-cloud-secret-manager==2.19.0
+#30 8.120   Downloading google_cloud_secret_manager-2.19.0-py2.py3-none-any.whl (178 kB)
+#30 8.152      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 178.7/178.7 kB 11.7 MB/s eta 0:00:00
+#30 8.257 Collecting google-generativeai==0.7.1
+#30 8.274   Downloading google_generativeai-0.7.1-py3-none-any.whl (163 kB)
+#30 8.300      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 163.9/163.9 kB 10.7 MB/s eta 0:00:00
+#30 8.568 Collecting Werkzeug>=3.0.0
+#30 8.586   Downloading werkzeug-3.1.3-py3-none-any.whl (224 kB)
+#30 8.608      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 224.5/224.5 kB 14.7 MB/s eta 0:00:00
+#30 8.708 Collecting click>=8.1.3
+#30 8.726   Downloading click-8.1.8-py3-none-any.whl (98 kB)
+#30 8.751      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 98.2/98.2 kB 95.0 MB/s eta 0:00:00
+#30 8.840 Collecting Jinja2>=3.1.2
+#30 8.857   Downloading jinja2-3.1.6-py3-none-any.whl (134 kB)
+#30 8.874      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 134.9/134.9 kB 12.1 MB/s eta 0:00:00
+#30 9.000 Collecting itsdangerous>=2.1.2
+#30 9.025   Downloading itsdangerous-2.2.0-py3-none-any.whl (16 kB)
+#30 9.131 Collecting blinker>=1.6.2
+#30 9.148   Downloading blinker-1.9.0-py3-none-any.whl (8.5 kB)
+#30 9.517 Collecting importlib-metadata>=3.6.0
+#30 9.534   Downloading importlib_metadata-8.7.0-py3-none-any.whl (27 kB)
+#30 9.747 Collecting packaging
+#30 9.769   Downloading packaging-25.0-py3-none-any.whl (66 kB)
+#30 9.793      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 66.5/66.5 kB 88.4 MB/s eta 0:00:00
+#30 ...
+#29 [discovery-cycle-service 4/5] RUN pip install --no-cache-dir -r requirements.txt
+#29 7.690      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 84.4/84.4 kB 12.5 MB/s eta 0:00:00
+#29 7.910 Collecting google-cloud-firestore==2.16.0
+#29 7.936   Downloading google_cloud_firestore-2.16.0-py2.py3-none-any.whl (317 kB)
+#29 7.974      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 317.4/317.4 kB 10.5 MB/s eta 0:00:00
+#29 8.161 Collecting google-cloud-secret-manager==2.19.0
+#29 8.182   Downloading google_cloud_secret_manager-2.19.0-py2.py3-none-any.whl (178 kB)
+#29 8.208      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 178.7/178.7 kB 11.0 MB/s eta 0:00:00
+#29 8.382 Collecting Jinja2>=3.1.2
+#29 8.399   Downloading jinja2-3.1.6-py3-none-any.whl (134 kB)
+#29 8.431      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 134.9/134.9 kB 10.9 MB/s eta 0:00:00
+#29 8.494 Collecting blinker>=1.6.2
+#29 8.511   Downloading blinker-1.9.0-py3-none-any.whl (8.5 kB)
+#29 8.599 Collecting itsdangerous>=2.1.2
+#29 8.616   Downloading itsdangerous-2.2.0-py3-none-any.whl (16 kB)
+#29 8.802 Collecting Werkzeug>=3.0.0
+#29 8.819   Downloading werkzeug-3.1.3-py3-none-any.whl (224 kB)
+#29 8.858      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 224.5/224.5 kB 12.1 MB/s eta 0:00:00
+#29 9.171 Collecting importlib-metadata>=3.6.0
+#29 9.188   Downloading importlib_metadata-8.7.0-py3-none-any.whl (27 kB)
+#29 9.343 Collecting click>=8.1.3
+#29 9.362   Downloading click-8.1.8-py3-none-any.whl (98 kB)
+#29 9.384      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 98.2/98.2 kB 76.7 MB/s eta 0:00:00
+#29 9.599 Collecting packaging
+#29 9.625   Downloading packaging-25.0-py3-none-any.whl (66 kB)
+#29 9.645      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 66.5/66.5 kB 99.2 MB/s eta 0:00:00
+#29 10.18 Collecting google-auth!=2.24.0,!=2.25.0,<3.0.0dev,>=2.14.1
+#29 10.20   Downloading google_auth-2.40.3-py2.py3-none-any.whl (216 kB)
+#29 10.23      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 216.1/216.1 kB 12.1 MB/s eta 0:00:00
+#29 12.14 Collecting protobuf!=3.20.0,!=3.20.1,!=4.21.0,!=4.21.1,!=4.21.2,!=4.21.3,!=4.21.4,!=4.21.5,<5.0.0dev,>=3.19.5
+#29 12.16   Downloading protobuf-4.25.8-cp37-abi3-manylinux2014_x86_64.whl (294 kB)
+#29 12.19      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 294.9/294.9 kB 13.0 MB/s eta 0:00:00
+#29 12.69 Collecting google-api-core[grpc]!=2.0.*,!=2.1.*,!=2.10.*,!=2.2.*,!=2.3.*,!=2.4.*,!=2.5.*,!=2.6.*,!=2.7.*,!=2.8.*,!=2.9.*,<3.0.0dev,>=1.34.0
+#29 12.71   Downloading google_api_core-2.25.1-py3-none-any.whl (160 kB)
+#29 12.73      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 160.8/160.8 kB 13.0 MB/s eta 0:00:00
+#29 12.86 Collecting proto-plus<2.0.0dev,>=1.22.0
+#29 12.88   Downloading proto_plus-1.26.1-py3-none-any.whl (50 kB)
+#29 12.90      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 50.2/50.2 kB 78.0 MB/s eta 0:00:00
+#29 13.16 Collecting google-cloud-core<3.0.0dev,>=1.4.1
+#29 13.18   Downloading google_cloud_core-2.4.3-py2.py3-none-any.whl (29 kB)
+#29 13.57 Collecting grpc-google-iam-v1<1.0.0dev,>=0.12.4
+#29 13.59   Downloading grpc_google_iam_v1-0.14.2-py3-none-any.whl (19 kB)
+#29 13.89 Collecting requests<3.0.0,>=2.18.0
+#29 13.91   Downloading requests-2.32.4-py3-none-any.whl (64 kB)
+#29 13.93      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 64.8/64.8 kB 90.4 MB/s eta 0:00:00
+#29 14.48 Collecting googleapis-common-protos<2.0.0,>=1.56.2
+#29 14.50   Downloading googleapis_common_protos-1.70.0-py3-none-any.whl (294 kB)
+#29 14.53      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 294.5/294.5 kB 14.0 MB/s eta 0:00:00
+#29 ...
+#30 [ai-developer-agent-service 4/5] RUN pip install --no-cache-dir -r requirements.txt
+#30 10.35 Collecting google-api-core[grpc]!=2.0.*,!=2.1.*,!=2.10.*,!=2.2.*,!=2.3.*,!=2.4.*,!=2.5.*,!=2.6.*,!=2.7.*,!=2.8.*,!=2.9.*,<3.0.0dev,>=1.34.0
+#30 10.36   Downloading google_api_core-2.25.1-py3-none-any.whl (160 kB)
+#30 10.38      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 160.8/160.8 kB 110.2 MB/s eta 0:00:00
+#30 10.62 Collecting google-cloud-core<3.0.0dev,>=1.4.1
+#30 10.64   Downloading google_cloud_core-2.4.3-py2.py3-none-any.whl (29 kB)
+#30 10.84 Collecting proto-plus<2.0.0dev,>=1.22.0
+#30 10.86   Downloading proto_plus-1.26.1-py3-none-any.whl (50 kB)
+#30 10.87      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 50.2/50.2 kB 90.6 MB/s eta 0:00:00
+#30 11.31 Collecting google-auth!=2.24.0,!=2.25.0,<3.0.0dev,>=2.14.1
+#30 11.33   Downloading google_auth-2.40.3-py2.py3-none-any.whl (216 kB)
+#30 11.35      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 216.1/216.1 kB 23.9 MB/s eta 0:00:00
+#30 13.28 Collecting protobuf!=3.20.0,!=3.20.1,!=4.21.0,!=4.21.1,!=4.21.2,!=4.21.3,!=4.21.4,!=4.21.5,<5.0.0dev,>=3.19.5
+#30 13.30   Downloading protobuf-4.25.8-cp37-abi3-manylinux2014_x86_64.whl (294 kB)
+#30 13.33      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 294.9/294.9 kB 22.0 MB/s eta 0:00:00
+#30 13.83 Collecting grpc-google-iam-v1<1.0.0dev,>=0.12.4
+#30 13.87   Downloading grpc_google_iam_v1-0.14.2-py3-none-any.whl (19 kB)
+#30 14.15 Collecting google-ai-generativelanguage==0.6.6
+#30 14.17   Downloading google_ai_generativelanguage-0.6.6-py3-none-any.whl (718 kB)
+#30 14.22      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 718.3/718.3 kB 20.5 MB/s eta 0:00:00
+#30 14.61 Collecting tqdm
+#30 14.63   Downloading tqdm-4.67.1-py3-none-any.whl (78 kB)
+#30 14.65      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 78.5/78.5 kB 10.7 MB/s eta 0:00:00
+#30 15.23 Collecting google-api-python-client
+#30 15.26   Downloading google_api_python_client-2.176.0-py3-none-any.whl (13.7 MB)
+#30 15.66      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 13.7/13.7 MB 40.9 MB/s eta 0:00:00
+#30 16.97 Collecting pydantic
+#30 16.99   Downloading pydantic-2.11.7-py3-none-any.whl (444 kB)
+#30 17.02      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 444.8/444.8 kB 86.7 MB/s eta 0:00:00
+#30 17.19 Collecting typing-extensions
+#30 17.23   Downloading typing_extensions-4.14.1-py3-none-any.whl (43 kB)
+#30 17.24      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 43.9/43.9 kB 82.1 MB/s eta 0:00:00
+#30 17.91 Collecting requests<3.0.0,>=2.18.0
+#30 17.94   Downloading requests-2.32.4-py3-none-any.whl (64 kB)
+#30 17.95      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 64.8/64.8 kB 90.2 MB/s eta 0:00:00
+#30 18.29 Collecting googleapis-common-protos<2.0.0,>=1.56.2
+#30 18.31   Downloading googleapis_common_protos-1.70.0-py3-none-any.whl (294 kB)
+#30 18.33      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 294.5/294.5 kB 26.0 MB/s eta 0:00:00
+#30 ...
+#28 [web-scraper-tool 4/5] RUN pip install --no-cache-dir -r requirements.txt
+#28 10.27 Collecting protobuf!=3.20.0,!=3.20.1,!=4.21.0,!=4.21.1,!=4.21.2,!=4.21.3,!=4.21.4,!=4.21.5,<5.0.0dev,>=3.19.5
+#28 10.29   Downloading protobuf-4.25.8-cp37-abi3-manylinux2014_x86_64.whl (294 kB)
+#28 10.32      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 294.9/294.9 kB 15.5 MB/s eta 0:00:00
+#28 10.91 Collecting google-api-core[grpc]!=2.0.*,!=2.1.*,!=2.10.*,!=2.2.*,!=2.3.*,!=2.4.*,!=2.5.*,!=2.6.*,!=2.7.*,!=2.8.*,!=2.9.*,<3.0.0dev,>=1.34.0
+#28 10.93   Downloading google_api_core-2.25.1-py3-none-any.whl (160 kB)
+#28 10.96      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 160.8/160.8 kB 19.6 MB/s eta 0:00:00
+#28 11.17 Collecting google-cloud-core<3.0.0dev,>=1.4.1
+#28 11.18   Downloading google_cloud_core-2.4.3-py2.py3-none-any.whl (29 kB)
+#28 11.33 Collecting grpc-google-iam-v1<1.0.0dev,>=0.12.4
+#28 11.35   Downloading grpc_google_iam_v1-0.14.2-py3-none-any.whl (19 kB)
+#28 11.95 Collecting requests<3.0.0,>=2.18.0
+#28 11.97   Downloading requests-2.32.4-py3-none-any.whl (64 kB)
+#28 11.98      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 64.8/64.8 kB 29.7 MB/s eta 0:00:00
+#28 12.69 Collecting googleapis-common-protos<2.0.0,>=1.56.2
+#28 12.71   Downloading googleapis_common_protos-1.70.0-py3-none-any.whl (294 kB)
+#28 12.74      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 294.5/294.5 kB 16.7 MB/s eta 0:00:00
+#28 18.45 Collecting grpcio<2.0.0,>=1.33.2
+#28 18.47   Downloading grpcio-1.73.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (6.0 MB)
+#28 18.71      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 6.0/6.0 MB 26.6 MB/s eta 0:00:00
+#28 19.02 Collecting grpcio-status<2.0.0,>=1.33.2
+#28 19.05   Downloading grpcio_status-1.73.1-py3-none-any.whl (14 kB)
+#28 19.52 Collecting rsa<5,>=3.1.4
+#28 19.54   Downloading rsa-4.9.1-py3-none-any.whl (34 kB)
+#28 19.67 Collecting pyasn1-modules>=0.2.1
+#28 19.69   Downloading pyasn1_modules-0.4.2-py3-none-any.whl (181 kB)
+#28 19.72      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 181.3/181.3 kB 54.8 MB/s eta 0:00:00
+#28 19.87 Collecting cachetools<6.0,>=2.0.0
+#28 19.89   Downloading cachetools-5.5.2-py3-none-any.whl (10 kB)
+#28 ...
+#29 [discovery-cycle-service 4/5] RUN pip install --no-cache-dir -r requirements.txt
+#29 20.78 Collecting grpcio<2.0.0,>=1.33.2
+#29 20.80   Downloading grpcio-1.73.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (6.0 MB)
+#29 21.03      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 6.0/6.0 MB 26.9 MB/s eta 0:00:00
+#29 21.35 Collecting grpcio-status<2.0.0,>=1.33.2
+#29 21.37   Downloading grpcio_status-1.73.1-py3-none-any.whl (14 kB)
+#29 21.75 Collecting cachetools<6.0,>=2.0.0
+#29 21.76   Downloading cachetools-5.5.2-py3-none-any.whl (10 kB)
+#29 22.08 Collecting pyasn1-modules>=0.2.1
+#29 22.11   Downloading pyasn1_modules-0.4.2-py3-none-any.whl (181 kB)
+#29 22.12      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 181.3/181.3 kB 103.2 MB/s eta 0:00:00
+#29 22.25 Collecting rsa<5,>=3.1.4
+#29 22.27   Downloading rsa-4.9.1-py3-none-any.whl (34 kB)
+#29 23.04 Collecting zipp>=3.20
+#29 23.06   Downloading zipp-3.23.0-py3-none-any.whl (10 kB)
+#29 23.51 Collecting MarkupSafe>=2.0
+#29 23.53   Downloading MarkupSafe-3.0.2-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (20 kB)
+#29 24.49 Collecting grpcio-status<2.0.0,>=1.33.2
+#29 24.50   Downloading grpcio_status-1.73.0-py3-none-any.whl (14 kB)
+#29 24.63   Downloading grpcio_status-1.72.2-py3-none-any.whl (14 kB)
+#29 24.72   Downloading grpcio_status-1.72.1-py3-none-any.whl (14 kB)
+#29 24.85   Downloading grpcio_status-1.71.2-py3-none-any.whl (14 kB)
+#29 25.02   Downloading grpcio_status-1.71.0-py3-none-any.whl (14 kB)
+#29 25.06   Downloading grpcio_status-1.70.0-py3-none-any.whl (14 kB)
+#29 25.11   Downloading grpcio_status-1.69.0-py3-none-any.whl (14 kB)
+#29 25.17   Downloading grpcio_status-1.68.1-py3-none-any.whl (14 kB)
+#29 25.24   Downloading grpcio_status-1.68.0-py3-none-any.whl (14 kB)
+#29 25.32   Downloading grpcio_status-1.67.1-py3-none-any.whl (14 kB)
+#29 25.39   Downloading grpcio_status-1.67.0-py3-none-any.whl (14 kB)
+#29 25.48   Downloading grpcio_status-1.66.2-py3-none-any.whl (14 kB)
+#29 25.55   Downloading grpcio_status-1.66.1-py3-none-any.whl (14 kB)
+#29 25.63   Downloading grpcio_status-1.66.0-py3-none-any.whl (14 kB)
+#29 25.71   Downloading grpcio_status-1.65.5-py3-none-any.whl (14 kB)
+#29 25.79   Downloading grpcio_status-1.65.4-py3-none-any.whl (14 kB)
+#29 25.88   Downloading grpcio_status-1.65.2-py3-none-any.whl (14 kB)
+#29 25.98   Downloading grpcio_status-1.65.1-py3-none-any.whl (14 kB)
+#29 26.03   Downloading grpcio_status-1.64.3-py3-none-any.whl (14 kB)
+#29 26.26   Downloading grpcio_status-1.64.1-py3-none-any.whl (14 kB)
+#29 26.35   Downloading grpcio_status-1.64.0-py3-none-any.whl (14 kB)
+#29 26.43   Downloading grpcio_status-1.63.2-py3-none-any.whl (14 kB)
+#29 26.50   Downloading grpcio_status-1.63.0-py3-none-any.whl (14 kB)
+#29 26.56   Downloading grpcio_status-1.62.3-py3-none-any.whl (14 kB)
+#29 27.13 Collecting pyasn1<0.7.0,>=0.6.1
+#29 27.15   Downloading pyasn1-0.6.1-py3-none-any.whl (83 kB)
+#29 27.17      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 83.1/83.1 kB 107.3 MB/s eta 0:00:00
+#29 27.32 Collecting idna<4,>=2.5
+#29 27.34   Downloading idna-3.10-py3-none-any.whl (70 kB)
+#29 27.35      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 70.4/70.4 kB 82.3 MB/s eta 0:00:00
+#29 27.61 Collecting urllib3<3,>=1.21.1
+#29 27.63   Downloading urllib3-2.5.0-py3-none-any.whl (129 kB)
+#29 27.65      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 129.8/129.8 kB 109.1 MB/s eta 0:00:00
+#29 28.43 Collecting charset_normalizer<4,>=2
+#29 28.45   Downloading charset_normalizer-3.4.2-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (149 kB)
+#29 28.47      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 149.5/149.5 kB 114.7 MB/s eta 0:00:00
+#29 28.59 Collecting certifi>=2017.4.17
+#29 28.61   Downloading certifi-2025.7.14-py3-none-any.whl (162 kB)
+#29 28.62      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 162.7/162.7 kB 91.1 MB/s eta 0:00:00
+#29 29.63 Installing collected packages: zipp, urllib3, pyasn1, protobuf, packaging, MarkupSafe, itsdangerous, idna, grpcio, click, charset_normalizer, certifi, cachetools, blinker, Werkzeug, rsa, requests, pyasn1-modules, proto-plus, Jinja2, importlib-metadata, gunicorn, googleapis-common-protos, grpcio-status, google-auth, Flask, grpc-google-iam-v1, google-api-core, google-cloud-core, google-cloud-secret-manager, google-cloud-firestore
+#29 ...
+#28 [web-scraper-tool 4/5] RUN pip install --no-cache-dir -r requirements.txt
+#28 21.11 Collecting grpcio-status<2.0.0,>=1.33.2
+#28 21.12   Downloading grpcio_status-1.73.0-py3-none-any.whl (14 kB)
+#28 21.18   Downloading grpcio_status-1.72.2-py3-none-any.whl (14 kB)
+#28 21.26   Downloading grpcio_status-1.72.1-py3-none-any.whl (14 kB)
+#28 21.34   Downloading grpcio_status-1.71.2-py3-none-any.whl (14 kB)
+#28 21.53   Downloading grpcio_status-1.71.0-py3-none-any.whl (14 kB)
+#28 21.60   Downloading grpcio_status-1.70.0-py3-none-any.whl (14 kB)
+#28 21.70   Downloading grpcio_status-1.69.0-py3-none-any.whl (14 kB)
+#28 21.82   Downloading grpcio_status-1.68.1-py3-none-any.whl (14 kB)
+#28 21.88   Downloading grpcio_status-1.68.0-py3-none-any.whl (14 kB)
+#28 21.92   Downloading grpcio_status-1.67.1-py3-none-any.whl (14 kB)
+#28 21.96   Downloading grpcio_status-1.67.0-py3-none-any.whl (14 kB)
+#28 22.04   Downloading grpcio_status-1.66.2-py3-none-any.whl (14 kB)
+#28 22.12   Downloading grpcio_status-1.66.1-py3-none-any.whl (14 kB)
+#28 22.16   Downloading grpcio_status-1.66.0-py3-none-any.whl (14 kB)
+#28 22.25   Downloading grpcio_status-1.65.5-py3-none-any.whl (14 kB)
+#28 22.33   Downloading grpcio_status-1.65.4-py3-none-any.whl (14 kB)
+#28 22.53   Downloading grpcio_status-1.65.2-py3-none-any.whl (14 kB)
+#28 22.63   Downloading grpcio_status-1.65.1-py3-none-any.whl (14 kB)
+#28 22.69   Downloading grpcio_status-1.64.3-py3-none-any.whl (14 kB)
+#28 22.77   Downloading grpcio_status-1.64.1-py3-none-any.whl (14 kB)
+#28 22.84   Downloading grpcio_status-1.64.0-py3-none-any.whl (14 kB)
+#28 22.92   Downloading grpcio_status-1.63.2-py3-none-any.whl (14 kB)
+#28 22.99   Downloading grpcio_status-1.63.0-py3-none-any.whl (14 kB)
+#28 23.06   Downloading grpcio_status-1.62.3-py3-none-any.whl (14 kB)
+#28 23.85 Collecting pyasn1<0.7.0,>=0.6.1
+#28 23.86   Downloading pyasn1-0.6.1-py3-none-any.whl (83 kB)
+#28 23.88      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 83.1/83.1 kB 77.1 MB/s eta 0:00:00
+#28 24.04 Collecting certifi>=2017.4.17
+#28 24.06   Downloading certifi-2025.7.14-py3-none-any.whl (162 kB)
+#28 24.07      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 162.7/162.7 kB 80.1 MB/s eta 0:00:00
+#28 24.17 Collecting idna<4,>=2.5
+#28 24.19   Downloading idna-3.10-py3-none-any.whl (70 kB)
+#28 24.20      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 70.4/70.4 kB 92.2 MB/s eta 0:00:00
+#28 24.93 Collecting charset_normalizer<4,>=2
+#28 24.95   Downloading charset_normalizer-3.4.2-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (149 kB)
+#28 24.97      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 149.5/149.5 kB 116.6 MB/s eta 0:00:00
+#28 25.19 Collecting urllib3<3,>=1.21.1
+#28 25.21   Downloading urllib3-2.5.0-py3-none-any.whl (129 kB)
+#28 25.22      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 129.8/129.8 kB 110.1 MB/s eta 0:00:00
+#28 25.81 Installing collected packages: urllib3, pyasn1, protobuf, idna, grpcio, charset_normalizer, certifi, cachetools, rsa, requests, pyasn1-modules, proto-plus, googleapis-common-protos, grpcio-status, google-auth, grpc-google-iam-v1, google-api-core, google-cloud-core, google-cloud-secret-manager, google-cloud-firestore
+#28 30.52 Successfully installed cachetools-5.5.2 certifi-2025.7.14 charset_normalizer-3.4.2 google-api-core-2.25.1 google-auth-2.40.3 google-cloud-core-2.4.3 google-cloud-firestore-2.16.0 google-cloud-secret-manager-2.19.0 googleapis-common-protos-1.70.0 grpc-google-iam-v1-0.14.2 grpcio-1.73.1 grpcio-status-1.62.3 idna-3.10 proto-plus-1.26.1 protobuf-4.25.8 pyasn1-0.6.1 pyasn1-modules-0.4.2 requests-2.32.4 rsa-4.9.1 urllib3-2.5.0
+#28 30.52 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv
+#28 31.05 
+#28 31.05 [notice] A new release of pip is available: 23.0.1 -> 25.1.1
+#28 31.05 [notice] To update, run: pip install --upgrade pip
+#28 DONE 32.5s
+#30 [ai-developer-agent-service 4/5] RUN pip install --no-cache-dir -r requirements.txt
+#30 23.91 Collecting grpcio<2.0.0,>=1.33.2
+#30 23.92   Downloading grpcio-1.73.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (6.0 MB)
+#30 24.03      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 6.0/6.0 MB 65.3 MB/s eta 0:00:00
+#30 24.46 Collecting grpcio-status<2.0.0,>=1.33.2
+#30 24.47   Downloading grpcio_status-1.73.1-py3-none-any.whl (14 kB)
+#30 24.74 Collecting cachetools<6.0,>=2.0.0
+#30 24.75   Downloading cachetools-5.5.2-py3-none-any.whl (10 kB)
+#30 24.88 Collecting rsa<5,>=3.1.4
+#30 24.90   Downloading rsa-4.9.1-py3-none-any.whl (34 kB)
+#30 25.03 Collecting pyasn1-modules>=0.2.1
+#30 25.05   Downloading pyasn1_modules-0.4.2-py3-none-any.whl (181 kB)
+#30 25.06      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 181.3/181.3 kB 105.4 MB/s eta 0:00:00
+#30 26.09 Collecting zipp>=3.20
+#30 26.11   Downloading zipp-3.23.0-py3-none-any.whl (10 kB)
+#30 26.67 Collecting MarkupSafe>=2.0
+#30 26.69   Downloading MarkupSafe-3.0.2-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (20 kB)
+#30 27.22 Collecting google-auth-httplib2<1.0.0,>=0.2.0
+#30 27.24   Downloading google_auth_httplib2-0.2.0-py2.py3-none-any.whl (9.3 kB)
+#30 27.34 Collecting uritemplate<5,>=3.0.1
+#30 27.36   Downloading uritemplate-4.2.0-py3-none-any.whl (11 kB)
+#30 27.43 Collecting httplib2<1.0.0,>=0.19.0
+#30 27.45   Downloading httplib2-0.22.0-py3-none-any.whl (96 kB)
+#30 27.46      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 96.9/96.9 kB 105.0 MB/s eta 0:00:00
+#30 27.76 Collecting annotated-types>=0.6.0
+#30 27.78   Downloading annotated_types-0.7.0-py3-none-any.whl (13 kB)
+#30 27.86 Collecting typing-inspection>=0.4.0
+#30 27.89   Downloading typing_inspection-0.4.1-py3-none-any.whl (14 kB)
+#30 ...
+#31 [play-publisher-tool 3/5] COPY requirements.txt ./
+#31 CACHED
+#32 [play-publisher-tool 4/5] RUN pip install --no-cache-dir -r requirements.txt
+#32 CACHED
+#33 [web-scraper-tool 5/5] COPY main.py .
+#33 DONE 0.1s
+#34 [play-publisher-tool 5/5] COPY main.py .
+#34 DONE 0.2s
+#35 [web-scraper-tool] exporting to image
+#35 exporting layers
+#35 exporting layers 1.4s done
+#35 writing image sha256:c2b883b0c080bcf7d4ebd743fa2b78a3dbe848efc5cf487405d84fd1e498c5be done
+#35 naming to us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool done
+#35 exporting layers 1.3s done
+#35 writing image sha256:5740e4dd38df0b003378583d60b9a816707fbd5b5fa794d93fc21a800a758a45 done
+#35 naming to us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool done
+#35 DONE 1.5s
+#30 [ai-developer-agent-service 4/5] RUN pip install --no-cache-dir -r requirements.txt
+#30 34.81 Collecting pydantic-core==2.33.2
+#30 34.83   Downloading pydantic_core-2.33.2-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.0 MB)
+#30 34.85      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.0/2.0 MB 106.5 MB/s eta 0:00:00
+#30 35.21 Collecting grpcio-status<2.0.0,>=1.33.2
+#30 35.23   Downloading grpcio_status-1.73.0-py3-none-any.whl (14 kB)
+#30 35.28   Downloading grpcio_status-1.72.2-py3-none-any.whl (14 kB)
+#30 35.38   Downloading grpcio_status-1.72.1-py3-none-any.whl (14 kB)
+#30 35.45   Downloading grpcio_status-1.71.2-py3-none-any.whl (14 kB)
+#30 35.62   Downloading grpcio_status-1.71.0-py3-none-any.whl (14 kB)
+#30 35.66   Downloading grpcio_status-1.70.0-py3-none-any.whl (14 kB)
+#30 35.71   Downloading grpcio_status-1.69.0-py3-none-any.whl (14 kB)
+#30 35.76   Downloading grpcio_status-1.68.1-py3-none-any.whl (14 kB)
+#30 35.80   Downloading grpcio_status-1.68.0-py3-none-any.whl (14 kB)
+#30 35.85   Downloading grpcio_status-1.67.1-py3-none-any.whl (14 kB)
+#30 35.89   Downloading grpcio_status-1.67.0-py3-none-any.whl (14 kB)
+#30 35.94   Downloading grpcio_status-1.66.2-py3-none-any.whl (14 kB)
+#30 35.98   Downloading grpcio_status-1.66.1-py3-none-any.whl (14 kB)
+#30 36.03   Downloading grpcio_status-1.66.0-py3-none-any.whl (14 kB)
+#30 36.13   Downloading grpcio_status-1.65.5-py3-none-any.whl (14 kB)
+#30 36.17   Downloading grpcio_status-1.65.4-py3-none-any.whl (14 kB)
+#30 36.22   Downloading grpcio_status-1.65.2-py3-none-any.whl (14 kB)
+#30 36.27   Downloading grpcio_status-1.65.1-py3-none-any.whl (14 kB)
+#30 36.31   Downloading grpcio_status-1.64.3-py3-none-any.whl (14 kB)
+#30 36.35   Downloading grpcio_status-1.64.1-py3-none-any.whl (14 kB)
+#30 36.39   Downloading grpcio_status-1.64.0-py3-none-any.whl (14 kB)
+#30 36.44   Downloading grpcio_status-1.63.2-py3-none-any.whl (14 kB)
+#30 36.48   Downloading grpcio_status-1.63.0-py3-none-any.whl (14 kB)
+#30 36.53   Downloading grpcio_status-1.62.3-py3-none-any.whl (14 kB)
+#30 36.91 Collecting pyparsing!=3.0.0,!=3.0.1,!=3.0.2,!=3.0.3,<4,>=2.4.2
+#30 36.93   Downloading pyparsing-3.2.3-py3-none-any.whl (111 kB)
+#30 36.94      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 111.1/111.1 kB 70.9 MB/s eta 0:00:00
+#30 37.07 Collecting pyasn1<0.7.0,>=0.6.1
+#30 37.09   Downloading pyasn1-0.6.1-py3-none-any.whl (83 kB)
+#30 37.10      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 83.1/83.1 kB 89.4 MB/s eta 0:00:00
+#30 ...
+#29 [discovery-cycle-service 4/5] RUN pip install --no-cache-dir -r requirements.txt
+#29 36.26 Successfully installed Flask-3.0.3 Jinja2-3.1.6 MarkupSafe-3.0.2 Werkzeug-3.1.3 blinker-1.9.0 cachetools-5.5.2 certifi-2025.7.14 charset_normalizer-3.4.2 click-8.1.8 google-api-core-2.25.1 google-auth-2.40.3 google-cloud-core-2.4.3 google-cloud-firestore-2.16.0 google-cloud-secret-manager-2.19.0 googleapis-common-protos-1.70.0 grpc-google-iam-v1-0.14.2 grpcio-1.73.1 grpcio-status-1.62.3 gunicorn-22.0.0 idna-3.10 importlib-metadata-8.7.0 itsdangerous-2.2.0 packaging-25.0 proto-plus-1.26.1 protobuf-4.25.8 pyasn1-0.6.1 pyasn1-modules-0.4.2 requests-2.32.4 rsa-4.9.1 urllib3-2.5.0 zipp-3.23.0
+#29 36.26 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv
+#29 36.55 
+#29 36.55 [notice] A new release of pip is available: 23.0.1 -> 25.1.1
+#29 36.55 [notice] To update, run: pip install --upgrade pip
+#29 DONE 37.5s
+#36 [cmo-publishing-agent 4/5] RUN pip install --no-cache-dir -r requirements.txt
+#36 CACHED
+#37 [cmo-publishing-agent 3/5] COPY requirements.txt ./
+#37 CACHED
+#38 [cso-vetting-service 3/5] COPY requirements.txt ./
+#38 CACHED
+#39 [cso-vetting-service 4/5] RUN pip install --no-cache-dir -r requirements.txt
+#39 CACHED
+#40 [discovery-cycle-service 5/5] COPY main.py .
+#40 DONE 0.1s
+#41 [cso-vetting-service 5/5] COPY main.py .
+#41 DONE 0.2s
+#42 [cmo-publishing-agent 5/5] COPY main.py .
+#42 DONE 0.1s
+#30 [ai-developer-agent-service 4/5] RUN pip install --no-cache-dir -r requirements.txt
+#30 37.69 Collecting charset_normalizer<4,>=2
+#30 37.71   Downloading charset_normalizer-3.4.2-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (149 kB)
+#30 37.73      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 149.5/149.5 kB 118.6 MB/s eta 0:00:00
+#30 37.80 Collecting idna<4,>=2.5
+#30 37.82   Downloading idna-3.10-py3-none-any.whl (70 kB)
+#30 37.83      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 70.4/70.4 kB 97.1 MB/s eta 0:00:00
+#30 38.00 Collecting urllib3<3,>=1.21.1
+#30 38.02   Downloading urllib3-2.5.0-py3-none-any.whl (129 kB)
+#30 38.03      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 129.8/129.8 kB 104.2 MB/s eta 0:00:00
+#30 38.16 Collecting certifi>=2017.4.17
+#30 38.17   Downloading certifi-2025.7.14-py3-none-any.whl (162 kB)
+#30 38.19      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 162.7/162.7 kB 107.8 MB/s eta 0:00:00
+#30 39.32 Installing collected packages: zipp, urllib3, uritemplate, typing-extensions, tqdm, pyparsing, pyasn1, protobuf, packaging, MarkupSafe, itsdangerous, idna, grpcio, click, charset_normalizer, certifi, cachetools, blinker, annotated-types, Werkzeug, typing-inspection, rsa, requests, pydantic-core, pyasn1-modules, proto-plus, Jinja2, importlib-metadata, httplib2, gunicorn, googleapis-common-protos, pydantic, grpcio-status, google-auth, Flask, grpc-google-iam-v1, google-auth-httplib2, google-api-core, google-cloud-core, google-api-python-client, google-cloud-secret-manager, google-cloud-firestore, google-ai-generativelanguage, google-generativeai
+#30 ...
+#35 [cmo-publishing-agent] exporting to image
+#35 exporting layers 2.2s done
+#35 writing image sha256:d24a6a0c27f9659aacbbfb475640e937e06fda45a4afe568a12788a2e89cf048 done
+#35 naming to us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service 0.0s done
+#35 writing image sha256:82aff054ef0b0a538753be5ec4de959723723d17b4fcfde0f14754187dbfd05b done
+#35 naming to us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/discovery-cycle-service done
+#35 writing image sha256:dd88e04abb22dfb5a565bda3f840693278926a00f06f4ba1ba939a610c0304cc done
+#35 naming to us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent done
+#35 DONE 3.7s
+#30 [ai-developer-agent-service 4/5] RUN pip install --no-cache-dir -r requirements.txt
+#30 44.53 Successfully installed Flask-3.0.3 Jinja2-3.1.6 MarkupSafe-3.0.2 Werkzeug-3.1.3 annotated-types-0.7.0 blinker-1.9.0 cachetools-5.5.2 certifi-2025.7.14 charset_normalizer-3.4.2 click-8.1.8 google-ai-generativelanguage-0.6.6 google-api-core-2.25.1 google-api-python-client-2.176.0 google-auth-2.40.3 google-auth-httplib2-0.2.0 google-cloud-core-2.4.3 google-cloud-firestore-2.16.0 google-cloud-secret-manager-2.19.0 google-generativeai-0.7.1 googleapis-common-protos-1.70.0 grpc-google-iam-v1-0.14.2 grpcio-1.73.1 grpcio-status-1.62.3 gunicorn-22.0.0 httplib2-0.22.0 idna-3.10 importlib-metadata-8.7.0 itsdangerous-2.2.0 packaging-25.0 proto-plus-1.26.1 protobuf-4.25.8 pyasn1-0.6.1 pyasn1-modules-0.4.2 pydantic-2.11.7 pydantic-core-2.33.2 pyparsing-3.2.3 requests-2.32.4 rsa-4.9.1 tqdm-4.67.1 typing-extensions-4.14.1 typing-inspection-0.4.1 uritemplate-4.2.0 urllib3-2.5.0 zipp-3.23.0
+#30 44.53 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv
+#30 44.73 
+#30 44.73 [notice] A new release of pip is available: 23.0.1 -> 25.1.1
+#30 44.73 [notice] To update, run: pip install --upgrade pip
+#30 DONE 46.3s
+#43 [cpo-analysis-service 3/5] COPY requirements.txt ./
+#43 CACHED
+#44 [cpo-analysis-service 4/5] RUN pip install --no-cache-dir -r requirements.txt
+#44 CACHED
+#45 [cpo-analysis-service 5/5] COPY main.py .
+#45 DONE 0.0s
+#46 [ai-developer-agent-service 5/5] COPY main.py .
+#46 DONE 0.1s
+#35 [cpo-analysis-service] exporting to image
+#35 exporting layers
+#35 exporting layers 1.8s done
+#35 writing image sha256:ffa54ce7b8da8cb5840541311dbbb81c046320304de0c4dd1d39137a42679924 done
+#35 naming to us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service done
+ ai-developer-agent-service  Built
+ cmo-publishing-agent  Built
+ cpo-analysis-service  Built
+ cso-vetting-service  Built
+ discovery-cycle-service  Built
+ play-publisher-tool  Built
+ web-scraper-tool  Built
+#35 exporting layers 1.8s done
+#35 writing image sha256:41dbf23d878da87e12962e02bc23a56dd145883f610ad3d2fa0b9719c6f8ad5c done
+#35 naming to us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/ai-developer-agent-service done
+#35 DONE 5.7s
+Finished Step #0
+Starting Step #1
+Already have image (with digest): gcr.io/cloud-builders/docker
+ github-tool Skipped 
+ mcp-gateway Skipped 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: eded9cac993d Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: ecbb26ceda43 Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: c6b44a3a0945 Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 13242f53ac09 Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 3d8533b4dc1f Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 7ff2f4499221 Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 5c93044ff6b3 Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: c5d3726ac173 Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: c6b44a3a0945 Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 13242f53ac09 Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 3d8533b4dc1f Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 7ff2f4499221 Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 5c93044ff6b3 Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: c5d3726ac173 Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: c6b44a3a0945 Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 13242f53ac09 Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 3d8533b4dc1f Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 7ff2f4499221 Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 3d8533b4dc1f Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 7ff2f4499221 Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 3526afa0f9b5 Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: c5d3726ac173 Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: c6b44a3a0945 Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 13242f53ac09 Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 3d8533b4dc1f Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 7ff2f4499221 Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 3526afa0f9b5 Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: c5d3726ac173 Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: c6b44a3a0945 Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 13242f53ac09 Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 3d8533b4dc1f Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 7ff2f4499221 Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/ai-developer-agent-service: 524d8622e39c Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/ai-developer-agent-service: 69eab19846b7 Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/ai-developer-agent-service: ecbb26ceda43 Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/ai-developer-agent-service: c6b44a3a0945 Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/ai-developer-agent-service: 13242f53ac09 Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/ai-developer-agent-service: 3d8533b4dc1f Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/ai-developer-agent-service: 7ff2f4499221 Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/ai-developer-agent-service: 1bb35e8b4de1 Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/ai-developer-agent-service: 524d8622e39c Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/ai-developer-agent-service: 69eab19846b7 Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/ai-developer-agent-service: ecbb26ceda43 Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/ai-developer-agent-service: c6b44a3a0945 Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/ai-developer-agent-service: 13242f53ac09 Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/ai-developer-agent-service: 3d8533b4dc1f Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/ai-developer-agent-service: 7ff2f4499221 Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/ai-developer-agent-service: 1bb35e8b4de1 Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 48fa8e8fa879 Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 04dee0342cf5 Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: ba6b364ef4c9 Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: c6b44a3a0945 Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 13242f53ac09 Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 3d8533b4dc1f Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 7ff2f4499221 Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 1bb35e8b4de1 Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 48fa8e8fa879 Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 04dee0342cf5 Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: ba6b364ef4c9 Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: c6b44a3a0945 Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 13242f53ac09 Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 3d8533b4dc1f Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 7ff2f4499221 Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 1bb35e8b4de1 Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 298c3d94c48f Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 04dee0342cf5 Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: ba6b364ef4c9 Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: c6b44a3a0945 Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 13242f53ac09 Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 3d8533b4dc1f Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 7ff2f4499221 Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 1bb35e8b4de1 Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 298c3d94c48f Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 04dee0342cf5 Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: ba6b364ef4c9 Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: c6b44a3a0945 Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 13242f53ac09 Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 3d8533b4dc1f Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 7ff2f4499221 Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 1bb35e8b4de1 Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/discovery-cycle-service: c43e2637da03 Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/discovery-cycle-service: eeadc53a168a Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/discovery-cycle-service: c5d3726ac173 Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/discovery-cycle-service: c6b44a3a0945 Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/discovery-cycle-service: 13242f53ac09 Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/discovery-cycle-service: 3d8533b4dc1f Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/discovery-cycle-service: 7ff2f4499221 Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/discovery-cycle-service: 1bb35e8b4de1 Preparing 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/discovery-cycle-service: c43e2637da03 Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/discovery-cycle-service: 13242f53ac09 Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/discovery-cycle-service: eeadc53a168a Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/discovery-cycle-service: 3d8533b4dc1f Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/discovery-cycle-service: 7ff2f4499221 Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/discovery-cycle-service: c5d3726ac173 Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/discovery-cycle-service: 1bb35e8b4de1 Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/discovery-cycle-service: c6b44a3a0945 Waiting 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: eded9cac993d Pushing [======>                                            ]     512B/3.76kB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: eded9cac993d Pushing [==================================================>]  7.168kB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 13242f53ac09 Layer already exists 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: c6b44a3a0945 Pushing  3.072kB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: ecbb26ceda43 Pushing [==================================================>]     512B
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: ecbb26ceda43 Pushing [==================================================>]  3.584kB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [>                                                  ]  525.3kB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 3d8533b4dc1f Layer already exists 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [>                                                  ]  2.132MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 7ff2f4499221 Layer already exists 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: eded9cac993d Pushed 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: c6b44a3a0945 Pushed 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [=>                                                 ]  3.764MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: ecbb26ceda43 Pushed 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [=>                                                 ]  5.357MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [>                                                  ]  537.5kB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [==>                                                ]  6.426MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [=>                                                 ]  1.634MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [==>                                                ]  7.501MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 5c93044ff6b3 Pushing [========>                                          ]     512B/3.189kB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 5c93044ff6b3 Pushing [==================================================>]  6.656kB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [=>                                                 ]  2.727MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: c5d3726ac173 Pushing [==================================================>]     512B
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: c5d3726ac173 Pushing [==================================================>]  3.584kB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [===>                                               ]  9.115MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [==>                                                ]  3.794MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [===>                                               ]  11.24MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [===>                                               ]  4.871MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [====>                                              ]  13.35MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [>                                                  ]  439.9kB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [===>                                               ]  5.412MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [=====>                                             ]  14.93MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [===>                                               ]  5.941MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [=====>                                             ]  17.04MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [=>                                                 ]  867.3kB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [====>                                              ]  6.483MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [======>                                            ]  18.67MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [====>                                              ]  7.025MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [=>                                                 ]  1.298MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [=======>                                           ]  20.77MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [=======>                                           ]  22.37MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [=====>                                             ]  8.112MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [==>                                                ]  1.724MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 5c93044ff6b3 Pushed 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [========>                                          ]     24MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [=====>                                             ]  8.651MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [==>                                                ]   2.15MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: c5d3726ac173 Pushed 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [========>                                          ]  25.61MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [======>                                            ]  9.746MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [=========>                                         ]  27.77MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [===>                                               ]    2.6MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [==========>                                        ]  29.99MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [=======>                                           ]  10.84MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: c6b44a3a0945 Layer already exists 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [==========>                                        ]  31.65MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [=======>                                           ]  11.93MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [===========>                                       ]  33.83MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [===>                                               ]  3.035MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [============>                                      ]  35.98MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 13242f53ac09 Layer already exists 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [========>                                          ]  13.03MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [============>                                      ]  38.12MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [=========>                                         ]  14.15MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [=============>                                     ]  40.26MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [==========>                                        ]  15.82MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [====>                                              ]  3.455MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [==============>                                    ]  41.87MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 3d8533b4dc1f Layer already exists 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [===========>                                       ]  16.88MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [==============>                                    ]  44.02MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [====>                                              ]  3.897MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [===============>                                   ]  46.79MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [=====>                                             ]  4.327MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [============>                                      ]  17.96MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [================>                                  ]  49.57MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 7ff2f4499221 Layer already exists 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [=================>                                 ]  52.89MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [============>                                      ]  19.06MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [=====>                                             ]  4.748MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [===================>                               ]  56.22MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [=============>                                     ]  20.13MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [===================>                               ]     59MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [======>                                            ]  5.171MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [====================>                              ]  61.17MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [======>                                            ]  5.604MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [=====================>                             ]  63.31MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [==============>                                    ]  21.19MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [======================>                            ]  65.48MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [=======>                                           ]  6.033MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [==============>                                    ]  22.27MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [=======================>                           ]  68.15MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [=======>                                           ]  6.454MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [=======================>                           ]  70.35MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [===============>                                   ]  22.79MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [========================>                          ]  72.56MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [========>                                          ]  6.883MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [===============>                                   ]  23.86MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [=========================>                         ]  74.78MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [================>                                  ]  24.94MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [==========================>                        ]   77.5MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [========>                                          ]  7.304MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 3526afa0f9b5 Pushing [============>                                      ]     512B/2.033kB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 3526afa0f9b5 Pushing [==================================================>]   5.12kB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [=========>                                         ]   8.17MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [==========================>                        ]  78.62MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [=================>                                 ]  26.04MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [===========================>                       ]  80.79MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [==========>                                        ]  8.591MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [===========>                                       ]  9.893MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [==================>                                ]  27.12MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [============================>                      ]  82.96MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [>                                                  ]  537.5kB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [==================>                                ]  28.19MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [============================>                      ]  84.06MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [============>                                      ]  10.32MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [=>                                                 ]  1.634MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [============================>                      ]  84.59MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [============>                                      ]  10.74MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [===================>                               ]  29.27MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [=============>                                     ]  11.17MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [=>                                                 ]  2.727MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [============================>                      ]  85.66MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [====================>                              ]  30.33MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [=============>                                     ]   11.6MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [=============================>                     ]  86.75MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [==>                                                ]  3.794MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [====================>                              ]  31.42MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [==============>                                    ]  12.02MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [==>                                                ]  4.339MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [=============================>                     ]  87.82MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [=====================>                             ]  32.53MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 3526afa0f9b5 Pushed 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [======================>                            ]  33.62MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [===>                                               ]  5.412MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [==============================>                    ]  88.89MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [==============>                                    ]  12.46MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [=======================>                           ]  34.68MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [====>                                              ]  6.483MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [===============>                                   ]   12.9MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [==============================>                    ]  89.42MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [=======================>                           ]  35.79MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [=====>                                             ]  7.556MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [========================>                          ]  36.89MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [=====>                                             ]  8.651MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [===============>                                   ]  13.34MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [==============================>                    ]  89.98MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [======>                                            ]  9.746MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [=========================>                         ]  38.01MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [================>                                  ]  13.79MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [=======>                                           ]  10.84MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [==============================>                    ]  90.51MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [==========================>                        ]  39.09MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [================>                                  ]  14.21MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [=======>                                           ]  11.93MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [==========================>                        ]  40.19MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [==============================>                    ]  91.07MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [===========================>                       ]  41.27MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [========>                                          ]  12.47MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [===============================>                   ]  93.24MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [================================>                  ]  95.38MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [===========================>                       ]  41.83MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [========>                                          ]  13.03MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [=================================>                 ]  97.55MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [============================>                      ]  42.39MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [=========>                                         ]  13.59MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [=================================>                 ]  99.68MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [============================>                      ]  42.94MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [=========>                                         ]  14.15MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [==================================>                ]  101.3MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [=================>                                 ]  14.63MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [>                                                  ]  439.9kB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [=========>                                         ]   14.7MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [=============================>                     ]  43.47MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [==================================>                ]  102.4MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [=>                                                 ]  867.3kB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [==========>                                        ]  15.26MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [==================================>                ]  103.5MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [=============================>                     ]  44.02MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [=>                                                 ]  1.298MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [==========>                                        ]  15.82MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [===================================>               ]  104.5MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [=============================>                     ]  44.56MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [==>                                                ]  1.724MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [===================================>               ]  105.6MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [==============================>                    ]  45.12MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [==========>                                        ]  16.35MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [==>                                                ]   2.15MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [====================================>              ]  106.7MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [==============================>                    ]  45.68MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [=================>                                 ]  15.09MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [===========>                                       ]  16.88MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [===>                                               ]    2.6MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [====================================>              ]  108.3MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [===============================>                   ]  46.77MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [=====================================>             ]  109.9MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [===========>                                       ]  17.43MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [===>                                               ]  3.035MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [===============================>                   ]  47.31MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [=====================================>             ]  111.5MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [==================>                                ]  15.51MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [===============================>                   ]  47.84MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [============>                                      ]  17.96MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [====>                                              ]  3.455MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [======================================>            ]  113.7MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [============>                                      ]  18.51MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [=====>                                             ]  4.327MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [================================>                  ]  48.93MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [======================================>            ]  114.7MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [============>                                      ]  19.06MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [==================>                                ]  15.94MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [=================================>                 ]  49.47MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [=====>                                             ]  4.748MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [=======================================>           ]  115.8MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [=============>                                     ]  19.59MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [=================================>                 ]  50.02MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [=======================================>           ]    117MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [=============>                                     ]  20.13MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [=================================>                 ]  50.55MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [======>                                            ]  5.171MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [=======================================>           ]  118.1MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [==================================>                ]   51.1MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [=============>                                     ]  20.66MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [========================================>          ]  119.2MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [===================>                               ]  16.36MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [======>                                            ]  5.604MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [==================================>                ]  52.18MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [========================================>          ]  120.3MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [==============>                                    ]  21.19MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [===================================>               ]  53.29MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [=========================================>         ]  121.4MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [=======>                                           ]  6.033MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [===================================>               ]  53.82MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [==============>                                    ]  21.74MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [=========================================>         ]  122.5MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [====================================>              ]  54.37MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [=========================================>         ]  123.6MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [==============>                                    ]  22.27MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [=====================================>             ]  55.48MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [==========================================>        ]  124.8MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [=====================================>             ]  56.56MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [==========================================>        ]  126.4MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [=======>                                           ]  6.454MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [======================================>            ]  57.63MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [===========================================>       ]  127.5MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [===================>                               ]  16.79MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [===============>                                   ]  22.79MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [========>                                          ]  6.883MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [===========================================>       ]  129.2MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [=====================>                             ]  17.67MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [=========>                                         ]  7.743MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [======================================>            ]  58.17MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [============================================>      ]  130.2MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [======================>                            ]  18.52MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [=========>                                         ]   8.17MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [===============>                                   ]  23.33MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [=======================================>           ]  58.71MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [======================>                            ]  18.95MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [============================================>      ]  131.3MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [==========>                                        ]  9.029MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [=======================>                           ]  19.37MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [============>                                      ]  10.32MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [============================================>      ]  132.3MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [===============>                                   ]  23.86MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [========================>                          ]  20.22MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [=============>                                     ]  11.17MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [============================================>      ]  132.9MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [=======================================>           ]  59.23MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [=========================>                         ]  21.08MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [==============>                                    ]  12.46MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [=============================================>     ]  133.4MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [================>                                  ]  24.42MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [==========================>                        ]  21.93MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [================>                                  ]  13.79MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [=======================================>           ]  59.77MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [=============================================>     ]  134.5MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [=================>                                 ]  14.63MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [===========================>                       ]  22.78MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [================>                                  ]  24.94MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [=============================================>     ]  135.5MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [==================>                                ]  15.51MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [============================>                      ]  23.63MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [==============================================>    ]  136.1MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [===================>                               ]  16.36MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [=============================>                     ]  24.48MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [=================>                                 ]  25.48MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [===================>                               ]  16.79MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [==============================================>    ]  137.1MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [==============================>                    ]  25.34MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [=====================>                             ]  18.09MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [=================>                                 ]  26.04MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [===============================>                   ]  26.19MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [======================>                            ]  18.95MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [=================>                                 ]  26.59MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [========================>                          ]  20.22MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [================================>                  ]  27.04MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [=========================>                         ]   21.5MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [=================================>                 ]  27.89MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [==================>                                ]  27.12MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [==================================>                ]  28.74MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [===========================>                       ]  22.78MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [========================================>          ]  60.29MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [==============================================>    ]  137.7MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [============================>                      ]  24.06MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [===================================>               ]  30.02MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [==================>                                ]  27.65MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [==============================>                    ]  25.34MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [====================================>              ]  30.87MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [==================>                                ]  28.19MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [===============================>                   ]  26.61MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [===================>                               ]  28.74MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [==============================================>    ]  138.2MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [=====================================>             ]  31.73MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [=================================>                 ]  27.89MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [===================>                               ]  29.81MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [===================================>               ]   29.6MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [====================>                              ]  30.88MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [====================================>              ]  30.87MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [======================================>            ]  32.15MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [==============================================>    ]  138.7MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [========================================>          ]  60.82MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [=====================>                             ]  31.98MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [======================================>            ]  32.15MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [===============================================>   ]  139.8MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [======================>                            ]  33.09MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [======================================>            ]   32.6MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [===============================================>   ]  140.8MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [=======================================>           ]  33.03MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [======================>                            ]  34.15MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [================================================>  ]  141.9MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [======================================>            ]   32.6MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [================================================>  ]    143MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [=======================>                           ]  35.23MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [================================================>  ]  144.1MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [========================>                          ]  36.35MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [=================================================> ]  145.3MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [=========================>                         ]  37.45MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [========================================>          ]  33.88MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [=================================================> ]  146.9MB/147.8MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [=======================================>           ]  33.03MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [=========================>                         ]  38.56MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [=========================================>         ]  34.73MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [=======================================>           ]  33.46MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [==================================================>]    148MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [==========================>                        ]  39.64MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [==========================================>        ]  35.58MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [==================================================>]  148.5MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [===========================>                       ]  40.74MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [===========================================>       ]  36.43MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [==================================================>]  149.5MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [===========================>                       ]  41.83MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [==================================================>]  150.1MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [============================================>      ]  37.31MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [============================>                      ]  42.94MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [==================================================>]  150.6MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [========================================>          ]  33.88MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [=============================================>     ]  38.15MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [=============================>                     ]  44.02MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [========================================>          ]  61.34MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushing [==================================================>]  151.6MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [==============================================>    ]     39MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [========================================>          ]   34.3MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [==============================>                    ]  45.12MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [================================================>  ]   40.7MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [==============================>                    ]  46.21MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [=========================================>         ]  34.73MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [==================================================>]  42.41MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [===============================>                   ]  47.31MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [==================================================>]  43.68MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushing [==================================================>]  44.53MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [================================>                  ]   48.4MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 69eab19846b7 Pushed 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [=========================================>         ]  61.87MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [=========================================>         ]  35.16MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [=================================>                 ]  49.47MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [==========================================>        ]  62.93MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [=================================>                 ]  50.55MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [==========================================>        ]  64.01MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [==================================>                ]  51.62MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [==========================================>        ]  35.58MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [===========================================>       ]   65.1MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: c5d3726ac173 Layer already exists 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [===================================>               ]  52.74MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [============================================>      ]  66.19MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [===================================>               ]  53.82MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [============================================>      ]  67.28MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [====================================>              ]  54.92MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [=============================================>     ]  68.36MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [==========================================>        ]  36.01MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [=====================================>             ]  56.56MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [======================================>            ]  57.63MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: eeadc53a168a Pushed 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: c6b44a3a0945 Layer already exists 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [==============================================>    ]  69.41MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [===========================================>       ]  36.43MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [======================================>            ]  58.17MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [===============================================>   ]  70.48MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [=======================================>           ]  59.23MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [============================================>      ]  37.31MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 3d8533b4dc1f Layer already exists 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [===============================================>   ]     71MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 13242f53ac09 Layer already exists 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [=============================================>     ]  38.15MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [========================================>          ]  60.29MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 7ff2f4499221 Layer already exists 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [==============================================>    ]     39MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [===============================================>   ]  71.53MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [========================================>          ]  60.82MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [===============================================>   ]  40.28MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [========================================>          ]  61.34MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [================================================>  ]  72.05MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/ai-developer-agent-service: 524d8622e39c Pushing [=====>                                             ]     512B/4.788kB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/ai-developer-agent-service: 524d8622e39c Pushing [==================================================>]  8.192kB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [=================================================> ]  41.57MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [=========================================>         ]  62.39MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [================================================>  ]  72.58MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [==========================================>        ]  63.48MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [=================================================> ]  41.99MB/42.06MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [================================================>  ]   73.1MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [===========================================>       ]  64.55MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [>                                                  ]  537.5kB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [=================================================> ]  74.71MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [==================================================>]  42.41MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [===========================================>       ]   65.1MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [>                                                  ]  1.077MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [===========================================>       ]  65.63MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [==================================================>]  75.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [=>                                                 ]  1.634MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [==================================================>]  76.35MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [============================================>      ]  66.19MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [=>                                                 ]  2.191MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [============================================>      ]  66.73MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [==================================================>]  77.43MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [=>                                                 ]  2.727MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/ai-developer-agent-service: 524d8622e39c Pushed 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushing [==================================================>]  77.88MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [==================================================>]  42.84MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [==>                                                ]  3.255MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [============================================>      ]  67.28MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [==================================================>]  44.11MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/ai-developer-agent-service: 69eab19846b7 Layer already exists 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [==>                                                ]  3.794MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushing [==================================================>]  44.53MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [=============================================>     ]  67.82MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [===>                                               ]  4.871MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/ai-developer-agent-service: ecbb26ceda43 Layer already exists 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [==============================================>    ]  68.88MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [===>                                               ]  5.941MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [==============================================>    ]  69.95MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service: 1bb35e8b4de1 Pushed 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/ai-developer-agent-service: c6b44a3a0945 Layer already exists 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [===============================================>   ]     71MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [=====>                                             ]  7.556MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/ai-developer-agent-service: 3d8533b4dc1f Layer already exists 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: eeadc53a168a Pushed 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/ai-developer-agent-service: 13242f53ac09 Layer already exists 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [================================================>  ]  72.05MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [======>                                            ]  9.193MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/ai-developer-agent-service: 7ff2f4499221 Layer already exists 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/ai-developer-agent-service: 1bb35e8b4de1 Layer already exists 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [================================================>  ]   73.1MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [======>                                            ]  10.29MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [=================================================> ]  74.71MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [=======>                                           ]  11.38MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [==================================================>]  76.35MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [========>                                          ]  13.03MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushing [==================================================>]  77.88MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: ba6b364ef4c9 Pushing [==================================================>]     512B
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: ba6b364ef4c9 Pushing [==================================================>]  3.584kB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 48fa8e8fa879 Pushing [==================================================>]     512B
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 48fa8e8fa879 Pushing [==================================================>]  3.584kB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [=========>                                         ]  14.15MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 04dee0342cf5 Pushing [>                                                  ]  371.7kB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [==========>                                        ]  15.82MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 04dee0342cf5 Pushing [==>                                                ]   1.51MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [===========>                                       ]  17.43MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 04dee0342cf5 Pushing [===>                                               ]  2.632MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [============>                                      ]  19.06MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 04dee0342cf5 Pushing [=====>                                             ]  3.801MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 04dee0342cf5 Pushing [======>                                            ]   4.94MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [=============>                                     ]  20.66MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 04dee0342cf5 Pushing [========>                                          ]  6.442MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [==============>                                    ]  22.27MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 04dee0342cf5 Pushing [===========>                                       ]  8.362MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [===============>                                   ]  23.86MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service: 1bb35e8b4de1 Pushed 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 04dee0342cf5 Pushing [=============>                                     ]  9.885MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [=================>                                 ]  26.04MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: ba6b364ef4c9 Pushed 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 04dee0342cf5 Pushing [===============>                                   ]  11.82MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [==================>                                ]  28.19MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 48fa8e8fa879 Pushed 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 04dee0342cf5 Pushing [==================>                                ]  13.72MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [====================>                              ]  30.33MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 04dee0342cf5 Pushing [====================>                              ]  14.87MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: c6b44a3a0945 Layer already exists 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 13242f53ac09 Layer already exists 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [=====================>                             ]  31.98MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 04dee0342cf5 Pushing [=====================>                             ]     16MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [======================>                            ]  33.09MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 04dee0342cf5 Pushing [=======================>                           ]  17.19MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [=======================>                           ]  34.68MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 04dee0342cf5 Pushing [========================>                          ]  18.36MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [=======================>                           ]  35.79MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 04dee0342cf5 Pushing [==========================>                        ]  19.54MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [=========================>                         ]  37.45MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 04dee0342cf5 Pushing [===========================>                       ]  20.72MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [=========================>                         ]  38.56MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 04dee0342cf5 Pushing [=============================>                     ]   21.9MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [==========================>                        ]  40.19MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 04dee0342cf5 Pushing [===============================>                   ]  23.08MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [===========================>                       ]  41.83MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 04dee0342cf5 Pushing [================================>                  ]  24.26MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [============================>                      ]  42.94MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 04dee0342cf5 Pushing [==================================>                ]  25.44MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [=============================>                     ]  44.56MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 3d8533b4dc1f Layer already exists 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 04dee0342cf5 Pushing [===================================>               ]  26.62MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [==============================>                    ]  45.68MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 04dee0342cf5 Pushing [=====================================>             ]   28.2MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [===============================>                   ]  47.31MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 04dee0342cf5 Pushing [=======================================>           ]  29.37MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [================================>                  ]  48.93MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 7ff2f4499221 Layer already exists 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 1bb35e8b4de1 Layer already exists 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 04dee0342cf5 Pushing [=========================================>         ]  30.89MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [=================================>                 ]  50.55MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 04dee0342cf5 Pushing [===========================================>       ]  32.05MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 04dee0342cf5 Pushing [============================================>      ]  32.81MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [==================================>                ]  52.18MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 04dee0342cf5 Pushing [=============================================>     ]  33.97MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [===================================>               ]  53.82MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 04dee0342cf5 Pushing [===============================================>   ]  35.09MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [====================================>              ]  54.92MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 04dee0342cf5 Pushing [================================================>  ]  35.87MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: ba6b364ef4c9 Layer already exists 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 298c3d94c48f Pushing [=========================================>         ]     512B/615B
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 298c3d94c48f Pushing [==================================================>]  4.096kB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [=====================================>             ]  56.56MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 04dee0342cf5 Pushing [=================================================> ]  36.61MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [======================================>            ]  58.17MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 04dee0342cf5 Pushing [==================================================>]  38.14MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 04dee0342cf5 Pushing [>                                                  ]  371.7kB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: c6b44a3a0945 Layer already exists 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [=======================================>           ]  59.77MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 04dee0342cf5 Pushing [==================================================>]  38.51MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 04dee0342cf5 Pushing [=>                                                 ]  1.138MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [========================================>          ]  61.34MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 04dee0342cf5 Pushing [==================================================>]  38.88MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 04dee0342cf5 Pushing [==>                                                ]  1.887MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 13242f53ac09 Layer already exists 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [==========================================>        ]  62.93MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 04dee0342cf5 Pushing [==================================================>]  39.18MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 04dee0342cf5 Pushing [===>                                               ]  2.632MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [===========================================>       ]  64.55MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 04dee0342cf5 Pushing [=====>                                             ]  3.801MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [============================================>      ]  66.19MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 04dee0342cf5 Pushing [======>                                            ]   4.94MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [============================================>      ]  67.28MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 298c3d94c48f Pushed 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 04dee0342cf5 Pushing [========>                                          ]  6.442MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 3d8533b4dc1f Layer already exists 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [=============================================>     ]  68.36MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 04dee0342cf5 Pushing [==========>                                        ]  7.984MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [==============================================>    ]  69.95MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 04dee0342cf5 Pushing [============>                                      ]  9.506MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 7ff2f4499221 Layer already exists 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 1bb35e8b4de1 Layer already exists 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool: 04dee0342cf5 Pushed 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 04dee0342cf5 Pushing [===============>                                   ]  11.42MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [===============================================>   ]  71.53MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 04dee0342cf5 Pushing [=================>                                 ]  13.34MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [================================================>  ]  72.58MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/discovery-cycle-service: c43e2637da03 Pushing [=========>                                         ]     512B/2.655kB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/discovery-cycle-service: c43e2637da03 Pushing [==================================================>]  6.144kB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/discovery-cycle-service: c5d3726ac173 Layer already exists 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/discovery-cycle-service: eeadc53a168a Layer already exists 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [=================================================> ]  73.63MB/74.81MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 04dee0342cf5 Pushing [====================>                              ]  14.87MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/discovery-cycle-service: c6b44a3a0945 Layer already exists 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [==================================================>]  75.27MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 04dee0342cf5 Pushing [=====================>                             ]     16MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/discovery-cycle-service: 13242f53ac09 Layer already exists 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [==================================================>]   76.9MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/discovery-cycle-service: 3d8533b4dc1f Layer already exists 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 04dee0342cf5 Pushing [=======================>                           ]  17.19MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushing [==================================================>]  77.88MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/discovery-cycle-service: 7ff2f4499221 Layer already exists 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 04dee0342cf5 Pushing [========================>                          ]  18.36MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/discovery-cycle-service: 1bb35e8b4de1 Layer already exists 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/discovery-cycle-service: c43e2637da03 Pushed 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 04dee0342cf5 Pushing [==========================>                        ]  19.94MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent: 1bb35e8b4de1 Pushed 
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 04dee0342cf5 Pushing [============================>                      ]  21.51MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 04dee0342cf5 Pushing [===============================>                   ]  23.08MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 04dee0342cf5 Pushing [=================================>                 ]  24.66MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 04dee0342cf5 Pushing [===================================>               ]  26.23MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 04dee0342cf5 Pushing [=====================================>             ]   28.2MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 04dee0342cf5 Pushing [========================================>          ]  30.14MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 04dee0342cf5 Pushing [===========================================>       ]  32.05MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 04dee0342cf5 Pushing [=============================================>     ]  33.58MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 04dee0342cf5 Pushing [===============================================>   ]  35.09MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 04dee0342cf5 Pushing [=================================================> ]     37MB/37.13MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 04dee0342cf5 Pushing [==================================================>]  38.88MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 04dee0342cf5 Pushing [==================================================>]  39.18MB
+ Pushing us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool: 04dee0342cf5 Pushed 
+Finished Step #1
+Starting Step #2
+Pulling image: gcr.io/google.com/cloudsdktool/google-cloud-cli
+Using default tag: latest
+latest: Pulling from google.com/cloudsdktool/google-cloud-cli
+5c9256e0f3ca: Already exists
+c54dac92af92: Pulling fs layer
+5dabbeb36ba5: Pulling fs layer
+153a258695cc: Pulling fs layer
+48f6876739ea: Pulling fs layer
+48f6876739ea: Waiting
+5dabbeb36ba5: Verifying Checksum
+5dabbeb36ba5: Download complete
+48f6876739ea: Verifying Checksum
+48f6876739ea: Download complete
+c54dac92af92: Verifying Checksum
+c54dac92af92: Download complete
+c54dac92af92: Pull complete
+5dabbeb36ba5: Pull complete
+153a258695cc: Verifying Checksum
+153a258695cc: Download complete
+153a258695cc: Pull complete
+48f6876739ea: Pull complete
+Digest: sha256:fa4e7d418452a14ebbf2d5c4ed1827d63625914f3bb3e918cd95a504ac317c7b
+Status: Downloaded newer image for gcr.io/google.com/cloudsdktool/google-cloud-cli:latest
+gcr.io/google.com/cloudsdktool/google-cloud-cli:latest
+Default region set to us-central1.You can change the region with gcloud config set run/region us-central1.
+Pausing command execution:
+This command requires the `run-compose` component to be installed. Would you 
+like to install the `run-compose` component to continue command execution? 
+(Y/n)?  
+ERROR: (gcloud.alpha.run.compose.up) 
+You cannot perform this action because the Google Cloud CLI component manager 
+is disabled for this installation. You can run the following command 
+to achieve the same result for this installation: 
+sudo apt-get install google-cloud-cli-run-compose
+Finished Step #2
+ERROR
+ERROR: build step 2 "gcr.io/google.com/cloudsdktool/google-cloud-cli" failed: step exited with non-zero status: 1

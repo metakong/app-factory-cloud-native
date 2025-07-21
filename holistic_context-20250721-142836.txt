@@ -1,5 +1,5 @@
 Project Context for app-factory-v2
-Generated on: 2025-07-21T13:32:04.301612
+Generated on: 2025-07-21T14:28:36.063698
 ================================================================================
 
 --- Google Cloud Build Log (Latest) ---
@@ -59,69 +59,45 @@ The App Factory is an automated system that discovers, vets, develops, and publi
 --- File: cloudbuild.yaml ---
 
 steps:
-# Step 0: Overwrite the main.py for the tool services to ensure they run as web servers.
-- name: 'bash'
-  entrypoint: 'bash'
-  args:
-    - '-c'
-    - |
-      cat <<EOF > backend/tools/robust_web_scraper/main.py
-      import os
-      from flask import Flask
-      app = Flask(__name__)
-      @app.route('/')
-      def hello():
-          return "OK", 200
-      if __name__ == '__main__':
-          app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
-      EOF
-      cat <<EOF > backend/tools/google_play_publisher/main.py
-      import os
-      from flask import Flask
-      app = Flask(__name__)
-      @app.route('/')
-      def hello():
-          return "OK", 200
-      if __name__ == '__main__':
-          app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
-      EOF
-
-# Step 1: Build all container images.
+# Step 1: Build all container images using Docker Compose.
 - name: 'gcr.io/cloud-builders/docker'
   args: ['compose', '-f', 'compose.yaml', 'build']
   dir: 'backend'
 
-# Step 2: Push the images to Artifact Registry.
+# Step 2: Push the built images to Artifact Registry.
 - name: 'gcr.io/cloud-builders/docker'
   args: ['compose', '-f', 'compose.yaml', 'push']
   dir: 'backend'
 
-# Step 3: Deploy each service with environment variables for service-to-service communication.
+# Step 3: Deploy each service and job to Cloud Run.
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
   entrypoint: 'bash'
   args:
     - '-c'
     - |
-      # Define Service URLs
-      CSO_VETTING_URL="https://cso-vetting-service-515413116650.us-central1.run.app"
-      AI_DEV_URL="https://ai-developer-agent-service-515413116650.us-central1.run.app"
-      WEB_SCRAPER_URL="https://web-scraper-tool-515413116650.us-central1.run.app"
-      CMO_PUB_URL="https://cmo-publishing-agent-515413116650.us-central1.run.app"
-      CPO_ANALYSIS_URL="https://cpo-analysis-service-515413116650.us-central1.run.app"
-      DISCOVERY_URL="https://discovery-cycle-service-515413116650.us-central1.run.app"
-      PLAY_PUB_URL="https://play-publisher-tool-515413116650.us-central1.run.app"
+      # Define Service URLs using a substitution for environment flexibility.
+      # This allows deploying to different environments (e.g., dev, prod) by changing the suffix.
+      CSO_VETTING_URL="https://cso-vetting-service-${_ENV_SUFFIX}-515413116650.us-central1.run.app"
+      AI_DEV_URL="https://ai-developer-agent-service-${_ENV_SUFFIX}-515413116650.us-central1.run.app"
+      WEB_SCRAPER_URL="https://web-scraper-tool-${_ENV_SUFFIX}-515413116650.us-central1.run.app"
+      CMO_PUB_URL="https://cmo-publishing-agent-${_ENV_SUFFIX}-515413116650.us-central1.run.app"
+      CPO_ANALYSIS_URL="https://cpo-analysis-service-${_ENV_SUFFIX}-515413116650.us-central1.run.app"
+      DISCOVERY_URL="https://discovery-cycle-service-${_ENV_SUFFIX}-515413116650.us-central1.run.app"
+      PLAY_PUB_URL="https://play-publisher-tool-${_ENV_SUFFIX}-515413116650.us-central1.run.app"
 
-      # Construct a common set of environment variables
+      # Construct the environment variables string to be passed to each service.
       ENV_VARS="CSO_VETTING_SERVICE_URL=$CSO_VETTING_URL,AI_DEVELOPER_AGENT_SERVICE_URL=$AI_DEV_URL,WEB_SCRAPER_TOOL_URL=$WEB_SCRAPER_URL,CMO_PUBLISHING_AGENT_URL=$CMO_PUB_URL,CPO_ANALYSIS_SERVICE_URL=$CPO_ANALYSIS_URL,DISCOVERY_CYCLE_SERVICE_URL=$DISCOVERY_URL,PLAY_PUBLISHER_TOOL_URL=$PLAY_PUB_URL"
 
-      # Deploy all services with the environment variables
-      gcloud run deploy cso-vetting-service --image=us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service --region=us-central1 --platform=managed --allow-unauthenticated --set-env-vars="$ENV_VARS" && \
-      gcloud run deploy ai-developer-agent-service --image=us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/ai-developer-agent-service --region=us-central1 --platform=managed --allow-unauthenticated --set-env-vars="$ENV_VARS" && \
-      gcloud run deploy web-scraper-tool --image=us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool --region=us-central1 --platform=managed --allow-unauthenticated --set-env-vars="$ENV_VARS" && \
-      gcloud run deploy cmo-publishing-agent --image=us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent --region=us-central1 --platform=managed --allow-unauthenticated --set-env-vars="$ENV_VARS" && \
-      gcloud run deploy cpo-analysis-service --image=us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service --region=us-central1 --platform=managed --allow-unauthenticated --set-env-vars="$ENV_VARS" && \
-      gcloud run deploy discovery-cycle-service --image=us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/discovery-cycle-service --region=us-central1 --platform=managed --allow-unauthenticated --set-env-vars="$ENV_VARS" && \
-      gcloud run deploy play-publisher-tool --image=us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool --region=us-central1 --platform=managed --allow-unauthenticated --set-env-vars="$ENV_VARS"
+      # Deploy all services with internal-only ingress for security and inject environment variables.
+      gcloud run deploy cso-vetting-service --image=us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service --region=us-central1 --platform=managed --ingress=internal --set-env-vars="$ENV_VARS" && \
+      gcloud run deploy ai-developer-agent-service --image=us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/ai-developer-agent-service --region=us-central1 --platform=managed --ingress=internal --set-env-vars="$ENV_VARS" && \
+      gcloud run deploy cmo-publishing-agent --image=us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent --region=us-central1 --platform=managed --ingress=internal --set-env-vars="$ENV_VARS" && \
+      gcloud run deploy cpo-analysis-service --image=us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service --region=us-central1 --platform=managed --ingress=internal --set-env-vars="$ENV_VARS" && \
+      gcloud run deploy discovery-cycle-service --image=us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/discovery-cycle-service --region=us-central1 --platform=managed --ingress=internal --set-env-vars="$ENV_VARS" && \
+      
+      # Deploy the tools as Cloud Run Jobs.
+      gcloud run jobs deploy web-scraper-tool --image=us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/web-scraper-tool --region=us-central1 && \
+      gcloud run jobs deploy play-publisher-tool --image=us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/play-publisher-tool --region=us-central1
   dir: 'backend'
 
 options:
@@ -1947,7 +1923,7 @@ WORKDIR /usr/src/app
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 COPY main.py .
-CMD ["sh", "-c", "exec gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 8 --timeout 0 main:app"]
+CMD ["python", "./main.py"]
 
 ================================================================================
 
@@ -2016,7 +1992,7 @@ WORKDIR /usr/src/app
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 COPY main.py .
-CMD ["sh", "-c", "exec gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 8 --timeout 0 main:app"]
+CMD ["python", "./main.py"]
 
 ================================================================================
 
@@ -2571,11 +2547,9 @@ def health_check():
 
 logger = get_logger(__name__)
 
-# The URLs for downstream services are provided by Cloud Run
-# Corrected environment variable name
 AI_DEVELOPER_AGENT_SERVICE_URL = os.environ.get("AI_DEVELOPER_AGENT_SERVICE_URL")
 
-# Configure the Gemini API client (will use Application Default Credentials)
+# Configure the Gemini API client
 genai.configure()
 
 @app.route('/analyze', methods=['POST'])

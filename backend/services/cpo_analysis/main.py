@@ -8,7 +8,7 @@ app = Flask(__name__)
 logger = get_logger(__name__)
 
 # The URLs for downstream services are provided by Cloud Run
-AI_DEV_SERVICE_URL = os.environ.get("AI_DEV_SERVICE_URL")
+AI_DEVELOPER_AGENT_SERVICE_URL = os.environ.get("AI_DEVELOPER_AGENT_SERVICE_URL")
 
 # Configure the Gemini API client (will use Application Default Credentials)
 genai.configure()
@@ -60,15 +60,15 @@ def analyze_idea():
         logger.info(f"Successfully generated and saved product spec for '{idea_id}'.")
 
         # 3. Trigger the AI Developer Agent service.
-        if not AI_DEV_SERVICE_URL:
-            logger.error("AI_DEV_SERVICE_URL environment variable is not set.")
+        if not AI_DEVELOPER_AGENT_SERVICE_URL:
+            logger.error("AI_DEVELOPER_AGENT_SERVICE_URL environment variable is not set.")
             save_to_firestore("app_ideas", idea_id, {"status": "DEV_TRIGGER_FAILED"})
             return jsonify({"status": "error", "message": "Downstream AI Developer service is not configured."}), 500
 
-        logger.info(f"Triggering AI Developer service for idea '{idea_id}' at {AI_DEV_SERVICE_URL}")
+        logger.info(f"Triggering AI Developer service for idea '{idea_id}' at {AI_DEVELOPER_AGENT_SERVICE_URL}")
         dev_request_data = {"idea_id": idea_id}
         dev_response = make_internal_request(
-            service_url=f"{AI_DEV_SERVICE_URL}/develop",
+            service_url=f"{AI_DEVELOPER_AGENT_SERVICE_URL}/develop",
             method='POST',
             data=dev_request_data
         )

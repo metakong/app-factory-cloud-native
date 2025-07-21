@@ -1,5 +1,6 @@
 #!/bin/bash
 # This script sets up the necessary IAM permissions for the App Factory services.
+
 set -e # Exit immediately if a command exits with a non-zero status.
 set -u # Treat unset variables as an error.
 
@@ -47,6 +48,13 @@ SERVICE_ACCOUNTS=(
     "ai-developer-agent-sa"
     "cmo-publishing-agent-sa"
 )
+
+echo "Creating service accounts if they do not exist..."
+for SA_NAME in "${SERVICE_ACCOUNTS[@]}"; do
+    gcloud iam service-accounts create $SA_NAME \
+        --display-name="$SA_NAME" \
+        --project=$PROJECT_ID || echo "Service account $SA_NAME already exists."
+done
 
 # Grant permissions to all service accounts
 for SA_NAME in "${SERVICE_ACCOUNTS[@]}"; do

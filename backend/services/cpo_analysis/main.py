@@ -1,7 +1,7 @@
 import os
 from flask import Flask, request, jsonify
 from shared.utils import get_logger
-from shared.gcp_client import get_from_firestore, save_to_firestore, make_internal_request
+from shared.gcp_client import get_from_firestore, save_to_firestore, make_internal_request, get_secret
 import google.generativeai as genai
 
 app = Flask(__name__)
@@ -14,8 +14,13 @@ logger = get_logger(__name__)
 
 AI_DEVELOPER_AGENT_SERVICE_URL = os.environ.get("AI_DEVELOPER_AGENT_SERVICE_URL")
 
-# Configure the Gemini API client
-genai.configure(api_key=get_secret("gemini-api-key"))
+# Configure the Gemini API client by securely fetching the key from Secret Manager
+try:
+    api_key = get_secret("gemini-api-key")
+    if api_key:
+        genai.configure(api_key=api_key)
+except Exception as e:
+    logger.error(f"Failed to configure Gemini API client: {e}")
 
 @app.route('/analyze', methods=['POST'])
 def analyze_idea():

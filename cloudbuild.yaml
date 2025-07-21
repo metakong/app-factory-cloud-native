@@ -1,20 +1,19 @@
 steps:
-# Step 1: Build all container images.
+# Step 1: Build all container images from the backend directory.
 - name: 'gcr.io/cloud-builders/docker'
   args: ['compose', '-f', 'backend/compose.yaml', 'build']
 
-# Step 2: Push the images to Artifact Registry.
+# Step 2: Push the built images to Artifact Registry.
 - name: 'gcr.io/cloud-builders/docker'
   args: ['compose', '-f', 'backend/compose.yaml', 'push']
 
-# Step 3: Execute the deployment script, passing the substitution variable.
+# Step 3: Execute the deployment script, passing the environment suffix from the trigger.
 - name: 'gcr.io/google.com/cloudsdktool/google-cloud-cli'
   entrypoint: 'bash'
   args: ['./deploy.sh', '${_ENV_SUFFIX}']
 
-# Define the substitution variable with a default value.
 substitutions:
-  _ENV_SUFFIX: dev
+  _ENV_SUFFIX: dev # Default to 'dev' unless overridden by the trigger
 
 options:
   logging: CLOUD_LOGGING_ONLY

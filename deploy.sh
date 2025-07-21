@@ -15,6 +15,7 @@ gcloud run deploy ceo-dashboard \
     --region="$REGION" \
     --platform=managed \
     --ingress=all \
+    --port=80 \
     --allow-unauthenticated \
     --quiet
 

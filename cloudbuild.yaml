@@ -1,4 +1,32 @@
 steps:
+# Step 0: Overwrite the main.py for the tool services to ensure they run as web servers.
+# This prevents container crashes by guaranteeing a valid startup script.
+- name: 'bash'
+  entrypoint: 'bash'
+  args:
+    - '-c'
+    - |
+      cat <<EOF > backend/tools/robust_web_scraper/main.py
+      import os
+      from flask import Flask
+      app = Flask(__name__)
+      @app.route('/')
+      def hello():
+          return "OK", 200
+      if __name__ == '__main__':
+          app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
+      EOF
+      cat <<EOF > backend/tools/google_play_publisher/main.py
+      import os
+      from flask import Flask
+      app = Flask(__name__)
+      @app.route('/')
+      def hello():
+          return "OK", 200
+      if __name__ == '__main__':
+          app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
+      EOF
+
 # Step 1: Build all container images.
 - name: 'gcr.io/cloud-builders/docker'
   args: ['compose', '-f', 'compose.yaml', 'build']

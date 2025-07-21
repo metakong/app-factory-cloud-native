@@ -10,7 +10,7 @@ steps:
   dir: 'backend'
 
 # Step 3: Deploy the now-existing images from the registry to Cloud Run.
-- name: 'gcr.io/cloud-builders/gcloud'
+- name: 'google/cloud-sdk:latest'
   entrypoint: 'bash'
   args:
     - '-c'

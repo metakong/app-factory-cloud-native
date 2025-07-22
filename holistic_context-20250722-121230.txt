@@ -1,5 +1,5 @@
 Project Context for app-factory-v2
-Generated on: 2025-07-21T22:27:13.510450
+Generated on: 2025-07-22T12:12:30.715197
 ================================================================================
 
 --- Google Cloud Build Log (Latest) ---
@@ -212,6 +212,7 @@ gcloud run deploy ceo-dashboard \
     --region="$REGION" \
     --platform=managed \
     --ingress=all \
+    --port=80 \
     --allow-unauthenticated \
     --quiet
 

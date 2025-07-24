@@ -1,42 +1,30 @@
 steps:
-  # Install Docker and Docker Compose for local testing and image building
+  # Build and push all container images
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['info']
-    id: 'Initialize Docker'
-
-  # Build all container images from the backend directory
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['compose', '-f', 'backend/compose.yaml', 'build']
-    id: 'Build Images'
-    waitFor: ['Initialize Docker']
-
-  # Push all container images to Artifact Registry
-  - name: 'gcr.io/cloud-builders/docker'
+    id: 'Build and Push Images'
     args: ['compose', '-f', 'backend/compose.yaml', 'push']
-    id: 'Push Images'
-    waitFor: ['Build Images']
 
-  # Initialize Terraform
+  # Initialize Terraform in the 'terraform' subdirectory
   - name: 'hashicorp/terraform:1.5.7'
     id: 'Terraform Init'
     entrypoint: 'terraform'
     args:
+      - '-chdir=terraform'
       - 'init'
       - '-reconfigure'
       - '-backend-config=bucket=${_TERRAFORM_STATE_BUCKET}'
       - '-backend-config=prefix=terraform/state/${_ENV_SUFFIX}'
-    dir: 'terraform'
-    waitFor: ['Push Images']
+    waitFor: ['Build and Push Images']
 
-  # Terraform Plan
+  # Terraform Plan, referencing the correct var-file path from within the terraform directory
   - name: 'hashicorp/terraform:1.5.7'
     id: 'Terraform Plan'
     entrypoint: 'terraform'
     args:
+      - '-chdir=terraform'
       - 'plan'
       - '-out=tf.plan'
       - '-var-file=environments/${_ENV_SUFFIX}.tfvars'
-    dir: 'terraform'
     waitFor: ['Terraform Init']
 
   # Manual Approval Step for Production Environment
@@ -54,21 +42,21 @@ steps:
     waitFor:
       - 'Terraform Plan'
 
-  # Terraform Apply
+  # Terraform Apply, referencing the plan file within the terraform directory
   - name: 'hashicorp/terraform:1.5.7'
     id: 'Terraform Apply'
     entrypoint: 'terraform'
     args:
+      - '-chdir=terraform'
       - 'apply'
       - '-auto-approve'
       - 'tf.plan'
-    dir: 'terraform'
     waitFor:
       - 'Manual Approval'
 
 substitutions:
-  _ENV_SUFFIX: 'dev' # Default value, can be overridden by trigger
-  _TERRAFORM_STATE_BUCKET: 'app-factory-v2-tf-state' # CHANGE THIS to your globally unique bucket name
+  _ENV_SUFFIX: 'dev'
+  _TERRAFORM_STATE_BUCKET: 'app-factory-v2-tf-state'
 
 options:
   logging: CLOUD_LOGGING_ONLY

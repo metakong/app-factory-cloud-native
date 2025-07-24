@@ -3,7 +3,7 @@ import uuid
 from datetime import datetime
 from flask import Flask, request, jsonify
 from shared.utils import get_logger
-from shared.gcp_client import save_to_firestore, db
+from shared.gcp_client import save_to_firestore, get_from_firestore, db
 
 app = Flask(__name__)
 logger = get_logger(__name__)
@@ -18,7 +18,7 @@ def start_cycle():
     idea_id = f"idea-{uuid.uuid4()}"
     app_idea_data = {
         "idea_id": idea_id,
-        "status": "VETTING_PASSED", # Simulating passing for dashboard test
+        "status": "VETTING_PASSED", # This test route is now out of sync with the main flow
         "description": "A new mobile app that helps users find and trade rare houseplants.",
         "created_at": datetime.utcnow().isoformat()
     }
@@ -30,23 +30,41 @@ def start_cycle():
     return jsonify({"status": "success", "message": f"Discovery cycle started for idea '{idea_id}'."})
 
 @app.route('/vetted-ideas', methods=['GET'])
-def get_vetted_ideas():
-    logger.info("Request received for vetted ideas.")
+def get_ideas_for_approval(): # Function name updated for clarity
+    logger.info("Request received for ideas awaiting CEO approval.")
     try:
-        ideas_ref = db.collection("app_ideas").where("status", "==", "VETTING_PASSED").stream()
+        # --- UPDATED LINE ---
+        # Query for the new status to ensure SWOT analysis is complete before display
+        ideas_ref = db.collection("app_ideas").where("status", "==", "PENDING_CEO_APPROVAL").stream()
         ideas = [idea.to_dict() for idea in ideas_ref]
         return jsonify({"ideas": ideas}), 200
     except Exception as e:
-        logger.error(f"Failed to fetch vetted ideas from Firestore: {e}")
+        logger.error(f"Failed to fetch ideas for approval from Firestore: {e}")
         return jsonify({"status": "error", "message": "Failed to retrieve app ideas."}), 500
 
 @app.route('/reject-idea', methods=['POST'])
 def reject_idea():
     data = request.get_json()
     idea_id = data.get("idea_id")
-    logger.info(f"Received rejection for idea: {idea_id}")
+    logger.info(f"Received CEO rejection for idea: {idea_id}")
     try:
-        save_to_firestore("app_ideas", idea_id, {"status": "CEO_REJECTED"})
+        app_idea = get_from_firestore("app_ideas", idea_id)
+        if not app_idea:
+            logger.error(f"Could not find idea '{idea_id}' to reject.")
+            return jsonify({"status": "error", "message": "Idea not found."}), 404
+
+        rejection_reason = "CEO_REJECTED"
+        save_to_firestore("app_ideas", idea_id, {"status": rejection_reason})
+        
+        rejected_idea_data = {
+            "original_idea_id": idea_id,
+            "description": app_idea.get("description"),
+            "rejection_reason": rejection_reason,
+            "rejected_at": datetime.utcnow().isoformat()
+        }
+        save_to_firestore("rejected_app_ideas", idea_id, rejected_idea_data)
+        logger.info(f"Idea '{idea_id}' rejected by CEO and logged.")
+        
         return jsonify({"status": "success", "message": f"Idea {idea_id} rejected."}), 200
     except Exception as e:
         logger.error(f"Failed to reject idea '{idea_id}': {e}")

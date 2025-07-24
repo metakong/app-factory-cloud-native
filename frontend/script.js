@@ -21,10 +21,11 @@ function setStatus(message, isError = false) {
     const statusEl = document.getElementById('status-message');
     statusEl.textContent = message;
     statusEl.className = isError ? 'status-message error' : 'status-message success';
+    statusEl.style.display = 'block';
 }
 
 async function apiFetch(path, options = {}) {
-    const baseUrl = document.getElementById('api-gateway-url').value.trim();
+     const baseUrl = document.getElementById('api-gateway-url').value.trim();
     const apiKey = document.getElementById('api-key').value.trim();
 
     if (!baseUrl || !apiKey) {
@@ -49,9 +50,8 @@ async function apiFetch(path, options = {}) {
         if (contentType && contentType.includes("application/json")) {
             return response.json();
         }
-        return; // For non-json responses like 204 No Content
+        return; 
     } catch (error) {
-        // This catches network errors (like "Failed to fetch") and errors thrown above
         console.error('API Fetch Error:', error);
         setStatus(error.message, true);
         throw error;
@@ -72,14 +72,17 @@ async function fetchVettedIdeas() {
         const tableBody = document.querySelector('#ideas-table tbody');
         tableBody.innerHTML = '';
         if (ideas.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="4">No ideas are currently awaiting review.</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="5">No ideas are currently awaiting review.</td></tr>';
             return;
         }
         ideas.forEach(idea => {
+            // Base64 encode the SWOT analysis to safely pass it in the onclick handler
+            const encodedSwot = btoa(idea.product_spec_and_swot || 'No SWOT analysis available.');
             const row = `<tr>
                 <td>${idea.idea_id}</td>
                 <td>${idea.description}</td>
-                <td>${new Date(idea.created_at).toLocaleString()}</td>
+                <td>${idea.competition_score !== undefined ? idea.competition_score.toFixed(2) : 'N/A'} / 10.00</td>
+                <td><button onclick="showSwot('${encodedSwot}')">View SWOT</button></td>
                 <td class="actions">
                     <button onclick="approveIdea('${idea.idea_id}')">Approve</button>
                     <button class="reject" onclick="rejectIdea('${idea.idea_id}')">Reject</button>
@@ -90,6 +93,13 @@ async function fetchVettedIdeas() {
     } catch (error) {
         console.error('Error fetching vetted ideas:', error);
     }
+}
+
+// New function to display the SWOT analysis
+function showSwot(encodedSwot) {
+    // Decode the Base64 string and show it in an alert
+    const swotText = atob(encodedSwot);
+    alert(swotText);
 }
 
 async function fetchDevelopedApks() {
@@ -121,13 +131,15 @@ async function fetchDevelopedApks() {
 
 async function approveIdea(ideaId) {
     if (!confirm(`Are you sure you want to approve idea ${ideaId} for development?`)) return;
+    setStatus(`Approving ${ideaId}...`, false);
     await apiFetch('/approve-idea', { method: 'POST', body: JSON.stringify({ idea_id: ideaId }) });
-    setStatus(`Idea ${ideaId} approved.`, false);
+    setStatus(`Idea ${ideaId} approved and sent for development.`, false);
     fetchVettedIdeas();
 }
 
 async function rejectIdea(ideaId) {
     if (!confirm(`Are you sure you want to reject idea ${ideaId}?`)) return;
+    setStatus(`Rejecting ${ideaId}...`, false);
     await apiFetch('/reject-idea', { method: 'POST', body: JSON.stringify({ idea_id: ideaId }) });
     setStatus(`Idea ${ideaId} rejected.`, false);
     fetchVettedIdeas();
@@ -135,6 +147,7 @@ async function rejectIdea(ideaId) {
 
 async function publishApk(ideaId) {
     if (!confirm(`Are you sure you want to publish the app for idea ${ideaId}?`)) return;
+    setStatus(`Publishing app for ${ideaId}...`, false);
     await apiFetch('/publish-app', { method: 'POST', body: JSON.stringify({ idea_id: ideaId }) });
     setStatus(`App for idea ${ideaId} sent for publishing.`, false);
     fetchDevelopedApks();
@@ -143,9 +156,9 @@ async function publishApk(ideaId) {
 async function reviseApk(ideaId) {
     const feedback = prompt(`Please provide revision feedback for app ${ideaId}:`);
     if (feedback && feedback.trim() !== '') {
+        setStatus(`Requesting revision for ${ideaId}...`, false);
         await apiFetch('/revise-apk', { method: 'POST', body: JSON.stringify({ idea_id: ideaId, feedback: feedback }) });
         setStatus(`Revision requested for app ${ideaId}.`, false);
         fetchDevelopedApks();
     }
 }
-

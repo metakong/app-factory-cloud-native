@@ -1,5 +1,5 @@
 Project Context for app-factory-v2
-Generated on: 2025-07-22T12:12:30.715197
+Generated on: 2025-07-24T03:00:26.093399
 ================================================================================
 
 --- Google Cloud Build Log (Latest) ---
@@ -40,19 +40,34 @@ crash.log
 
 # App Factory V2 - Cloud Native
 
-This repository contains the complete infrastructure-as-code and application source for the App Factory V2 project, designed to run entirely on the Google Cloud Platform.
+This repository contains the complete infrastructure-as-code and application source for the App Factory V2 project, a pragmatic and functional prototype designed to run entirely on the Google Cloud Platform.
 
 ## Overview
 
-The App Factory is an automated system that discovers, vets, develops, and publishes mobile applications. It operates as a collection of containerized microservices, each acting as a specialized "AI employee" within a digital assembly line. This project leverages Docker, Cloud Run, Cloud Build, and other GCP services to create a scalable and autonomous application production pipeline.
+The App Factory is an automated system that discovers, vets, develops, and publishes mobile applications. It operates as a collection of containerized microservices and jobs, each acting as a specialized "AI employee" within a digital assembly line. This project leverages Docker, Cloud Run, Cloud Build, API Gateway, and other GCP services to create a scalable and autonomous application production pipeline.
 
-### Architecture
+## Current Architecture
 
-- **CI/CD:** Managed by Cloud Build, triggered by pushes to the `main` branch.
-- **Orchestration:** Cloud Run services are defined and deployed via a `compose.yaml` file.
-- **Services:** Each service (`discovery-cycle`, `cso-vetting`, etc.) runs as an independent Cloud Run service with a dedicated IAM service account.
-- **Tools:** Long-running or heavy tasks (`robust-web-scraper`, `google-play-publisher`) are designed to run as Cloud Run Jobs.
-- **Security:** Secrets are managed via Google Secret Manager. Service-to-service communication will be secured through IAM and service account identities.
+The current architecture is a functional, end-to-end prototype designed for rapid iteration and deployment.
+
+* **Frontend**: A static HTML/CSS/JavaScript single-page application that serves as the **CEO Dashboard**. [cite_start]It is deployed as a dedicated, publicly accessible Cloud Run service. [cite: 1981, 1982]
+* **API Layer**: A **Google Cloud API Gateway** provides a single, secure endpoint for the frontend. [cite_start]It uses an API key for authentication and routes requests to the appropriate backend services as defined in `api-spec.yaml`. [cite: 2, 3, 4, 5, 6]
+* **Backend Services**: The backend consists of multiple Python-based microservices, each running in its own container on **Cloud Run**. [cite_start]Services are configured with specific ingress settings (e.g., `internal-and-cloud-load-balancing`) and dedicated IAM service accounts for security. [cite: 1946, 1947, 1962, 1965, 1971, 1973, 1977]
+* [cite_start]**Backend Jobs**: Long-running or intensive tasks, such as the `web-scraper-tool` and `play-publisher-tool`, are implemented as **Cloud Run Jobs** to run to completion without tying up service resources. [cite: 1947, 1950]
+* **CI/CD Pipeline**: The entire system is deployed via a CI/CD pipeline orchestrated by **Cloud Build** and defined in `cloudbuild.yaml`. The pipeline is triggered on a `git push` to the `main` branch. [cite_start]It uses `docker compose` to build and push all service images to Artifact Registry, followed by a custom `deploy.sh` script that handles the deployment of each service to Cloud Run. [cite: 6, 7]
+* [cite_start]**State Management**: **Firestore** is used as the central database to track the state of each app idea as it moves through the production pipeline (e.g., `PENDING_VETTING`, `PENDING_CEO_APPROVAL`). [cite: 1956, 1963, 1964]
+* **Security**: All sensitive credentials (API keys, tokens) are managed securely in **Google Secret Manager** and are injected into the appropriate Cloud Run services at runtime. [cite_start]The `.env` file is explicitly ignored via `.gitignore` and is not used for cloud deployments. [cite: 1, 1947]
+
+## Core Services & Tools
+
+* `ceo-dashboard`: The frontend user interface for the CEO.
+* `discovery-cycle-service`: The primary backend service that manages the lifecycle of app ideas.
+* `cso-vetting-service`: An AI agent that analyzes the market competition for a new idea.
+* `cpo-analysis-service`: An AI agent that generates a detailed product specification and SWOT analysis.
+* `ai-developer-agent-service`: The core development agent responsible for generating code and managing the build process.
+* `cmo-publishing-agent`: An agent that orchestrates the final publishing of the app to the Google Play Store.
+* `web-scraper-tool`: A Cloud Run Job that scrapes public forums to source new app ideas.
+* `play-publisher-tool`: A Cloud Run Job that handles the technical steps of uploading and publishing the final app bundle.
 
 ================================================================================
 
@@ -97,10 +112,13 @@ paths:
       operationId: approveIdea
       security:
         - api_key: []
+      # --- UPDATED SECTION ---
+      # This now correctly points to the AI Developer service to kick off development.
       x-google-backend:
-        address: https://cpo-analysis-service-dev-515413116650.us-central1.run.app/analyze
+        address: https://ai-developer-agent-service-dev-515413116650.us-central1.run.app/develop
+      # --- END UPDATED SECTION ---
       responses:
-        '200': { description: Idea approved. }
+        '200': { description: Idea approved and sent for development. }
     options:
       summary: CORS support
       operationId: corsApproveIdea
@@ -580,6 +598,16 @@ gcloud projects add-iam-policy-binding $PROJECT_ID \
     --role="roles/aiplatform.user" --condition=None
 
 echo "IAM setup complete."
+
+================================================================================
+
+--- File: key.properties ---
+
+storePassword=SRD$&#TNT469bfg
+keyPassword=SRD$&#TNT469bfg
+keyAlias=my-key-alias
+storeFile=keystore.jks
+
 
 ================================================================================
 
@@ -2072,50 +2100,107 @@ CMD ["python", "./main.py"]
 --- File: backend/tools/google_play_publisher/main.py ---
 
 import os
+import json
 from shared.utils import get_logger
 from shared.gcp_client import get_from_firestore, save_to_firestore, get_secret
+from google.cloud import storage
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaFileUpload
 
 logger = get_logger(__name__)
+PROJECT_ID = os.environ.get("GCP_PROJECT", "app-factory-v2")
+APK_BUCKET_NAME = f"{PROJECT_ID}-apks"
+
+def get_play_service():
+    """Authenticates and builds the Google Play Developer API service client."""
+    try:
+        creds_json_str = get_secret("google-play-api-key")
+        if not creds_json_str:
+            raise ValueError("Google Play API key secret not found.")
+            
+        creds_info = json.loads(creds_json_str)
+        credentials = service_account.Credentials.from_service_account_info(
+            creds_info,
+            scopes=['https://www.googleapis.com/auth/androidpublisher']
+        )
+        return build('androidpublisher', 'v3', credentials=credentials)
+    except Exception as e:
+        logger.error(f"Failed to authenticate with Google Play API: {e}")
+        raise
 
 def main():
-    """
-    Main function for the Google Play Publisher Cloud Run Job.
-    """
+    """Main function for the Google Play Publisher Cloud Run Job."""
     logger.info("Google Play Publisher Tool job started.")
     
-    # The ID of the app to publish is passed as an environment variable
-    idea_id_to_publish = os.environ.get("IDEA_ID")
-    if not idea_id_to_publish:
+    idea_id = os.environ.get("IDEA_ID")
+    if not idea_id:
         logger.error("IDEA_ID environment variable not set. Exiting.")
         return
         
     try:
         # 1. Fetch the app data from Firestore
-        app_idea = get_from_firestore("app_ideas", idea_id_to_publish)
+        app_idea = get_from_firestore("app_ideas", idea_id)
         if not app_idea:
-            logger.error(f"App idea '{idea_id_to_publish}' not found in Firestore.")
+            logger.error(f"App idea '{idea_id}' not found.")
             return
 
-        # 2. Authenticate with Google Play API using the secret
-        api_key = get_secret("google-play-api-key")
-        if not api_key:
-            logger.error("Could not retrieve Google Play API key.")
-            save_to_firestore("app_ideas", idea_id_to_publish, {"status": "PUBLISHING_FAILED", "error": "Missing API Key"})
-            return
+        package_name = f"com.appfactory.{idea_id.replace('-', '')}"
+        apk_gcs_path = f"{idea_id}/app-release.apk"
+        local_apk_path = "/tmp/app-release.apk"
 
-        # 3. TODO: Implement the actual publishing logic here.
-        # This would involve using the google-api-python-client to upload the
-        # app bundle (.aab) which would be stored in a GCS bucket.
-        logger.info(f"Publishing app '{idea_id_to_publish}' to the Google Play Store... (Placeholder)")
+        # 2. Download the APK from Cloud Storage
+        logger.info(f"Downloading APK from gs://{APK_BUCKET_NAME}/{apk_gcs_path}")
+        storage_client = storage.Client()
+        bucket = storage_client.bucket(APK_BUCKET_NAME)
+        blob = bucket.blob(apk_gcs_path)
+        blob.download_to_filename(local_apk_path)
+        logger.info(f"Successfully downloaded APK to {local_apk_path}")
+
+        # 3. Authenticate and connect to the Google Play Developer API
+        service = get_play_service()
+
+        # 4. Create a new app listing if it doesn't exist (or start an edit)
+        logger.info(f"Creating new edit for package: {package_name}")
+        app_edit = service.edits().insert(packageName=package_name).execute()
+        edit_id = app_edit['id']
+
+        # 5. Upload the APK
+        logger.info(f"Uploading APK for edit ID: {edit_id}")
+        media = MediaFileUpload(local_apk_path, mimetype='application/vnd.android.package-archive')
+        apk_upload_result = service.edits().apks().upload(
+            packageName=package_name,
+            editId=edit_id,
+            media_body=media
+        ).execute()
+        version_code = apk_upload_result['versionCode']
+        logger.info(f"Successfully uploaded APK with version code: {version_code}")
+
+        # 6. Assign the APK to the 'internal' testing track
+        logger.info("Assigning APK to the internal testing track.")
+        service.edits().tracks().update(
+            packageName=package_name,
+            editId=edit_id,
+            track='internal',
+            body={
+                'releases': [{
+                    'versionCodes': [str(version_code)],
+                    'status': 'completed'
+                }]
+            }
+        ).execute()
+
+        # 7. Commit the changes to publish the app
+        logger.info(f"Committing edit ID: {edit_id}")
+        service.edits().commit(packageName=package_name, editId=edit_id).execute()
         
-        # 4. Update the status in Firestore to reflect success
-        save_to_firestore("app_ideas", idea_id_to_publish, {"status": "PUBLISHED"})
-        logger.info(f"Successfully published app '{idea_id_to_publish}'.")
+        # 8. Update Firestore to reflect success
+        save_to_firestore("app_ideas", idea_id, {"status": "PUBLISHED"})
+        logger.info(f"Successfully published app '{idea_id}' to the internal track.")
 
     except Exception as e:
-        logger.error(f"An error occurred during the publishing job for '{idea_id_to_publish}': {e}")
-        if idea_id_to_publish:
-            save_to_firestore("app_ideas", idea_id_to_publish, {"status": "PUBLISHING_FAILED", "error": str(e)})
+        logger.error(f"An error occurred during the publishing job for '{idea_id}': {e}")
+        save_to_firestore("app_ideas", idea_id, {"status": "PUBLISHING_FAILED", "error": str(e)})
             
     logger.info("Google Play Publisher Tool job finished.")
 
@@ -2128,6 +2213,9 @@ if __name__ == "__main__":
 
 google-cloud-firestore==2.16.0
 google-cloud-secret-manager==2.19.0
+google-cloud-storage==2.16.0
+google-api-python-client==2.128.0
+google-auth-oauthlib==1.2.0
 
 ================================================================================
 
@@ -2157,38 +2245,160 @@ CMD ["python", "./main.py"]
 
 import os
 import uuid
+import json
 from datetime import datetime
 from shared.utils import get_logger
-from shared.gcp_client import save_to_firestore
+from shared.gcp_client import save_to_firestore, get_secret, db
+import praw
+import google.generativeai as genai
 
 logger = get_logger(__name__)
 
-def main():
-    """
-    Main function for the web scraper Cloud Run Job.
-    Performs a mock scrape and saves a new idea to Firestore.
-    """
-    logger.info("Robust Web Scraper Tool job started.")
-    
+# --- Reddit Scraper Configuration (Full List) ---
+SUBREDDIT_PORTFOLIO = [
+    {"name": "lifehacks", "tier": 1}, {"name": "LifeProTips", "tier": 1},
+    {"name": "YouShouldKnow", "tier": 1}, {"name": "NoStupidQuestions", "tier": 1},
+    {"name": "howto", "tier": 1}, {"name": "IWantToLearn", "tier": 1},
+    {"name": "solvethis", "tier": 1}, {"name": "GetMotivated", "tier": 2},
+    {"name": "GetDisciplined", "tier": 2}, {"name": "selfimprovement", "tier": 2},
+    {"name": "productivity", "tier": 2}, {"name": "ZenHabits", "tier": 2},
+    {"name": "personalfinance", "tier": 2}, {"name": "financialindependence", "tier": 2},
+    {"name": "Frugal", "tier": 2}, {"name": "povertyfinance", "tier": 2},
+    {"name": "careerguidance", "tier": 2}, {"name": "jobs", "tier": 2},
+    {"name": "BuyItForLife", "tier": 2}, {"name": "goodvalue", "tier": 2},
+    {"name": "Anticonsumption", "tier": 2}, {"name": "minimalism", "tier": 2},
+    {"name": "shutupandtakemymoney", "tier": 2}, {"name": "HomeImprovement", "tier": 2},
+    {"name": "DIY", "tier": 2}, {"name": "homemaking", "tier": 2},
+    {"name": "organization", "tier": 2}, {"name": "declutter", "tier": 2},
+    {"name": "Parenting", "tier": 2}, {"name": "daddit", "tier": 2},
+    {"name": "mommit", "tier": 2}, {"name": "relationships", "tier": 2},
+    {"name": "relationship_advice", "tier": 2}, {"name": "travel", "tier": 2},
+    {"name": "Fitness", "tier": 2}, {"name": "EatCheapAndHealthy", "tier": 2},
+    {"name": "cookingforbeginners", "tier": 2}, {"name": "MealPrepSunday", "tier": 2},
+    {"name": "gardening", "tier": 2}, {"name": "SkincareAddiction", "tier": 2},
+    {"name": "hobbies", "tier": 2}, {"name": "mildlyinfuriating", "tier": 2},
+    {"name": "CrappyDesign", "tier": 2}, {"name": "rant", "tier": 2},
+    {"name": "offmychest", "tier": 2}, {"name": "talesfromretail", "tier": 2},
+    {"name": "firstworldproblems", "tier": 2}, {"name": "Showerthoughts", "tier": 1},
+    {"name": "CrazyIdeas", "tier": 1}, {"name": "SomebodyMakeThis", "tier": 1},
+    {"name": "Lightbulb", "tier": 1}
+]
+
+SEARCH_TERMS = [
+    "is there a tool for", "easier way to", "app that does", "I wish there was an app",
+    "how do I fix", "solve this", "help me figure out", "what to do if",
+    "the hardest part is", "I'm struggling with", "I hate how",
+    "wouldn't it be cool if", "make this", "I would pay for", "needed invention"
+]
+
+# --- Gemini Configuration ---
+genai.configure()
+SUMMARIZATION_MODEL = genai.GenerativeModel('gemini-pro')
+SUMMARIZATION_PROMPT = """
+Summarize the core problem, unmet need, or product idea from the following text, which was extracted from a public online forum.
+The summary should be a single, concise sentence.
+Focus only on the abstract concept.
+CRITICALLY IMPORTANT: Do not include any personal details, names, locations, or conversational filler from the original text.
+
+TEXT TO SUMMARIZE:
+---
+{text_content}
+---
+"""
+
+def get_reddit_client():
+    """Initializes and returns an authenticated PRAW client."""
     try:
-        # In a real scenario, this would involve complex scraping logic.
-        # For now, we will generate a mock "scraped" idea.
+        creds_json = get_secret("reddit-app-credentials")
+        if not creds_json:
+            logger.error("Failed to retrieve Reddit credentials from Secret Manager.")
+            return None
+        creds = json.loads(creds_json)
+        return praw.Reddit(
+            client_id=creds["client_id"],
+            client_secret=creds["client_secret"],
+            password=creds["password"],
+            user_agent=creds["user_agent"],
+            username=creds["username"]
+        )
+    except Exception as e:
+        logger.error(f"Error initializing Reddit client: {e}")
+        return None
+
+def summarize_content(title: str, body: str) -> str:
+    """Uses Gemini to summarize the user content into a single-sentence idea."""
+    full_text = f"Title: {title}\n\nBody: {body}"
+    prompt = SUMMARIZATION_PROMPT.format(text_content=full_text)
+    try:
+        response = SUMMARIZATION_MODEL.generate_content(prompt)
+        return response.text.strip()
+    except Exception as e:
+        logger.error(f"Gemini summarization failed: {e}")
+        return title
+
+def is_previously_rejected(summary: str) -> bool:
+    """Checks if an idea with the same summary exists in the rejected collection."""
+    try:
+        rejected_ref = db.collection("rejected_app_ideas").where("description", "==", summary).limit(1).stream()
+        return any(rejected_ref) # Returns True if the iterator is not empty
+    except Exception as e:
+        logger.error(f"Error checking for rejected ideas: {e}")
+        return False # Fail open to avoid blocking new ideas if check fails
+
+def scrape_subreddit(reddit, subreddit_name):
+    """Scrapes, summarizes, and stores ideas from a single subreddit."""
+    logger.info(f"Scraping subreddit: r/{subreddit_name}")
+    subreddit = reddit.subreddit(subreddit_name)
+    found_ideas = 0
+    
+    query = " OR ".join(f'"{term}"' for term in SEARCH_TERMS)
+    
+    for submission in subreddit.search(query, sort="new", time_filter="month", limit=50):
+        if submission.score < 3 or not submission.selftext:
+            continue
+
+        summary = summarize_content(submission.title, submission.selftext)
+
+        # --- START: NEW REJECTION CHECK ---
+        if is_previously_rejected(summary):
+            logger.info(f"Skipping previously rejected idea: {summary}")
+            continue
+        # --- END: NEW REJECTION CHECK ---
+
         idea_id = f"idea-{uuid.uuid4()}"
         app_idea_data = {
             "idea_id": idea_id,
             "status": "PENDING_VETTING",
-            "source_url": "mock-scrape.com/trends",
-            "description": f"A new mobile app that tracks local food trucks in real-time. Generated at {datetime.utcnow().isoformat()}",
+            "source_url": f"https://www.reddit.com{submission.permalink}",
+            "description": summary,
+            "community_validation_score": submission.score,
+            "community_validation_comments": submission.num_comments,
+            "source_subreddit": subreddit_name,
             "created_at": datetime.utcnow().isoformat()
         }
         
-        save_to_firestore("app_ideas", idea_id, app_idea_data)
-        logger.info(f"Successfully generated and saved new app idea: {idea_id}")
-        
-    except Exception as e:
-        logger.error(f"An error occurred during the scraping job: {e}")
-        # In a production system, you might have a separate collection for job failures.
-    
+        try:
+            save_to_firestore("app_ideas", idea_id, app_idea_data)
+            logger.info(f"Saved summarized idea from r/{subreddit_name}: {summary}")
+            found_ideas += 1
+        except Exception as e:
+            logger.error(f"Failed to save idea {idea_id} to Firestore: {e}")
+            
+    logger.info(f"Found and processed {found_ideas} new ideas in r/{subreddit_name}.")
+
+def main():
+    """Main function for the web scraper Cloud Run Job."""
+    logger.info("Robust Web Scraper Tool job started.")
+    reddit_client = get_reddit_client()
+    if not reddit_client:
+        return
+
+    for sub in SUBREDDIT_PORTFOLIO:
+        try:
+            scrape_subreddit(reddit_client, sub["name"])
+        except Exception as e:
+            logger.error(f"Failed to scrape r/{sub['name']}: {e}")
+
     logger.info("Robust Web Scraper Tool job finished.")
 
 if __name__ == "__main__":
@@ -2200,6 +2410,8 @@ if __name__ == "__main__":
 
 google-cloud-firestore==2.16.0
 google-cloud-secret-manager==2.19.0
+praw==7.7.1
+google-generativeai==0.7.1
 
 ================================================================================
 
@@ -2346,7 +2558,7 @@ import uuid
 from datetime import datetime
 from flask import Flask, request, jsonify
 from shared.utils import get_logger
-from shared.gcp_client import save_to_firestore, db
+from shared.gcp_client import save_to_firestore, get_from_firestore, db
 
 app = Flask(__name__)
 logger = get_logger(__name__)
@@ -2361,7 +2573,7 @@ def start_cycle():
     idea_id = f"idea-{uuid.uuid4()}"
     app_idea_data = {
         "idea_id": idea_id,
-        "status": "VETTING_PASSED", # Simulating passing for dashboard test
+        "status": "VETTING_PASSED", # This test route is now out of sync with the main flow
         "description": "A new mobile app that helps users find and trade rare houseplants.",
         "created_at": datetime.utcnow().isoformat()
     }
@@ -2373,23 +2585,41 @@ def start_cycle():
     return jsonify({"status": "success", "message": f"Discovery cycle started for idea '{idea_id}'."})
 
 @app.route('/vetted-ideas', methods=['GET'])
-def get_vetted_ideas():
-    logger.info("Request received for vetted ideas.")
+def get_ideas_for_approval(): # Function name updated for clarity
+    logger.info("Request received for ideas awaiting CEO approval.")
     try:
-        ideas_ref = db.collection("app_ideas").where("status", "==", "VETTING_PASSED").stream()
+        # --- UPDATED LINE ---
+        # Query for the new status to ensure SWOT analysis is complete before display
+        ideas_ref = db.collection("app_ideas").where("status", "==", "PENDING_CEO_APPROVAL").stream()
         ideas = [idea.to_dict() for idea in ideas_ref]
         return jsonify({"ideas": ideas}), 200
     except Exception as e:
-        logger.error(f"Failed to fetch vetted ideas from Firestore: {e}")
+        logger.error(f"Failed to fetch ideas for approval from Firestore: {e}")
         return jsonify({"status": "error", "message": "Failed to retrieve app ideas."}), 500
 
 @app.route('/reject-idea', methods=['POST'])
 def reject_idea():
     data = request.get_json()
     idea_id = data.get("idea_id")
-    logger.info(f"Received rejection for idea: {idea_id}")
+    logger.info(f"Received CEO rejection for idea: {idea_id}")
     try:
-        save_to_firestore("app_ideas", idea_id, {"status": "CEO_REJECTED"})
+        app_idea = get_from_firestore("app_ideas", idea_id)
+        if not app_idea:
+            logger.error(f"Could not find idea '{idea_id}' to reject.")
+            return jsonify({"status": "error", "message": "Idea not found."}), 404
+
+        rejection_reason = "CEO_REJECTED"
+        save_to_firestore("app_ideas", idea_id, {"status": rejection_reason})
+        
+        rejected_idea_data = {
+            "original_idea_id": idea_id,
+            "description": app_idea.get("description"),
+            "rejection_reason": rejection_reason,
+            "rejected_at": datetime.utcnow().isoformat()
+        }
+        save_to_firestore("rejected_app_ideas", idea_id, rejected_idea_data)
+        logger.info(f"Idea '{idea_id}' rejected by CEO and logged.")
+        
         return jsonify({"status": "success", "message": f"Idea {idea_id} rejected."}), 200
     except Exception as e:
         logger.error(f"Failed to reject idea '{idea_id}': {e}")
@@ -2434,77 +2664,120 @@ CMD ["gunicorn", "--bind", "0.0.0.0:8080", "main:app"]
 --- File: backend/services/cso_vetting/main.py ---
 
 import os
+import requests
+from datetime import datetime
 from flask import Flask, request, jsonify
 from shared.utils import get_logger
 from shared.gcp_client import get_from_firestore, save_to_firestore, make_internal_request
+from google_play_scraper import search
 
 app = Flask(__name__)
-@app.route("/")
-def health_check():
-    """Provides a simple health check endpoint."""
-    return "OK", 200
-
 logger = get_logger(__name__)
 
-# The URL for the CPO Analysis Service
 CPO_ANALYSIS_SERVICE_URL = os.environ.get("CPO_ANALYSIS_SERVICE_URL")
+
+# --- Competition Analysis Configuration ---
+HACKERNEWS_API_URL = "http://hn.algolia.com/api/v1/search?query="
+STACKEXCHANGE_API_URL = "https://api.stackexchange.com/2.3/search/advanced?order=desc&sort=relevance&site=stackoverflow&q="
+REJECTION_THRESHOLD = 7.5
+
+def calculate_competition_score(description: str) -> float:
+    """
+    Calculates a competition score from 0-10 based on search results.
+    10 = no competition, 0 = saturated market.
+    """
+    logger.info(f"Performing competition analysis for: '{description}'")
+    keywords = " ".join(description.split()[:5])
+
+    weights = {"play_store": 0.6, "hacker_news": 0.3, "stack_exchange": 0.1}
+    total_weighted_hits = 0
+
+    try:
+        # 1. Google Play Store Search
+        play_results = search(keywords, n_hits=50)
+        play_hits = len(play_results)
+        normalized_play_hits = min(play_hits / 50.0, 1.0)
+        total_weighted_hits += weights["play_store"] * normalized_play_hits
+        logger.info(f"Play Store found {play_hits} potential competitors.")
+
+        # 2. Hacker News Search
+        hn_res = requests.get(f"{HACKERNEWS_API_URL}{keywords}", timeout=10)
+        hn_res.raise_for_status()
+        hn_hits = hn_res.json().get("nbHits", 0)
+        normalized_hn_hits = min(hn_hits / 50.0, 1.0)
+        total_weighted_hits += weights["hacker_news"] * normalized_hn_hits
+        logger.info(f"Hacker News found {hn_hits} related posts.")
+
+        # 3. Stack Exchange Search
+        se_res = requests.get(f"{STACKEXCHANGE_API_URL}{keywords}", timeout=10)
+        se_res.raise_for_status()
+        se_hits = len(se_res.json().get("items", []))
+        normalized_se_hits = min(se_hits / 50.0, 1.0)
+        total_weighted_hits += weights["stack_exchange"] * normalized_se_hits
+        logger.info(f"Stack Exchange found {se_hits} related questions.")
+
+    except requests.RequestException as e:
+        logger.warning(f"Could not complete competition analysis search: {e}")
+        return 5.0
+
+    final_score = 10 * (1 - total_weighted_hits)
+    return round(final_score, 2)
+
+@app.route("/")
+def health_check():
+    return "OK", 200
 
 @app.route('/vet', methods=['POST'])
 def vet_idea():
-    """
-    Receives an app idea ID, retrieves it from Firestore, and performs a mock vetting.
-    """
     logger.info("CSO Vetting Service received a request.")
     data = request.get_json()
+    idea_id = data.get("idea_id")
 
-    if not data or "idea_id" not in data:
-        logger.warning("Request missing 'idea_id'.")
+    if not idea_id:
         return jsonify({"status": "error", "message": "Missing 'idea_id' in request body."}), 400
 
-    idea_id = data["idea_id"]
-    logger.info(f"Starting security vetting for app idea: {idea_id}")
-
     try:
-        # 1. Get the idea from Firestore
         app_idea = get_from_firestore("app_ideas", idea_id)
         if not app_idea:
             return jsonify({"status": "error", "message": f"App idea '{idea_id}' not found."}), 404
+        
+        score = calculate_competition_score(app_idea.get("description", ""))
+        
+        if score < REJECTION_THRESHOLD:
+            rejection_reason = "REJECTED_COMPETITION"
+            save_to_firestore("app_ideas", idea_id, {"status": rejection_reason, "competition_score": score})
+            
+            rejected_idea_data = {
+                "original_idea_id": idea_id,
+                "description": app_idea.get("description"),
+                "rejection_reason": rejection_reason,
+                "competition_score": score,
+                "rejected_at": datetime.utcnow().isoformat()
+            }
+            save_to_firestore("rejected_app_ideas", idea_id, rejected_idea_data)
+            logger.info(f"Idea '{idea_id}' rejected and logged. Score: {score}")
+            return jsonify({"status": "success", "message": f"Idea '{idea_id}' rejected due to high competition."}), 200
 
-        # 2. Perform mock vetting logic
-        logger.info(f"Performing security checks on: {app_idea.get('description')}")
-        # ... In a real scenario, complex security checks would happen here ...
+        # --- UPDATED LINE ---
+        # Set status to PENDING_ANALYSIS instead of VETTING_PASSED
+        save_to_firestore("app_ideas", idea_id, {"status": "PENDING_ANALYSIS", "competition_score": score})
+        logger.info(f"Vetting passed with score {score}. Status set to PENDING_ANALYSIS.")
 
-        # 3. Update the status in Firestore
-        updated_data = {"status": "VETTING_PASSED"}
-        save_to_firestore("app_ideas", idea_id, updated_data)
-
-        logger.info(f"Security vetting for '{idea_id}' passed. Triggering CPO Analysis.")
-
-        # 4. Trigger the next service in the chain
         if not CPO_ANALYSIS_SERVICE_URL:
-            logger.error("CPO_ANALYSIS_SERVICE_URL environment variable is not set.")
-            # Update status to reflect the error
+            logger.error("CPO_ANALYSIS_SERVICE_URL is not set.")
             save_to_firestore("app_ideas", idea_id, {"status": "ANALYSIS_TRIGGER_FAILED"})
             return jsonify({"status": "error", "message": "Downstream service (CPO) is not configured."}), 500
 
-        try:
-            analysis_request_data = {"idea_id": idea_id}
-            response = make_internal_request(
-                service_url=f"{CPO_ANALYSIS_SERVICE_URL}/analyze",
-                method='POST',
-                data=analysis_request_data
-            )
-            logger.info(f"CPO Analysis Service responded with status {response.status_code}: {response.text}")
-        except Exception as e:
-            logger.error(f"Failed to trigger CPO Analysis Service for idea '{idea_id}': {e}")
-            save_to_firestore("app_ideas", idea_id, {"status": "ANALYSIS_TRIGGER_FAILED"})
-            return jsonify({"status": "error", "message": "Failed to trigger downstream CPO service."}), 500
-
+        make_internal_request(
+            service_url=f"{CPO_ANALYSIS_SERVICE_URL}/analyze",
+            method='POST',
+            data={"idea_id": idea_id}
+        )
         return jsonify({"status": "success", "message": f"Vetting passed for '{idea_id}' and analysis triggered."})
 
     except Exception as e:
         logger.error(f"An error occurred during vetting for '{idea_id}': {e}")
-        # Optionally, update Firestore status to "VETTING_FAILED"
+        save_to_firestore("app_ideas", idea_id, {"status": "VETTING_FAILED", "error": str(e)})
         return jsonify({"status": "error", "message": "An internal error occurred."}), 500
 
 if __name__ == "__main__":
@@ -2518,6 +2791,8 @@ Flask==3.0.3
 gunicorn==22.0.0
 google-cloud-firestore==2.16.0
 google-cloud-secret-manager==2.19.0
+requests==2.32.3
+google-play-scraper==1.2.4
 
 ================================================================================
 
@@ -2546,56 +2821,162 @@ CMD ["gunicorn", "--bind", "0.0.0.0:8080", "main:app"]
 --- File: backend/services/ai_developer/main.py ---
 
 import os
+import json
 from flask import Flask, request, jsonify
 from shared.utils import get_logger
-from shared.gcp_client import get_from_firestore, save_to_firestore, make_internal_request, get_secret, db
+from shared.gcp_client import get_from_firestore, save_to_firestore, get_secret
+import google.generativeai as genai
+from github import Github, GithubException
+from google.cloud import storage
 
 app = Flask(__name__)
 logger = get_logger(__name__)
 
+# --- Constants ---
+# The GitHub user/organization where new app repositories will be created.
+METAKONG_GITHUB_USER = "metakong" 
+# The name of the secret in Secret Manager holding the GitHub Personal Access Token.
+GITHUB_SECRET_NAME = "github-token"
+# The name of the secret in Secret Manager holding the Gemini API Key.
+GEMINI_SECRET_NAME = "gemini-api-key"
+# The GCP project ID, retrieved from the environment.
+PROJECT_ID = os.environ.get("GCP_PROJECT", "app-factory-v2")
+# The name of the GCS bucket where final APKs will be stored.
+APK_BUCKET_NAME = f"{PROJECT_ID}-apks"
+
+
 @app.route("/")
 def health_check():
+    """Provides a simple health check endpoint."""
     return "OK", 200
+
+def generate_flutter_app_and_pipeline(spec: str, idea_id: str, feedback: str) -> dict:
+    """
+    Calls the Gemini API to generate a complete Flutter application codebase
+    and a Cloud Build pipeline to build and sign a release APK.
+    """
+    logger.info(f"Generating full Flutter app and CI/CD pipeline for idea: {idea_id}")
+    
+    api_key = get_secret(GEMINI_SECRET_NAME)
+    if not api_key:
+        raise ValueError(f"Could not retrieve secret: {GEMINI_SECRET_NAME}")
+    genai.configure(api_key=api_key)
+    
+    model = genai.GenerativeModel('gemini-pro')
+    
+    prompt = f"""
+    Act as an expert Flutter developer and a DevOps engineer specializing in mobile CI/CD pipelines.
+    Your task is to generate a complete, functional, multi-screen Flutter application based on the provided specification and CEO feedback.
+    You must also generate a `cloudbuild.yaml` file to build a signed, release-ready .apk and upload it to Google Cloud Storage.
+
+    **Directives**:
+    1.  **Output Format**: Return the output as a single, valid JSON object. The keys must be the full file paths (e.g., `lib/main.dart`, `pubspec.yaml`, `cloudbuild.yaml`), and the values must be the complete string content for each file.
+    2.  **Flutter Application**:
+        - The application must be a functional, multi-screen app (e.g., a list view and a detail view).
+        - The code must be clean, well-commented, and follow Flutter best practices.
+        - Generate a `pubspec.yaml` with necessary dependencies (like http or provider).
+        - Generate a `README.md` that briefly describes the application.
+    3.  **CI/CD Pipeline (`cloudbuild.yaml`)**:
+        - The pipeline must build a signed, release-ready Android APK.
+        - Step 1: Use a builder to download the signing keystore (`keystore.jks`) from Secret Manager (secret name: 'flutter-keystore-jks'). Place it in `android/app/keystore.jks`.
+        - Step 2: Use a builder to download the key properties (`key.properties`) from Secret Manager (secret name: 'flutter-key-properties'). Place it in `android/key.properties`.
+        - Step 3: Use a Flutter build environment (e.g., `cirrusci/flutter`) to run `flutter pub get`.
+        - Step 4: In the same Flutter environment, run `flutter build apk --release`. The build process will automatically use the `key.properties` and `keystore.jks` to sign the APK.
+        - Step 5: Use the `gcr.io/cloud-builders/gsutil` builder to copy the final APK from `build/app/outputs/apk/release/app-release.apk` to the Cloud Storage bucket `gs://{APK_BUCKET_NAME}/{idea_id}/app-release.apk`.
+        - Step 6: Use `gsutil` to make the uploaded APK publicly readable (`gsutil iam ch allUsers:objectViewer`).
+
+    **Product Specification & SWOT**:
+    ---
+    {spec}
+    ---
+
+    **CEO Feedback**:
+    ---
+    {feedback}
+    ---
+    """
+    
+    response = model.generate_content(prompt)
+    
+    # Clean the response to ensure it's valid JSON.
+    cleaned_response = response.text.strip().replace("```json", "").replace("```", "")
+    return json.loads(cleaned_response)
+
+def create_and_commit_to_github(token: str, repo_name: str, files: dict, description: str) -> str:
+    """
+    Creates a new GitHub repository and commits the generated files.
+    """
+    logger.info(f"Connecting to GitHub to create repository: {repo_name}")
+    g = Github(token)
+    user = g.get_user(METAKONG_GITHUB_USER)
+
+    try:
+        repo = user.create_repo(name=repo_name, description=description, private=False)
+        logger.info(f"Successfully created public repository: {repo.full_name}")
+
+        for filepath, content in files.items():
+            repo.create_file(path=filepath, message=f"Initial commit of {filepath}", content=content, branch="main")
+            logger.info(f"Committed file: {filepath}")
+        
+        return repo.html_url
+    except GithubException as e:
+        if e.status == 422 and "name already exists" in str(e.data):
+            logger.warning(f"Repository '{repo_name}' already exists. Re-using.")
+            return f"https://github.com/{METAKONG_GITHUB_USER}/{repo_name}"
+        else:
+            raise
 
 @app.route('/develop', methods=['POST'])
 def develop_app():
     data = request.get_json()
     idea_id = data.get("idea_id")
-    feedback = data.get("feedback")
-    logger.info(f"Development request for idea: {idea_id} with feedback: '{feedback}'")
+    ceo_feedback = data.get("feedback", "No specific feedback provided.")
+    
+    if not idea_id:
+        return jsonify({"status": "error", "message": "Missing 'idea_id'."}), 400
+
+    logger.info(f"AI Developer Agent received request for idea: {idea_id}")
+
     try:
-        # TODO: Add logic to use feedback in prompts
-        save_to_firestore("app_ideas", idea_id, {
-            "status": "PENDING_CEO_REVISION",
-            "ceo_feedback": feedback,
-            # Placeholder for the APK download URL
-            "apk_download_url": "https://storage.googleapis.com/app-factory-apks/placeholder.apk"
-        })
-        return jsonify({"status": "success", "message": f"Development started for {idea_id}."}), 200
+        app_idea = get_from_firestore("app_ideas", idea_id)
+        if not app_idea or "product_spec_and_swot" not in app_idea:
+            raise ValueError("Product specification not found in Firestore document.")
+        
+        generated_files = generate_flutter_app_and_pipeline(
+            spec=app_idea["product_spec_and_swot"],
+            idea_id=idea_id,
+            feedback=ceo_feedback
+        )
+
+        github_token = get_secret(GITHUB_SECRET_NAME)
+        if not github_token:
+            raise ValueError(f"Could not retrieve secret: {GITHUB_SECRET_NAME}")
+        
+        repo_name = f"app-factory-{idea_id}"
+        repo_url = create_and_commit_to_github(
+            token=github_token,
+            repo_name=repo_name,
+            files=generated_files,
+            description=app_idea.get("description", "An AI-generated mobile application.")
+        )
+        
+        # Construct the public URL for the APK that will be built.
+        apk_download_url = f"https://storage.googleapis.com/{APK_BUCKET_NAME}/{idea_id}/app-release.apk"
+
+        update_data = {
+            "status": "PENDING_CEO_TESTING",
+            "repo_url": repo_url,
+            "apk_download_url": apk_download_url
+        }
+        save_to_firestore("app_ideas", idea_id, update_data)
+        
+        logger.info(f"Successfully developed and committed code for '{idea_id}'. Repo: {repo_url}, APK will be at: {apk_download_url}")
+        return jsonify({"status": "success", "message": f"Development complete for {idea_id}.", "repo_url": repo_url}), 200
+
     except Exception as e:
         logger.error(f"Development failed for '{idea_id}': {e}")
-        return jsonify({"status": "error", "message": "Development failed."}), 500
-
-@app.route('/developed-apks', methods=['GET'])
-def get_developed_apks():
-    logger.info("Request received for developed APKs.")
-    try:
-        apks_ref = db.collection("app_ideas").where("status", "==", "PENDING_CEO_REVISION").stream()
-        apks = [apk.to_dict() for apk in apks_ref]
-        return jsonify({"apks": apks}), 200
-    except Exception as e:
-        logger.error(f"Failed to fetch developed APKs: {e}")
-        return jsonify({"status": "error", "message": "Failed to retrieve APKs."}), 500
-
-@app.route('/revise', methods=['POST'])
-def revise_app():
-    # Placeholder for revision logic
-    data = request.get_json()
-    idea_id = data.get("idea_id")
-    feedback = data.get("feedback")
-    logger.info(f"Revision request for idea: {idea_id} with feedback: '{feedback}'")
-    save_to_firestore("app_ideas", idea_id, {"status": "PENDING_CEO_REVISION", "ceo_revision_feedback": feedback})
-    return jsonify({"status": "success", "message": f"Revision in progress for {idea_id}."}), 200
+        save_to_firestore("app_ideas", idea_id, {"status": "DEVELOPMENT_FAILED", "error": str(e)})
+        return jsonify({"status": "error", "message": f"Development failed: {e}"}), 500
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
@@ -2609,6 +2990,8 @@ gunicorn==22.0.0
 google-cloud-firestore==2.16.0
 google-cloud-secret-manager==2.19.0
 google-generativeai==0.7.1
+PyGithub==2.3.0
+google-cloud-storage==2.16.0
 
 ================================================================================
 
@@ -2645,31 +3028,23 @@ import google.generativeai as genai
 app = Flask(__name__)
 logger = get_logger(__name__)
 
-# The URLs for downstream services are provided by Cloud Run
 AI_DEVELOPER_AGENT_SERVICE_URL = os.environ.get("AI_DEVELOPER_AGENT_SERVICE_URL")
 
-# Configure the Gemini API client (will use Application Default Credentials)
 genai.configure()
 
 @app.route("/")
 def health_check():
-    """Provides a simple health check endpoint."""
     return "OK", 200
 
 @app.route('/analyze', methods=['POST'])
 def analyze_idea():
-    """
-    Receives a vetted app idea, calls the Gemini API to generate a
-    product specification, and triggers the AI Developer service.
-    """
     logger.info("CPO Analysis Service received a request.")
     data = request.get_json()
+    idea_id = data.get("idea_id")
 
-    if not data or "idea_id" not in data:
-        logger.warning("Request missing 'idea_id'.")
+    if not idea_id:
         return jsonify({"status": "error", "message": "Missing 'idea_id' in request body."}), 400
 
-    idea_id = data["idea_id"]
     logger.info(f"Starting product analysis for app idea: {idea_id}")
 
     try:
@@ -2677,51 +3052,49 @@ def analyze_idea():
         if not app_idea:
             return jsonify({"status": "error", "message": f"App idea '{idea_id}' not found."}), 404
 
-        # 1. Call Gemini API to generate a detailed product specification.
-        logger.info(f"Generating product spec for: {app_idea.get('description')}")
+        logger.info(f"Generating product spec and SWOT for: {app_idea.get('description')}")
         model = genai.GenerativeModel('gemini-pro')
+        
         prompt = f"""
-        Act as a world-class Chief Product Officer. Based on the following high-level app idea,
+        Act as a world-class Chief Product Officer for a consumer mobile app startup.
+        Your primary goal is to design products for the "average, non-technical consumer."
+        Based on the following app idea, which was sourced from public online discussions,
         generate a detailed product specification document.
-        The spec should include:
-        1. A target user persona.
-        2. A list of core features (MVP).
-        3. A proposed technology stack (Flutter with Riverpod for state management).
-        4. A monetization strategy.
+
+        The document must contain these two main sections: "Product Specification" and "SWOT Analysis".
+
+        Under "Product Specification", include:
+        1.  **Target User Persona**: Describe the ideal user. Focus on their daily life, motivations, and frustrations.
+        2.  **Problem Statement**: Clearly articulate the core consumer pain point this app solves.
+        3.  **Core Feature Set (MVP)**: List the essential features for the first version. Prioritize simplicity.
+        4.  **Monetization Strategy**: Propose a simple, consumer-friendly model.
+
+        Under "SWOT Analysis", include:
+        1.  **Strengths**: What internal advantages will this app have? (e.g., unique features, simple UI).
+        2.  **Weaknesses**: What are the internal disadvantages or challenges? (e.g., reliance on third-party data, potential for user churn).
+        3.  **Opportunities**: What external factors can the app capitalize on? (e.g., growing market trend, lack of a dominant competitor).
+        4.  **Threats**: What external factors could harm the project? (e.g., a large company entering the space, changing regulations).
 
         App Idea: "{app_idea.get('description')}"
         """
         response = model.generate_content(prompt)
-        product_spec = response.text
+        product_spec_and_swot = response.text
 
-        # 2. Save the new spec to Firestore and update status.
+        # --- UPDATED LINE ---
+        # Set status to PENDING_CEO_APPROVAL to make it visible on the dashboard
         updated_data = {
-            "status": "ANALYSIS_PASSED",
-            "product_spec": product_spec
+            "status": "PENDING_CEO_APPROVAL",
+            "product_spec_and_swot": product_spec_and_swot
         }
         save_to_firestore("app_ideas", idea_id, updated_data)
-        logger.info(f"Successfully generated and saved product spec for '{idea_id}'.")
-
-        # 3. Trigger the AI Developer Agent service.
-        if not AI_DEVELOPER_AGENT_SERVICE_URL:
-            logger.error("AI_DEVELOPER_AGENT_SERVICE_URL environment variable is not set.")
-            save_to_firestore("app_ideas", idea_id, {"status": "DEV_TRIGGER_FAILED"})
-            return jsonify({"status": "error", "message": "Downstream AI Developer service is not configured."}), 500
-
-        logger.info(f"Triggering AI Developer service for idea '{idea_id}' at {AI_DEVELOPER_AGENT_SERVICE_URL}")
-        dev_request_data = {"idea_id": idea_id}
-        dev_response = make_internal_request(
-            service_url=f"{AI_DEVELOPER_AGENT_SERVICE_URL}/develop",
-            method='POST',
-            data=dev_request_data
-        )
-        logger.info(f"AI Developer service responded with status {dev_response.status_code}: {dev_response.text}")
-
-        return jsonify({"status": "success", "message": f"Analysis complete for '{idea_id}' and development triggered."})
+        logger.info(f"Successfully generated spec and SWOT for '{idea_id}'. Status set to PENDING_CEO_APPROVAL.")
+        
+        # This service no longer triggers the next step. The CEO's approval will.
+        return jsonify({"status": "success", "message": f"Analysis complete for '{idea_id}'. Ready for CEO review."})
 
     except Exception as e:
         logger.error(f"An error occurred during analysis for '{idea_id}': {e}")
-        save_to_firestore("app_ideas", idea_id, {"status": "ANALYSIS_FAILED"})
+        save_to_firestore("app_ideas", idea_id, {"status": "ANALYSIS_FAILED", "error": str(e)})
         return jsonify({"status": "error", "message": "An internal error occurred."}), 500
 
 if __name__ == "__main__":
@@ -2892,7 +3265,7 @@ EXPOSE 80
         <div class="config-section">
             <h2>Configuration</h2>
             <div class="config-inputs">
-                <input type="text" id="api-gateway-url" placeholder="API Gateway URL (e.g., https://my-gateway-xxxx.a.run.app)">
+                 <input type="text" id="api-gateway-url" placeholder="API Gateway URL (e.g., https://my-gateway-xxxx.a.run.app)">
                 <input type="password" id="api-key" placeholder="API Key">
                 <button id="load-data-btn">Load Data</button>
             </div>
@@ -2904,25 +3277,23 @@ EXPOSE 80
             <button class="tab-link" onclick="openTab(event, 'apk-review')">APK Review</button>
         </div>
 
-        <!-- Idea Review Tab -->
         <div id="idea-review" class="tab-content" style="display: block;">
             <h2>Ideas Awaiting Approval</h2>
             <table id="ideas-table">
                 <thead>
                     <tr>
                         <th>Idea ID</th>
-                        <th>Description</th>
-                        <th>Created At</th>
+                        <th>AI Summary</th>
+                        <th>Competition Score</th>
+                        <th>SWOT Analysis</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Idea rows will be inserted here by JavaScript -->
-                </tbody>
+                    </tbody>
             </table>
         </div>
 
-        <!-- APK Review Tab -->
         <div id="apk-review" class="tab-content">
             <h2>APKs Awaiting Review</h2>
             <table id="apks-table">
@@ -2935,8 +3306,7 @@ EXPOSE 80
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- APK rows will be inserted here by JavaScript -->
-                </tbody>
+                    </tbody>
             </table>
         </div>
     </div>
@@ -2944,8 +3314,6 @@ EXPOSE 80
     <script src="script.js"></script>
 </body>
 </html>
-
-
 
 ================================================================================
 
@@ -2974,10 +3342,11 @@ function setStatus(message, isError = false) {
     const statusEl = document.getElementById('status-message');
     statusEl.textContent = message;
     statusEl.className = isError ? 'status-message error' : 'status-message success';
+    statusEl.style.display = 'block';
 }
 
 async function apiFetch(path, options = {}) {
-    const baseUrl = document.getElementById('api-gateway-url').value.trim();
+     const baseUrl = document.getElementById('api-gateway-url').value.trim();
     const apiKey = document.getElementById('api-key').value.trim();
 
     if (!baseUrl || !apiKey) {
@@ -3002,9 +3371,8 @@ async function apiFetch(path, options = {}) {
         if (contentType && contentType.includes("application/json")) {
             return response.json();
         }
-        return; // For non-json responses like 204 No Content
+        return; 
     } catch (error) {
-        // This catches network errors (like "Failed to fetch") and errors thrown above
         console.error('API Fetch Error:', error);
         setStatus(error.message, true);
         throw error;
@@ -3025,14 +3393,17 @@ async function fetchVettedIdeas() {
         const tableBody = document.querySelector('#ideas-table tbody');
         tableBody.innerHTML = '';
         if (ideas.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="4">No ideas are currently awaiting review.</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="5">No ideas are currently awaiting review.</td></tr>';
             return;
         }
         ideas.forEach(idea => {
+            // Base64 encode the SWOT analysis to safely pass it in the onclick handler
+            const encodedSwot = btoa(idea.product_spec_and_swot || 'No SWOT analysis available.');
             const row = `<tr>
                 <td>${idea.idea_id}</td>
                 <td>${idea.description}</td>
-                <td>${new Date(idea.created_at).toLocaleString()}</td>
+                <td>${idea.competition_score !== undefined ? idea.competition_score.toFixed(2) : 'N/A'} / 10.00</td>
+                <td><button onclick="showSwot('${encodedSwot}')">View SWOT</button></td>
                 <td class="actions">
                     <button onclick="approveIdea('${idea.idea_id}')">Approve</button>
                     <button class="reject" onclick="rejectIdea('${idea.idea_id}')">Reject</button>
@@ -3043,6 +3414,13 @@ async function fetchVettedIdeas() {
     } catch (error) {
         console.error('Error fetching vetted ideas:', error);
     }
+}
+
+// New function to display the SWOT analysis
+function showSwot(encodedSwot) {
+    // Decode the Base64 string and show it in an alert
+    const swotText = atob(encodedSwot);
+    alert(swotText);
 }
 
 async function fetchDevelopedApks() {
@@ -3074,13 +3452,15 @@ async function fetchDevelopedApks() {
 
 async function approveIdea(ideaId) {
     if (!confirm(`Are you sure you want to approve idea ${ideaId} for development?`)) return;
+    setStatus(`Approving ${ideaId}...`, false);
     await apiFetch('/approve-idea', { method: 'POST', body: JSON.stringify({ idea_id: ideaId }) });
-    setStatus(`Idea ${ideaId} approved.`, false);
+    setStatus(`Idea ${ideaId} approved and sent for development.`, false);
     fetchVettedIdeas();
 }
 
 async function rejectIdea(ideaId) {
     if (!confirm(`Are you sure you want to reject idea ${ideaId}?`)) return;
+    setStatus(`Rejecting ${ideaId}...`, false);
     await apiFetch('/reject-idea', { method: 'POST', body: JSON.stringify({ idea_id: ideaId }) });
     setStatus(`Idea ${ideaId} rejected.`, false);
     fetchVettedIdeas();
@@ -3088,6 +3468,7 @@ async function rejectIdea(ideaId) {
 
 async function publishApk(ideaId) {
     if (!confirm(`Are you sure you want to publish the app for idea ${ideaId}?`)) return;
+    setStatus(`Publishing app for ${ideaId}...`, false);
     await apiFetch('/publish-app', { method: 'POST', body: JSON.stringify({ idea_id: ideaId }) });
     setStatus(`App for idea ${ideaId} sent for publishing.`, false);
     fetchDevelopedApks();
@@ -3096,22 +3477,21 @@ async function publishApk(ideaId) {
 async function reviseApk(ideaId) {
     const feedback = prompt(`Please provide revision feedback for app ${ideaId}:`);
     if (feedback && feedback.trim() !== '') {
+        setStatus(`Requesting revision for ${ideaId}...`, false);
         await apiFetch('/revise-apk', { method: 'POST', body: JSON.stringify({ idea_id: ideaId, feedback: feedback }) });
         setStatus(`Revision requested for app ${ideaId}.`, false);
         fetchDevelopedApks();
     }
 }
 
-
-
 ================================================================================
 
 --- File: frontend/style.css ---
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background-color: #f4f6f8;
-    color: #333;
+    font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background-color: #121212; /* Very dark gray background */
+    color: #E0E0E0; /* Light gray text for readability */
     margin: 0;
     padding: 20px;
 }
@@ -3119,28 +3499,30 @@ body {
 .container {
     max-width: 1200px;
     margin: 0 auto;
-    background-color: #fff;
+    background-color: #1E1E1E; /* Slightly lighter gray for the main container */
     padding: 20px 40px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    border-radius: 12px; /* Slightly more rounded corners */
+    border: 1px solid #2C2C2E;
 }
 
 h1 {
     text-align: center;
-    color: #1a73e8;
+    color: #6E9EFF; /* Samsung-style accent blue */
     margin-bottom: 30px;
+    font-weight: 500;
 }
 
 h2 {
-    border-bottom: 2px solid #e0e0e0;
+    border-bottom: 1px solid #38383A; /* Softer, darker border */
     padding-bottom: 10px;
     margin-top: 40px;
-    color: #424242;
+    color: #F5F5F5;
+    font-weight: 500;
 }
 
 .config-section {
-    background-color: #e8f0fe;
-    border: 1px solid #d2e3fc;
+    background-color: #2C2C2E; /* A distinct dark shade for the section */
+    border: 1px solid #444;
     border-radius: 8px;
     padding: 20px;
     margin-bottom: 30px;
@@ -3154,31 +3536,40 @@ h2 {
 
 .config-inputs input {
     flex-grow: 1;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    padding: 12px;
+    border: 1px solid #555;
+    border-radius: 6px;
     font-size: 14px;
+    background-color: #333;
+    color: #E0E0E0;
+}
+
+.config-inputs input::placeholder {
+    color: #888;
 }
 
 .status-message {
-    margin-top: 10px;
-    padding: 10px;
-    border-radius: 4px;
+    margin-top: 15px;
+    padding: 12px;
+    border-radius: 6px;
     text-align: center;
     font-weight: 500;
+    display: none; /* Hidden by default, shown via JS */
 }
 .status-message.success {
-    background-color: #e6f4ea;
-    color: #1e8e3e;
+    background-color: #304034;
+    color: #7DCEA0;
+    display: block;
 }
 .status-message.error {
-    background-color: #fce8e6;
-    color: #d93025;
+    background-color: #442B2B;
+    color: #F1948A;
+    display: block;
 }
 
 .tabs {
     overflow: hidden;
-    border-bottom: 1px solid #ccc;
+    border-bottom: 1px solid #38383A;
     margin-bottom: 20px;
 }
 
@@ -3191,16 +3582,17 @@ h2 {
     padding: 14px 16px;
     transition: 0.3s;
     font-size: 17px;
+    color: #A0A0A0; /* Dimmer color for inactive tabs */
     border-bottom: 3px solid transparent;
 }
 
 .tab-link:hover {
-    background-color: #f1f1f1;
+    background-color: #2C2C2E;
 }
 
 .tab-link.active {
-    border-bottom: 3px solid #1a73e8;
-    color: #1a73e8;
+    border-bottom: 3px solid #6E9EFF;
+    color: #6E9EFF;
     font-weight: 600;
 }
 
@@ -3215,49 +3607,58 @@ table {
 }
 
 th, td {
-    border: 1px solid #ddd;
-    padding: 12px;
+    border: 1px solid #38383A; /* Darker, subtle borders */
+    padding: 14px;
     text-align: left;
 }
 
 th {
-    background-color: #f2f2f2;
+    background-color: #2C2C2E;
     font-weight: 600;
+    color: #F5F5F5;
 }
 
 tr:nth-child(even) {
-    background-color: #f9f9f9;
+    background-color: #252525; /* Subtle zebra striping */
+}
+
+td a {
+    color: #6E9EFF;
+    text-decoration: none;
+}
+
+td a:hover {
+    text-decoration: underline;
 }
 
 button {
-    padding: 8px 12px;
+    padding: 10px 16px;
     border: none;
-    border-radius: 4px;
+    border-radius: 6px;
     cursor: pointer;
     font-weight: 500;
-    background-color: #1a73e8;
-    color: white;
+    background-color: #6E9EFF; /* Accent blue */
+    color: #121212; /* Dark text for contrast on blue button */
     transition: background-color 0.2s;
 }
 
 button:hover {
-    background-color: #185abc;
+    background-color: #8AB4F8;
 }
 
 button.reject, button.revise {
-    background-color: #d93025;
+    background-color: #FF453A; /* Muted, dark-theme friendly red */
+    color: #FFFFFF;
 }
 
 button.reject:hover, button.revise:hover {
-    background-color: #a50e0e;
+    background-color: #E57373;
 }
 
 .actions {
     display: flex;
     gap: 10px;
 }
-
-
 
 ================================================================================
 

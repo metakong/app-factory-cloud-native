@@ -37,10 +37,13 @@ paths:
       operationId: approveIdea
       security:
         - api_key: []
+      # --- UPDATED SECTION ---
+      # This now correctly points to the AI Developer service to kick off development.
       x-google-backend:
-        address: https://cpo-analysis-service-dev-515413116650.us-central1.run.app/analyze
+        address: https://ai-developer-agent-service-dev-515413116650.us-central1.run.app/develop
+      # --- END UPDATED SECTION ---
       responses:
-        '200': { description: Idea approved. }
+        '200': { description: Idea approved and sent for development. }
     options:
       summary: CORS support
       operationId: corsApproveIdea

@@ -13,7 +13,7 @@
         <div class="config-section">
             <h2>Configuration</h2>
             <div class="config-inputs">
-                <input type="text" id="api-gateway-url" placeholder="API Gateway URL (e.g., https://my-gateway-xxxx.a.run.app)">
+                 <input type="text" id="api-gateway-url" placeholder="API Gateway URL (e.g., https://my-gateway-xxxx.a.run.app)">
                 <input type="password" id="api-key" placeholder="API Key">
                 <button id="load-data-btn">Load Data</button>
             </div>
@@ -25,25 +25,23 @@
             <button class="tab-link" onclick="openTab(event, 'apk-review')">APK Review</button>
         </div>
 
-        <!-- Idea Review Tab -->
         <div id="idea-review" class="tab-content" style="display: block;">
             <h2>Ideas Awaiting Approval</h2>
             <table id="ideas-table">
                 <thead>
                     <tr>
                         <th>Idea ID</th>
-                        <th>Description</th>
-                        <th>Created At</th>
+                        <th>AI Summary</th>
+                        <th>Competition Score</th>
+                        <th>SWOT Analysis</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Idea rows will be inserted here by JavaScript -->
-                </tbody>
+                    </tbody>
             </table>
         </div>
 
-        <!-- APK Review Tab -->
         <div id="apk-review" class="tab-content">
             <h2>APKs Awaiting Review</h2>
             <table id="apks-table">
@@ -56,8 +54,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- APK rows will be inserted here by JavaScript -->
-                </tbody>
+                    </tbody>
             </table>
         </div>
     </div>
@@ -65,4 +62,3 @@
     <script src="script.js"></script>
 </body>
 </html>
-

@@ -25,7 +25,6 @@ resource "google_project_service" "apis" {
   ])
   project            = var.project_id
   service            = each.key
-  # This is the corrected argument. It prevents Terraform from disabling APIs on destroy.
   disable_on_destroy = false
 }
 
@@ -110,13 +109,6 @@ module "app_services" {
       }
     }
   }
-
-  depends_on = [
-    module.iam_service_accounts,
-    module.secrets,
-    google_project_service.apis,
-    google_artifact_registry_repository.repo
-  ]
 }
 
 # Define all backend jobs
@@ -137,10 +129,4 @@ module "app_jobs" {
       timeout              = "3600s"
     }
   }
-
-  depends_on = [
-    module.iam_service_accounts,
-    google_project_service.apis,
-    google_artifact_registry_repository.repo
-  ]
 }

@@ -23,9 +23,10 @@ resource "google_project_service" "apis" {
     "servicecontrol.googleapis.com",
     "servicemanagement.googleapis.com"
   ])
-  service                    = each.key
-  disable_dependency_violation = true
-  project                    = var.project_id
+  project            = var.project_id
+  service            = each.key
+  # This is the corrected argument. It prevents Terraform from disabling APIs on destroy.
+  disable_on_destroy = false
 }
 
 # Create the Artifact Registry for Docker images
@@ -35,8 +36,7 @@ resource "google_artifact_registry_repository" "repo" {
   repository_id = "app-factory-repo"
   description   = "Docker repository for App Factory V2"
   format        = "DOCKER"
-
-  depends_on = [google_project_service.apis]
+  depends_on    = [google_project_service.apis]
 }
 
 # CEO Dashboard (Frontend)
@@ -59,21 +59,26 @@ resource "google_cloud_run_v2_service" "ceo_dashboard" {
     percent = 100
   }
 
-  # Allow public access to the dashboard
-  iam_bindings {
-    role = "roles/run.invoker"
-    members = [
-      "allUsers",
-    ]
-  }
-
   depends_on = [google_project_service.apis, google_artifact_registry_repository.repo]
 }
 
+# Allow unauthenticated access to the CEO Dashboard
+resource "google_cloud_run_service_iam_member" "ceo_dashboard_invoker" {
+  location = google_cloud_run_v2_service.ceo_dashboard.location
+  project  = google_cloud_run_v2_service.ceo_dashboard.project
+  service  = google_cloud_run_v2_service.ceo_dashboard.name
+  role     = "roles/run.invoker"
+  member   = "allUsers"
+}
 
 # Define all backend services
 module "app_services" {
-  source = "./modules/cloud_run_service"
+  source     = "./modules/cloud_run_service"
+  project_id = var.project_id
+  region     = var.region
+  env_suffix = var.env_suffix
+  repo_name  = google_artifact_registry_repository.repo.repository_id
+
   services = {
     "discovery-cycle-service" = {
       service_account_name = "discovery-cycle-sa"
@@ -106,11 +111,6 @@ module "app_services" {
     }
   }
 
-  project_id = var.project_id
-  region     = var.region
-  env_suffix = var.env_suffix
-  repo_name  = google_artifact_registry_repository.repo.repository_id
-
   depends_on = [
     module.iam_service_accounts,
     module.secrets,
@@ -121,22 +121,22 @@ module "app_services" {
 
 # Define all backend jobs
 module "app_jobs" {
-  source = "./modules/cloud_run_job"
-  jobs = {
-    "web-scraper-tool" = {
-      service_account_name = "discovery-cycle-sa" # Re-using SA for simplicity
-      timeout              = "3600s"
-    },
-    "play-publisher-tool" = {
-      service_account_name = "cmo-publishing-agent-sa" # Re-using SA
-      timeout              = "3600s"
-    }
-  }
-
+  source     = "./modules/cloud_run_job"
   project_id = var.project_id
   region     = var.region
   env_suffix = var.env_suffix
   repo_name  = google_artifact_registry_repository.repo.repository_id
+
+  jobs = {
+    "web-scraper-tool" = {
+      service_account_name = "discovery-cycle-sa"
+      timeout              = "3600s"
+    },
+    "play-publisher-tool" = {
+      service_account_name = "cmo-publishing-agent-sa"
+      timeout              = "3600s"
+    }
+  }
 
   depends_on = [
     module.iam_service_accounts,

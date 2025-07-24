@@ -1,7 +1,24 @@
 document.addEventListener('DOMContentLoaded', () => {
     const loadDataBtn = document.getElementById('load-data-btn');
     loadDataBtn.addEventListener('click', loadAllData);
+    
+    // --- NEW EVENT LISTENER ---
+    const startDiscoveryBtn = document.getElementById('start-discovery-btn');
+    startDiscoveryBtn.addEventListener('click', startDiscovery);
 });
+
+// --- NEW FUNCTION ---
+async function startDiscovery() {
+    if (!confirm('This will start the automated discovery pipeline. This may take several minutes. Proceed?')) return;
+    setStatus('Starting discovery cycle...', false);
+    try {
+        await apiFetch('/start-discovery', { method: 'POST' });
+        setStatus('Discovery cycle started successfully. Data will appear in the review queue once processed.', false);
+    } catch (error) {
+        setStatus('Failed to start discovery cycle.', true);
+        console.error('Error starting discovery cycle:', error);
+    }
+}
 
 function openTab(evt, tabName) {
     let i, tabcontent, tablinks;
@@ -76,7 +93,6 @@ async function fetchVettedIdeas() {
             return;
         }
         ideas.forEach(idea => {
-            // Base64 encode the SWOT analysis to safely pass it in the onclick handler
             const encodedSwot = btoa(idea.product_spec_and_swot || 'No SWOT analysis available.');
             const row = `<tr>
                 <td>${idea.idea_id}</td>
@@ -95,9 +111,7 @@ async function fetchVettedIdeas() {
     }
 }
 
-// New function to display the SWOT analysis
 function showSwot(encodedSwot) {
-    // Decode the Base64 string and show it in an alert
     const swotText = atob(encodedSwot);
     alert(swotText);
 }

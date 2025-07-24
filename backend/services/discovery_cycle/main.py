@@ -4,37 +4,39 @@ from datetime import datetime
 from flask import Flask, request, jsonify
 from shared.utils import get_logger
 from shared.gcp_client import save_to_firestore, get_from_firestore, db
+from google.cloud import run_v2
 
 app = Flask(__name__)
 logger = get_logger(__name__)
+
+PROJECT_ID = os.environ.get("GCP_PROJECT", "app-factory-v2")
+REGION = "us-central1"
 
 @app.route("/")
 def health_check():
     return "OK", 200
 
-@app.route('/start', methods=['POST'])
-def start_cycle():
-    logger.info("Discovery Cycle Service received a request to start.")
-    idea_id = f"idea-{uuid.uuid4()}"
-    app_idea_data = {
-        "idea_id": idea_id,
-        "status": "VETTING_PASSED", # This test route is now out of sync with the main flow
-        "description": "A new mobile app that helps users find and trade rare houseplants.",
-        "created_at": datetime.utcnow().isoformat()
-    }
+@app.route('/start-discovery', methods=['POST'])
+def start_discovery_job():
+    """Triggers the web-scraper-tool Cloud Run Job to start the pipeline."""
+    logger.info("Received request to start discovery cycle job.")
     try:
-        save_to_firestore("app_ideas", idea_id, app_idea_data)
+        run_client = run_v2.JobsClient()
+        job_name = f"projects/{PROJECT_ID}/locations/{REGION}/jobs/web-scraper-tool"
+        
+        request_body = run_v2.RunJobRequest(name=job_name)
+        operation = run_client.run_job(request=request_body)
+        
+        logger.info(f"Successfully triggered job 'web-scraper-tool'. Operation: {operation.metadata.name}")
+        return jsonify({"status": "success", "message": "Discovery cycle job started successfully."}), 200
     except Exception as e:
-        logger.error(f"Failed to save new app idea '{idea_id}': {e}")
-        return jsonify({"status": "error", "message": "Could not save app idea."}), 500
-    return jsonify({"status": "success", "message": f"Discovery cycle started for idea '{idea_id}'."})
+        logger.error(f"Failed to trigger 'web-scraper-tool' job: {e}")
+        return jsonify({"status": "error", "message": "Failed to start discovery job."}), 500
 
 @app.route('/vetted-ideas', methods=['GET'])
-def get_ideas_for_approval(): # Function name updated for clarity
+def get_ideas_for_approval():
     logger.info("Request received for ideas awaiting CEO approval.")
     try:
-        # --- UPDATED LINE ---
-        # Query for the new status to ensure SWOT analysis is complete before display
         ideas_ref = db.collection("app_ideas").where("status", "==", "PENDING_CEO_APPROVAL").stream()
         ideas = [idea.to_dict() for idea in ideas_ref]
         return jsonify({"ideas": ideas}), 200

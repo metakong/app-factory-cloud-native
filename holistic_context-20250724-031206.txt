@@ -1,5 +1,5 @@
 Project Context for app-factory-v2
-Generated on: 2025-07-24T03:00:26.093399
+Generated on: 2025-07-24T03:12:06.045007
 ================================================================================
 
 --- Google Cloud Build Log (Latest) ---
@@ -2828,26 +2828,24 @@ from shared.gcp_client import get_from_firestore, save_to_firestore, get_secret
 import google.generativeai as genai
 from github import Github, GithubException
 from google.cloud import storage
+from google.cloud.devtools import cloudbuild_v1
 
 app = Flask(__name__)
 logger = get_logger(__name__)
 
 # --- Constants ---
-# The GitHub user/organization where new app repositories will be created.
-METAKONG_GITHUB_USER = "metakong" 
-# The name of the secret in Secret Manager holding the GitHub Personal Access Token.
+METAKONG_GITHUB_USER = "metakong"
 GITHUB_SECRET_NAME = "github-token"
-# The name of the secret in Secret Manager holding the Gemini API Key.
 GEMINI_SECRET_NAME = "gemini-api-key"
-# The GCP project ID, retrieved from the environment.
 PROJECT_ID = os.environ.get("GCP_PROJECT", "app-factory-v2")
-# The name of the GCS bucket where final APKs will be stored.
+REGION = "us-central1"
 APK_BUCKET_NAME = f"{PROJECT_ID}-apks"
 
+# Initialize Google Cloud clients
+build_client = cloudbuild_v1.CloudBuildClient()
 
 @app.route("/")
 def health_check():
-    """Provides a simple health check endpoint."""
     return "OK", 200
 
 def generate_flutter_app_and_pipeline(spec: str, idea_id: str, feedback: str) -> dict:
@@ -2878,11 +2876,12 @@ def generate_flutter_app_and_pipeline(spec: str, idea_id: str, feedback: str) ->
         - Generate a `README.md` that briefly describes the application.
     3.  **CI/CD Pipeline (`cloudbuild.yaml`)**:
         - The pipeline must build a signed, release-ready Android APK.
+        - It must have access to secrets from Secret Manager.
         - Step 1: Use a builder to download the signing keystore (`keystore.jks`) from Secret Manager (secret name: 'flutter-keystore-jks'). Place it in `android/app/keystore.jks`.
         - Step 2: Use a builder to download the key properties (`key.properties`) from Secret Manager (secret name: 'flutter-key-properties'). Place it in `android/key.properties`.
-        - Step 3: Use a Flutter build environment (e.g., `cirrusci/flutter`) to run `flutter pub get`.
+        - Step 3: Use a Flutter build environment (e.g., `cirrusci/flutter:stable`) to run `flutter pub get`.
         - Step 4: In the same Flutter environment, run `flutter build apk --release`. The build process will automatically use the `key.properties` and `keystore.jks` to sign the APK.
-        - Step 5: Use the `gcr.io/cloud-builders/gsutil` builder to copy the final APK from `build/app/outputs/apk/release/app-release.apk` to the Cloud Storage bucket `gs://{APK_BUCKET_NAME}/{idea_id}/app-release.apk`.
+        - Step 5: Use the `gcr.io/cloud-builders/gsutil` builder to copy the final APK from `build/app/outputs/flutter-apk/app-release.apk` to the Cloud Storage bucket `gs://{APK_BUCKET_NAME}/{idea_id}/app-release.apk`.
         - Step 6: Use `gsutil` to make the uploaded APK publicly readable (`gsutil iam ch allUsers:objectViewer`).
 
     **Product Specification & SWOT**:
@@ -2897,15 +2896,11 @@ def generate_flutter_app_and_pipeline(spec: str, idea_id: str, feedback: str) ->
     """
     
     response = model.generate_content(prompt)
-    
-    # Clean the response to ensure it's valid JSON.
     cleaned_response = response.text.strip().replace("```json", "").replace("```", "")
     return json.loads(cleaned_response)
 
 def create_and_commit_to_github(token: str, repo_name: str, files: dict, description: str) -> str:
-    """
-    Creates a new GitHub repository and commits the generated files.
-    """
+    """Creates a new GitHub repository and commits the generated files."""
     logger.info(f"Connecting to GitHub to create repository: {repo_name}")
     g = Github(token)
     user = g.get_user(METAKONG_GITHUB_USER)
@@ -2913,18 +2908,48 @@ def create_and_commit_to_github(token: str, repo_name: str, files: dict, descrip
     try:
         repo = user.create_repo(name=repo_name, description=description, private=False)
         logger.info(f"Successfully created public repository: {repo.full_name}")
-
-        for filepath, content in files.items():
-            repo.create_file(path=filepath, message=f"Initial commit of {filepath}", content=content, branch="main")
-            logger.info(f"Committed file: {filepath}")
-        
-        return repo.html_url
     except GithubException as e:
         if e.status == 422 and "name already exists" in str(e.data):
             logger.warning(f"Repository '{repo_name}' already exists. Re-using.")
-            return f"https://github.com/{METAKONG_GITHUB_USER}/{repo_name}"
+            repo = user.get_repo(repo_name)
         else:
             raise
+
+    # Create a single commit with all files for efficiency
+    master_ref = repo.get_git_ref('heads/main')
+    master_sha = master_ref.object.sha
+    base_tree = repo.get_git_tree(master_sha)
+    
+    element_list = list()
+    for filepath, content in files.items():
+        element = cloudbuild_v1.GitSource(path=filepath, content=content, type='blob', mode='100644')
+        element_list.append(element)
+
+    tree = repo.create_git_tree(element_list, base_tree)
+    parent = repo.get_git_commit(master_sha)
+    commit = repo.create_git_commit("Initial commit of generated app source", tree, [parent])
+    master_ref.edit(commit.sha)
+    
+    logger.info(f"Committed all files to {repo.full_name}")
+    return repo.html_url
+
+def trigger_cloud_build(repo_name: str, idea_id: str):
+    """Creates and runs a Cloud Build trigger for the new repository."""
+    logger.info(f"Triggering Cloud Build for repository: {repo_name}")
+    
+    build = cloudbuild_v1.Build()
+    build.source = {
+        "repo_source": {
+            "project_id": PROJECT_ID,
+            "repo_name": repo_name,
+            "branch_name": "main"
+        }
+    }
+    build.timeout = {"seconds": 3600} # 1 hour timeout for the build
+    
+    operation = build_client.create_build(project_id=PROJECT_ID, build=build)
+    logger.info(f"Started build operation: {operation.metadata.build.id}")
+    return operation
 
 @app.route('/develop', methods=['POST'])
 def develop_app():
@@ -2960,7 +2985,9 @@ def develop_app():
             description=app_idea.get("description", "An AI-generated mobile application.")
         )
         
-        # Construct the public URL for the APK that will be built.
+        # This is the new, critical step to start the build
+        trigger_cloud_build(repo_name, idea_id)
+        
         apk_download_url = f"https://storage.googleapis.com/{APK_BUCKET_NAME}/{idea_id}/app-release.apk"
 
         update_data = {
@@ -2970,8 +2997,8 @@ def develop_app():
         }
         save_to_firestore("app_ideas", idea_id, update_data)
         
-        logger.info(f"Successfully developed and committed code for '{idea_id}'. Repo: {repo_url}, APK will be at: {apk_download_url}")
-        return jsonify({"status": "success", "message": f"Development complete for {idea_id}.", "repo_url": repo_url}), 200
+        logger.info(f"Successfully developed, committed, and triggered build for '{idea_id}'.")
+        return jsonify({"status": "success", "message": f"Development and build started for {idea_id}.", "repo_url": repo_url}), 200
 
     except Exception as e:
         logger.error(f"Development failed for '{idea_id}': {e}")
@@ -2992,6 +3019,7 @@ google-cloud-secret-manager==2.19.0
 google-generativeai==0.7.1
 PyGithub==2.3.0
 google-cloud-storage==2.16.0
+google-cloud-build==3.22.0
 
 ================================================================================
 

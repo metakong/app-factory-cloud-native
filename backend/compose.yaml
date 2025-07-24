@@ -12,28 +12,32 @@ services:
       - "--servers=github-tool,web-scraper-tool,play-publisher-tool"
   discovery-cycle-service:
     build:
-      context: ./services/discovery_cycle
+      context: . # Corrected context
+      dockerfile: ./services/discovery_cycle/Dockerfile # Corrected path
     image: us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/discovery-cycle-service
     x-google-run-service:
       service-account: discovery-cycle-sa@app-factory-v2.iam.gserviceaccount.com
       ingress: internal-and-cloud-load-balancing
   cso-vetting-service:
     build:
-      context: ./services/cso_vetting
+      context: . # Corrected context
+      dockerfile: ./services/cso_vetting/Dockerfile # Corrected path
     image: us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service
     x-google-run-service:
       service-account: cso-vetting-sa@app-factory-v2.iam.gserviceaccount.com
       ingress: internal-and-cloud-load-balancing
   cpo-analysis-service:
     build:
-      context: ./services/cpo_analysis
+      context: . # Corrected context
+      dockerfile: ./services/cpo_analysis/Dockerfile # Corrected path
     image: us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service
     x-google-run-service:
       service-account: cpo-analysis-sa@app-factory-v2.iam.gserviceaccount.com
       ingress: internal-and-cloud-load-balancing
   ai-developer-agent-service:
     build:
-      context: ./services/ai_developer
+      context: . # Corrected context
+      dockerfile: ./services/ai_developer/Dockerfile # Corrected path
     image: us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/ai-developer-agent-service
     x-google-run-service:
       service-account: ai-developer-agent-sa@app-factory-v2.iam.gserviceaccount.com
@@ -43,7 +47,8 @@ services:
         env: GEMINI_API_KEY
   cmo-publishing-agent:
     build:
-      context: ./services/cmo_publishing
+      context: . # Corrected context
+      dockerfile: ./services/cmo_publishing/Dockerfile # Corrected path
     image: us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent
     x-google-run-service:
       service-account: cmo-publishing-agent-sa@app-factory-v2.iam.gserviceaccount.com

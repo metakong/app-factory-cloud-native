@@ -4,14 +4,13 @@ FROM python:3.9-slim
 # Set the working directory in the container
 WORKDIR /usr/src/app
 
-# Copy the requirements file into the container
-COPY requirements.txt ./
+# Copy the shared module first
+COPY ./shared ./shared
 
-# Install the dependencies
+# Copy the service-specific code
+COPY ./services/discovery_cycle/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy the main application file into the container
-COPY main.py .
+COPY ./services/discovery_cycle/main.py .
 
 # Command to run the application using Gunicorn
 CMD ["gunicorn", "--bind", "0.0.0.0:8080", "main:app"]

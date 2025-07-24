@@ -1,5 +1,6 @@
 import os
 import json
+import traceback
 from flask import Flask, request, jsonify
 from shared.utils import get_logger
 from shared.gcp_client import get_from_firestore, save_to_firestore, get_secret
@@ -24,6 +25,7 @@ build_client = cloudbuild_v1.CloudBuildClient()
 
 @app.route("/")
 def health_check():
+    """Provides a simple health check endpoint for monitoring."""
     return "OK", 200
 
 def generate_flutter_app_and_pipeline(spec: str, idea_id: str, feedback: str) -> dict:
@@ -94,9 +96,13 @@ def create_and_commit_to_github(token: str, repo_name: str, files: dict, descrip
             raise
 
     # Create a single commit with all files for efficiency
-    master_ref = repo.get_git_ref('heads/main')
-    master_sha = master_ref.object.sha
-    base_tree = repo.get_git_tree(master_sha)
+    try:
+        master_ref = repo.get_git_ref('heads/main')
+        master_sha = master_ref.object.sha
+        base_tree = repo.get_git_tree(master_sha)
+    except GithubException: # Handle empty repo
+        master_sha = None
+        base_tree = None
     
     element_list = list()
     for filepath, content in files.items():
@@ -104,9 +110,14 @@ def create_and_commit_to_github(token: str, repo_name: str, files: dict, descrip
         element_list.append(element)
 
     tree = repo.create_git_tree(element_list, base_tree)
-    parent = repo.get_git_commit(master_sha)
-    commit = repo.create_git_commit("Initial commit of generated app source", tree, [parent])
-    master_ref.edit(commit.sha)
+    parent = repo.get_git_commit(master_sha) if master_sha else None
+    parents = [parent] if parent else []
+    commit = repo.create_git_commit("Initial commit of generated app source", tree, parents)
+    
+    if master_sha:
+        master_ref.edit(commit.sha)
+    else:
+        repo.create_git_ref(ref='refs/heads/main', sha=commit.sha)
     
     logger.info(f"Committed all files to {repo.full_name}")
     return repo.html_url
@@ -116,10 +127,11 @@ def trigger_cloud_build(repo_name: str, idea_id: str):
     logger.info(f"Triggering Cloud Build for repository: {repo_name}")
     
     build = cloudbuild_v1.Build()
+    # The source is the new GitHub repo, not the factory repo
     build.source = {
         "repo_source": {
             "project_id": PROJECT_ID,
-            "repo_name": repo_name,
+            "repo_name": repo_name, # This must match the repo on GitHub
             "branch_name": "main"
         }
     }
@@ -131,16 +143,20 @@ def trigger_cloud_build(repo_name: str, idea_id: str):
 
 @app.route('/develop', methods=['POST'])
 def develop_app():
-    data = request.get_json()
-    idea_id = data.get("idea_id")
-    ceo_feedback = data.get("feedback", "No specific feedback provided.")
-    
-    if not idea_id:
-        return jsonify({"status": "error", "message": "Missing 'idea_id'."}), 400
-
-    logger.info(f"AI Developer Agent received request for idea: {idea_id}")
-
+    """
+    Endpoint to generate, commit, and build a new application.
+    Expects JSON: { "idea_id": "string", "feedback": "string" (optional) }
+    """
+    idea_id = "" # Initialize for error logging
     try:
+        data = request.get_json()
+        if not data or "idea_id" not in data:
+            raise ValueError("Missing 'idea_id' in request data.")
+        
+        idea_id = data["idea_id"]
+        ceo_feedback = data.get("feedback", "No specific feedback provided.")
+        logger.info(f"AI Developer Agent received request for idea: {idea_id}")
+
         app_idea = get_from_firestore("app_ideas", idea_id)
         if not app_idea or "product_spec_and_swot" not in app_idea:
             raise ValueError("Product specification not found in Firestore document.")
@@ -163,7 +179,6 @@ def develop_app():
             description=app_idea.get("description", "An AI-generated mobile application.")
         )
         
-        # This is the new, critical step to start the build
         trigger_cloud_build(repo_name, idea_id)
         
         apk_download_url = f"https://storage.googleapis.com/{APK_BUCKET_NAME}/{idea_id}/app-release.apk"
@@ -171,15 +186,16 @@ def develop_app():
         update_data = {
             "status": "PENDING_CEO_TESTING",
             "repo_url": repo_url,
-            "apk_download_url": apk_download_url
+            "apk_download_url": apk_download_url,
+            "error": None # Clear any previous errors
         }
         save_to_firestore("app_ideas", idea_id, update_data)
         
-        logger.info(f"Successfully developed, committed, and triggered build for '{idea_id}'.")
+        logger.info(f"Successfully developed and committed code for '{idea_id}'. Repo at: {repo_url}")
         return jsonify({"status": "success", "message": f"Development and build started for {idea_id}.", "repo_url": repo_url}), 200
 
     except Exception as e:
-        logger.error(f"Development failed for '{idea_id}': {e}")
+        logger.exception(f"Development failed for '{idea_id}'. Stacktrace: {traceback.format_exc()}")
         save_to_firestore("app_ideas", idea_id, {"status": "DEVELOPMENT_FAILED", "error": str(e)})
         return jsonify({"status": "error", "message": f"Development failed: {e}"}), 500
 

@@ -1,4 +1,5 @@
 import os
+import traceback
 from flask import Flask, request, jsonify
 from shared.utils import get_logger
 from shared.gcp_client import get_from_firestore, save_to_firestore, make_internal_request
@@ -7,30 +8,38 @@ import google.generativeai as genai
 app = Flask(__name__)
 logger = get_logger(__name__)
 
+# --- Configuration ---
 AI_DEVELOPER_AGENT_SERVICE_URL = os.environ.get("AI_DEVELOPER_AGENT_SERVICE_URL")
-
 genai.configure()
 
 @app.route("/")
 def health_check():
+    """Provides a simple health check endpoint for monitoring."""
     return "OK", 200
 
 @app.route('/analyze', methods=['POST'])
 def analyze_idea():
-    logger.info("CPO Analysis Service received a request.")
-    data = request.get_json()
-    idea_id = data.get("idea_id")
-
-    if not idea_id:
-        return jsonify({"status": "error", "message": "Missing 'idea_id' in request body."}), 400
-
-    logger.info(f"Starting product analysis for app idea: {idea_id}")
-
+    """
+    Receives a vetted idea, generates a product spec and SWOT analysis using the Gemini API,
+    and updates its status to 'PENDING_CEO_APPROVAL'.
+    Expects JSON: { "idea_id": "string" }
+    """
+    idea_id = "" # Initialize for error logging
     try:
+        data = request.get_json()
+        # --- INPUT VALIDATION ---
+        if not data or "idea_id" not in data:
+            logger.error("Request body missing 'idea_id'.")
+            return jsonify({"status": "error", "message": "Missing 'idea_id' in request body."}), 400
+
+        idea_id = data["idea_id"]
+        logger.info(f"Starting product analysis for app idea: {idea_id}")
+
         app_idea = get_from_firestore("app_ideas", idea_id)
         if not app_idea:
             return jsonify({"status": "error", "message": f"App idea '{idea_id}' not found."}), 404
 
+        # --- CORE LOGIC: Generate Product Spec and SWOT Analysis ---
         logger.info(f"Generating product spec and SWOT for: {app_idea.get('description')}")
         model = genai.GenerativeModel('gemini-pro')
         
@@ -59,20 +68,18 @@ def analyze_idea():
         response = model.generate_content(prompt)
         product_spec_and_swot = response.text
 
-        # --- UPDATED LINE ---
-        # Set status to PENDING_CEO_APPROVAL to make it visible on the dashboard
         updated_data = {
             "status": "PENDING_CEO_APPROVAL",
-            "product_spec_and_swot": product_spec_and_swot
+            "product_spec_and_swot": product_spec_and_swot,
+            "error": None # Clear any previous errors
         }
         save_to_firestore("app_ideas", idea_id, updated_data)
         logger.info(f"Successfully generated spec and SWOT for '{idea_id}'. Status set to PENDING_CEO_APPROVAL.")
         
-        # This service no longer triggers the next step. The CEO's approval will.
         return jsonify({"status": "success", "message": f"Analysis complete for '{idea_id}'. Ready for CEO review."})
 
     except Exception as e:
-        logger.error(f"An error occurred during analysis for '{idea_id}': {e}")
+        logger.exception(f"An error occurred during analysis for '{idea_id}'. Stacktrace: {traceback.format_exc()}")
         save_to_firestore("app_ideas", idea_id, {"status": "ANALYSIS_FAILED", "error": str(e)})
         return jsonify({"status": "error", "message": "An internal error occurred."}), 500
 

@@ -1,10 +1,16 @@
 steps:
-  # Build and push all container images
+  # Step 0: Build all container images using Docker Compose
   - name: 'gcr.io/cloud-builders/docker'
-    id: 'Build and Push Images'
-    args: ['compose', '-f', 'backend/compose.yaml', 'push']
+    id: 'Build Images'
+    args: ['compose', '-f', 'backend/compose.yaml', 'build']
 
-  # Initialize Terraform in the 'terraform' subdirectory
+  # Step 1: Push the built images to Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'Push Images'
+    args: ['compose', '-f', 'backend/compose.yaml', 'push']
+    waitFor: ['Build Images']
+
+  # Step 2: Initialize Terraform in the 'terraform' subdirectory
   - name: 'hashicorp/terraform:1.5.7'
     id: 'Terraform Init'
     entrypoint: 'terraform'
@@ -14,9 +20,9 @@ steps:
       - '-reconfigure'
       - '-backend-config=bucket=${_TERRAFORM_STATE_BUCKET}'
       - '-backend-config=prefix=terraform/state/${_ENV_SUFFIX}'
-    waitFor: ['Build and Push Images']
+    waitFor: ['Push Images']
 
-  # Terraform Plan, referencing the correct var-file path from within the terraform directory
+  # Step 3: Terraform Plan
   - name: 'hashicorp/terraform:1.5.7'
     id: 'Terraform Plan'
     entrypoint: 'terraform'
@@ -27,7 +33,7 @@ steps:
       - '-var-file=environments/${_ENV_SUFFIX}.tfvars'
     waitFor: ['Terraform Init']
 
-  # Manual Approval Step for Production Environment
+  # Step 4: Manual Approval for Production Environment
   - name: 'gcr.io/cloud-builders/gcloud'
     id: 'Manual Approval'
     entrypoint: 'bash'
@@ -42,7 +48,7 @@ steps:
     waitFor:
       - 'Terraform Plan'
 
-  # Terraform Apply, referencing the plan file within the terraform directory
+  # Step 5: Terraform Apply
   - name: 'hashicorp/terraform:1.5.7'
     id: 'Terraform Apply'
     entrypoint: 'terraform'

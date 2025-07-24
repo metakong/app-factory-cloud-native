@@ -13,8 +13,10 @@ venv/
 *.tfstate
 *.tfstate.*
 crash.log
-*.tfvars
 *.tfplan
+# IGNORE PRODUCTION and AUTO VARS, but allow dev
+*prod.tfvars
+*.auto.tfvars
 
 # Mac
 .DS_Store

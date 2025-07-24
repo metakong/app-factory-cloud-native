@@ -1,16 +1,31 @@
 steps:
-# Step 1: Build all container images from the backend directory.
+# Step 1: Install the required 'run-compose' component.
+# This directly addresses the error diagnosed from the build log.
+- name: 'gcr.io/google.com/cloudsdktool/google-cloud-cli'
+  entrypoint: 'bash'
+  args:
+    - '-c'
+    - 'apt-get update && apt-get install -y google-cloud-cli-run-compose'
+  id: 'Install gcloud components'
+
+# Step 2: Build all container images from the backend directory.
 - name: 'gcr.io/cloud-builders/docker'
   args: ['compose', '-f', 'backend/compose.yaml', 'build']
+  id: 'Build Images'
+  waitFor: ['Install gcloud components'] # Ensures installation is complete first
 
-# Step 2: Push the built images to Artifact Registry.
+# Step 3: Push the built images to Artifact Registry.
 - name: 'gcr.io/cloud-builders/docker'
   args: ['compose', '-f', 'backend/compose.yaml', 'push']
+  id: 'Push Images'
+  waitFor: ['Build Images'] # Ensures images are built first
 
-# Step 3: Execute the deployment script, passing the environment suffix from the trigger.
+# Step 4: Execute the deployment script to deploy all services and jobs.
 - name: 'gcr.io/google.com/cloudsdktool/google-cloud-cli'
   entrypoint: 'bash'
   args: ['./deploy.sh', '${_ENV_SUFFIX}']
+  id: 'Deploy Services'
+  waitFor: ['Push Images'] # Ensures images are pushed first
 
 substitutions:
   _ENV_SUFFIX: dev # Default to 'dev' unless overridden by the trigger

@@ -1,5 +1,5 @@
 Project Context for app-factory-v2
-Generated on: 2025-07-24T04:05:43.058972
+Generated on: 2025-07-24T05:29:12.681972
 ================================================================================
 
 --- Google Cloud Build Log (Latest) ---
@@ -226,19 +226,39 @@ options:
 --- File: deploy.sh ---
 
 #!/bin/bash
-set -e # Exit immediately if a command exits with a non-zero status.
+set -euo pipefail # Exit on error, unset variable, pipe failure
 
+# --- Configuration ---
 ENV_SUFFIX="$1"
 REGION="us-central1"
 PROJECT_ID="app-factory-v2"
 REPO="app-factory-repo"
 
+# --- Check for required arguments ---
+if [ -z "$ENV_SUFFIX" ]; then
+  echo "Error: Environment suffix is required. Usage: ./deploy.sh <dev|prod>"
+  exit 1
+fi
+
+# --- Construct service image URLs ---
+CEO_DASHBOARD_IMAGE="us-central1-docker.pkg.dev/$PROJECT_ID/$REPO/ceo-dashboard"
+CSO_VETTING_SERVICE_IMAGE="us-central1-docker.pkg.dev/$PROJECT_ID/$REPO/cso-vetting-service"
+AI_DEVELOPER_AGENT_SERVICE_IMAGE="us-central1-docker.pkg.dev/$PROJECT_ID/$REPO/ai-developer-agent-service"
+CMO_PUBLISHING_AGENT_SERVICE_IMAGE="us-central1-docker.pkg.dev/$PROJECT_ID/$REPO/cmo-publishing-agent"
+CPO_ANALYSIS_SERVICE_IMAGE="us-central1-docker.pkg.dev/$PROJECT_ID/$REPO/cpo-analysis-service"
+DISCOVERY_CYCLE_SERVICE_IMAGE="us-central1-docker.pkg.dev/$PROJECT_ID/$REPO/discovery-cycle-service"
+WEB_SCRAPER_TOOL_IMAGE="us-central1-docker.pkg.dev/$PROJECT_ID/$REPO/web-scraper-tool"
+PLAY_PUBLISHER_TOOL_IMAGE="us-central1-docker.pkg.dev/$PROJECT_ID/$REPO/play-publisher-tool"
+
+# --- Construct environment variables ---
+# All backend services need to know the GCP_PROJECT for the gcp_client.
+ENV_VARS="GCP_PROJECT=$PROJECT_ID"
+
 echo "--- Starting Deployment for environment: $ENV_SUFFIX ---"
-ENV_VARS="GCP_PROJECT=$PROJECT_ID,AI_DEVELOPER_AGENT_SERVICE_URL=https://ai-developer-agent-service-${ENV_SUFFIX}-515413116650.us-central1.run.app,CMO_PUBLISHING_AGENT_SERVICE_URL=https://cmo-publishing-agent-${ENV_SUFFIX}-515413116650.us-central1.run.app,CPO_ANALYSIS_SERVICE_URL=https://cpo-analysis-service-${ENV_SUFFIX}-515413116650.us-central1.run.app,DISCOVERY_CYCLE_SERVICE_URL=https://discovery-cycle-service-${ENV_SUFFIX}-515413116650.us-central1.run.app,CSO_VETTING_SERVICE_URL=https://cso-vetting-service-${ENV_SUFFIX}-515413116650.us-central1.run.app"
 
 echo "Deploying CEO Dashboard..."
 gcloud run deploy ceo-dashboard \
-    --image="us-central1-docker.pkg.dev/$PROJECT_ID/$REPO/ceo-dashboard" \
+    --image="$CEO_DASHBOARD_IMAGE" \
     --region="$REGION" \
     --platform=managed \
     --ingress=all \
@@ -247,19 +267,17 @@ gcloud run deploy ceo-dashboard \
     --quiet
 
 echo "Deploying internal services..."
-# These services are only called by other services and remain internal
-gcloud run deploy cso-vetting-service --image="us-central1-docker.pkg.dev/$PROJECT_ID/$REPO/cso-vetting-service" --region="$REGION" --platform=managed --ingress=internal --set-env-vars="$ENV_VARS" --quiet
-gcloud run deploy ai-developer-agent-service --image="us-central1-docker.pkg.dev/$PROJECT_ID/$REPO/ai-developer-agent-service" --region="$REGION" --platform=managed --ingress=all --set-env-vars="$ENV_VARS" --quiet
-gcloud run deploy cmo-publishing-agent --image="us-central1-docker.pkg.dev/$PROJECT_ID/$REPO/cmo-publishing-agent" --region="$REGION" --platform=managed --ingress=all --set-env-vars="$ENV_VARS" --quiet
-gcloud run deploy cpo-analysis-service --image="us-central1-docker.pkg.dev/$PROJECT_ID/$REPO/cpo-analysis-service" --region="$REGION" --platform=managed --ingress=all --set-env-vars="$ENV_VARS" --quiet
+gcloud run deploy cso-vetting-service --image="$CSO_VETTING_SERVICE_IMAGE" --region="$REGION" --platform=managed --ingress=internal --set-env-vars="$ENV_VARS" --quiet
+gcloud run deploy ai-developer-agent-service --image="$AI_DEVELOPER_AGENT_SERVICE_IMAGE" --region="$REGION" --platform=managed --ingress=all --set-env-vars="$ENV_VARS" --quiet
+gcloud run deploy cmo-publishing-agent --image="$CMO_PUBLISHING_AGENT_SERVICE_IMAGE" --region="$REGION" --platform=managed --ingress=all --set-env-vars="$ENV_VARS" --quiet
+gcloud run deploy cpo-analysis-service --image="$CPO_ANALYSIS_SERVICE_IMAGE" --region="$REGION" --platform=managed --ingress=all --set-env-vars="$ENV_VARS" --quiet
 
 echo "Deploying gateway-accessible service..."
-# This service is called by the API Gateway and MUST allow all traffic, protected by IAM.
-gcloud run deploy discovery-cycle-service --image="us-central1-docker.pkg.dev/$PROJECT_ID/$REPO/discovery-cycle-service" --region="$REGION" --platform=managed --ingress=all --set-env-vars="$ENV_VARS" --quiet
+gcloud run deploy discovery-cycle-service --image="$DISCOVERY_CYCLE_SERVICE_IMAGE" --region="$REGION" --platform=managed --ingress=all --set-env-vars="$ENV_VARS" --quiet
 
 echo "Deploying jobs..."
-gcloud run jobs deploy web-scraper-tool --image="us-central1-docker.pkg.dev/$PROJECT_ID/$REPO/web-scraper-tool" --region="$REGION" --quiet
-gcloud run jobs deploy play-publisher-tool --image="us-central1-docker.pkg.dev/$PROJECT_ID/$REPO/play-publisher-tool" --region="$REGION" --quiet
+gcloud run jobs deploy web-scraper-tool --image="$WEB_SCRAPER_TOOL_IMAGE" --region="$REGION" --quiet
+gcloud run jobs deploy play-publisher-tool --image="$PLAY_PUBLISHER_TOOL_IMAGE" --region="$REGION" --quiet
 
 echo "--- Deployment finished successfully. ---"
 
@@ -532,11 +550,11 @@ echo "--- Deployment finished successfully. ---"
 
 #!/bin/bash
 # This script sets up the necessary IAM permissions for the App Factory services.
-set -e # Exit immediately if a command exits with a non-zero status.
-set -u # Treat unset variables as an error.
+set -euo pipefail # Exit on error, unset variable, pipe failure
 
 PROJECT_ID="app-factory-v2"
 REGION="us-central1"
+PROJECT_NUMBER=$(gcloud projects describe "$PROJECT_ID" --format="value(projectNumber)")
 
 echo "Enabling necessary Google Cloud APIs for project: $PROJECT_ID..."
 gcloud services enable \
@@ -547,32 +565,33 @@ gcloud services enable \
     firestore.googleapis.com \
     artifactregistry.googleapis.com \
     aiplatform.googleapis.com \
-    --project=$PROJECT_ID
+    --project="$PROJECT_ID"
 
 echo "Creating Artifact Registry repository 'app-factory-repo'..."
 gcloud artifacts repositories create app-factory-repo \
     --repository-format=docker \
-    --location=$REGION \
+    --location="$REGION" \
     --description="Docker repository for App Factory V2" \
-    --project=$PROJECT_ID || echo "Repository already exists."
+    --project="$PROJECT_ID" || echo "Repository 'app-factory-repo' already exists."
 
-echo "Granting Cloud Build service account permissions to deploy to Cloud Run and push to Artifact Registry..."
-PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format="value(projectNumber)")
+echo "Granting Cloud Build service account permissions..."
 CLOUD_BUILD_SA="$PROJECT_NUMBER@cloudbuild.gserviceaccount.com"
 
-gcloud projects add-iam-policy-binding $PROJECT_ID \
+gcloud projects add-iam-policy-binding "$PROJECT_ID" \
     --member="serviceAccount:$CLOUD_BUILD_SA" \
-    --role="roles/run.admin"
-gcloud projects add-iam-policy-binding $PROJECT_ID \
+    --role="roles/run.admin" \
+    --condition=None
+gcloud projects add-iam-policy-binding "$PROJECT_ID" \
     --member="serviceAccount:$CLOUD_BUILD_SA" \
-    --role="roles/iam.serviceAccountUser"
-gcloud projects add-iam-policy-binding $PROJECT_ID \
+    --role="roles/iam.serviceAccountUser" \
+    --condition=None
+gcloud projects add-iam-policy-binding "$PROJECT_ID" \
     --member="serviceAccount:$CLOUD_BUILD_SA" \
-    --role="roles/artifactregistry.writer"
+    --role="roles/artifactregistry.writer" \
+    --condition=None
 
 echo "Configuring IAM permissions for each microservice..."
 
-# Define service accounts from compose.yaml
 SERVICE_ACCOUNTS=(
     "discovery-cycle-sa"
     "cso-vetting-sa"
@@ -584,30 +603,48 @@ SERVICE_ACCOUNTS=(
 
 echo "Creating service accounts if they do not exist..."
 for SA_NAME in "${SERVICE_ACCOUNTS[@]}"; do
-    gcloud iam service-accounts create $SA_NAME \
+    gcloud iam service-accounts create "$SA_NAME" \
         --display-name="$SA_NAME" \
-        --project=$PROJECT_ID || echo "Service account $SA_NAME already exists."
+        --project="$PROJECT_ID" || echo "Service account $SA_NAME already exists."
 done
 
 # Grant common permissions
 for SA_NAME in "${SERVICE_ACCOUNTS[@]}"; do
     SA_EMAIL="$SA_NAME@$PROJECT_ID.iam.gserviceaccount.com"
-    echo "Granting permissions to $SA_EMAIL..."
+    echo "Granting common permissions to $SA_EMAIL..."
 
     # Permission to access secrets
-    gcloud projects add-iam-policy-binding $PROJECT_ID --member="serviceAccount:$SA_EMAIL" --role="roles/secretmanager.secretAccessor" --condition=None
+    gcloud projects add-iam-policy-binding "$PROJECT_ID" --member="serviceAccount:$SA_EMAIL" --role="roles/secretmanager.secretAccessor" --condition=None
     # Permission to read/write to Firestore
-    gcloud projects add-iam-policy-binding $PROJECT_ID --member="serviceAccount:$SA_EMAIL" --role="roles/datastore.user" --condition=None
+    gcloud projects add-iam-policy-binding "$PROJECT_ID" --member="serviceAccount:$SA_EMAIL" --role="roles/datastore.user" --condition=None
 done
 
 # Grant specific permissions for services that use the Gemini API
 echo "Granting AI Platform User role to CPO and AI Developer services..."
-gcloud projects add-iam-policy-binding $PROJECT_ID \
+gcloud projects add-iam-policy-binding "$PROJECT_ID" \
     --member="serviceAccount:cpo-analysis-sa@$PROJECT_ID.iam.gserviceaccount.com" \
     --role="roles/aiplatform.user" --condition=None
-gcloud projects add-iam-policy-binding $PROJECT_ID \
+gcloud projects add-iam-policy-binding "$PROJECT_ID" \
     --member="serviceAccount:ai-developer-agent-sa@$PROJECT_ID.iam.gserviceaccount.com" \
     --role="roles/aiplatform.user" --condition=None
+
+# Grant specific permissions for services that trigger other services/jobs
+echo "Granting invoker and runner permissions..."
+gcloud run jobs add-iam-policy-binding web-scraper-tool \
+    --region="$REGION" \
+    --project="$PROJECT_ID" \
+    --member="serviceAccount:discovery-cycle-sa@$PROJECT_ID.iam.gserviceaccount.com" \
+    --role="roles/run.invoker"
+
+gcloud run jobs add-iam-policy-binding play-publisher-tool \
+    --region="$REGION" \
+    --project="$PROJECT_ID" \
+    --member="serviceAccount:cmo-publishing-agent-sa@$PROJECT_ID.iam.gserviceaccount.com" \
+    --role="roles/run.invoker"
+
+gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+    --member="serviceAccount:ai-developer-agent-sa@$PROJECT_ID.iam.gserviceaccount.com" \
+    --role="roles/cloudbuild.builds.editor" --condition=None
 
 echo "IAM setup complete."
 
@@ -2567,6 +2604,7 @@ CMD ["gunicorn", "--bind", "0.0.0.0:8080", "main:app"]
 
 import os
 import uuid
+import traceback
 from datetime import datetime
 from flask import Flask, request, jsonify
 from shared.utils import get_logger
@@ -2576,47 +2614,59 @@ from google.cloud import run_v2
 app = Flask(__name__)
 logger = get_logger(__name__)
 
+# --- Configuration ---
 PROJECT_ID = os.environ.get("GCP_PROJECT", "app-factory-v2")
 REGION = "us-central1"
+WEB_SCRAPER_JOB_NAME = f"projects/{PROJECT_ID}/locations/{REGION}/jobs/web-scraper-tool"
 
 @app.route("/")
 def health_check():
+    """Provides a simple health check endpoint for monitoring."""
     return "OK", 200
 
 @app.route('/start-discovery', methods=['POST'])
 def start_discovery_job():
-    """Triggers the web-scraper-tool Cloud Run Job to start the pipeline."""
+    """Triggers the web-scraper-tool Cloud Run Job to start the entire pipeline."""
     logger.info("Received request to start discovery cycle job.")
     try:
         run_client = run_v2.JobsClient()
-        job_name = f"projects/{PROJECT_ID}/locations/{REGION}/jobs/web-scraper-tool"
-        
-        request_body = run_v2.RunJobRequest(name=job_name)
+        request_body = run_v2.RunJobRequest(name=WEB_SCRAPER_JOB_NAME)
         operation = run_client.run_job(request=request_body)
         
-        logger.info(f"Successfully triggered job 'web-scraper-tool'. Operation: {operation.metadata.name}")
+        logger.info(f"Successfully triggered job '{WEB_SCRAPER_JOB_NAME}'. Operation: {operation.metadata.name}")
         return jsonify({"status": "success", "message": "Discovery cycle job started successfully."}), 200
     except Exception as e:
-        logger.error(f"Failed to trigger 'web-scraper-tool' job: {e}")
+        logger.exception(f"Failed to trigger 'web-scraper-tool' job. Stacktrace: {traceback.format_exc()}")
         return jsonify({"status": "error", "message": "Failed to start discovery job."}), 500
 
 @app.route('/vetted-ideas', methods=['GET'])
 def get_ideas_for_approval():
+    """Returns a list of app ideas that have passed automated vetting and are ready for CEO approval."""
     logger.info("Request received for ideas awaiting CEO approval.")
     try:
         ideas_ref = db.collection("app_ideas").where("status", "==", "PENDING_CEO_APPROVAL").stream()
         ideas = [idea.to_dict() for idea in ideas_ref]
         return jsonify({"ideas": ideas}), 200
     except Exception as e:
-        logger.error(f"Failed to fetch ideas for approval from Firestore: {e}")
+        logger.exception(f"Failed to fetch ideas for approval. Stacktrace: {traceback.format_exc()}")
         return jsonify({"status": "error", "message": "Failed to retrieve app ideas."}), 500
 
 @app.route('/reject-idea', methods=['POST'])
 def reject_idea():
-    data = request.get_json()
-    idea_id = data.get("idea_id")
-    logger.info(f"Received CEO rejection for idea: {idea_id}")
+    """
+    Handles the CEO's rejection of an app idea.
+    It updates the idea's status and logs it to the permanent 'rejected_app_ideas' collection.
+    """
+    idea_id = "" # Initialize for error logging
     try:
+        data = request.get_json()
+        if not data or "idea_id" not in data:
+            logger.error("Request body missing 'idea_id'.")
+            return jsonify({"status": "error", "message": "Missing 'idea_id' in request body."}), 400
+
+        idea_id = data["idea_id"]
+        logger.info(f"Received CEO rejection for idea: {idea_id}")
+        
         app_idea = get_from_firestore("app_ideas", idea_id)
         if not app_idea:
             logger.error(f"Could not find idea '{idea_id}' to reject.")
@@ -2636,7 +2686,7 @@ def reject_idea():
         
         return jsonify({"status": "success", "message": f"Idea {idea_id} rejected."}), 200
     except Exception as e:
-        logger.error(f"Failed to reject idea '{idea_id}': {e}")
+        logger.exception(f"Failed to reject idea '{idea_id}'. Stacktrace: {traceback.format_exc()}")
         return jsonify({"status": "error", "message": "Failed to reject idea."}), 500
 
 if __name__ == "__main__":
@@ -2837,6 +2887,7 @@ CMD ["gunicorn", "--bind", "0.0.0.0:8080", "main:app"]
 
 import os
 import json
+import traceback
 from flask import Flask, request, jsonify
 from shared.utils import get_logger
 from shared.gcp_client import get_from_firestore, save_to_firestore, get_secret
@@ -2861,6 +2912,7 @@ build_client = cloudbuild_v1.CloudBuildClient()
 
 @app.route("/")
 def health_check():
+    """Provides a simple health check endpoint for monitoring."""
     return "OK", 200
 
 def generate_flutter_app_and_pipeline(spec: str, idea_id: str, feedback: str) -> dict:
@@ -2931,9 +2983,13 @@ def create_and_commit_to_github(token: str, repo_name: str, files: dict, descrip
             raise
 
     # Create a single commit with all files for efficiency
-    master_ref = repo.get_git_ref('heads/main')
-    master_sha = master_ref.object.sha
-    base_tree = repo.get_git_tree(master_sha)
+    try:
+        master_ref = repo.get_git_ref('heads/main')
+        master_sha = master_ref.object.sha
+        base_tree = repo.get_git_tree(master_sha)
+    except GithubException: # Handle empty repo
+        master_sha = None
+        base_tree = None
     
     element_list = list()
     for filepath, content in files.items():
@@ -2941,9 +2997,14 @@ def create_and_commit_to_github(token: str, repo_name: str, files: dict, descrip
         element_list.append(element)
 
     tree = repo.create_git_tree(element_list, base_tree)
-    parent = repo.get_git_commit(master_sha)
-    commit = repo.create_git_commit("Initial commit of generated app source", tree, [parent])
-    master_ref.edit(commit.sha)
+    parent = repo.get_git_commit(master_sha) if master_sha else None
+    parents = [parent] if parent else []
+    commit = repo.create_git_commit("Initial commit of generated app source", tree, parents)
+    
+    if master_sha:
+        master_ref.edit(commit.sha)
+    else:
+        repo.create_git_ref(ref='refs/heads/main', sha=commit.sha)
     
     logger.info(f"Committed all files to {repo.full_name}")
     return repo.html_url
@@ -2953,10 +3014,11 @@ def trigger_cloud_build(repo_name: str, idea_id: str):
     logger.info(f"Triggering Cloud Build for repository: {repo_name}")
     
     build = cloudbuild_v1.Build()
+    # The source is the new GitHub repo, not the factory repo
     build.source = {
         "repo_source": {
             "project_id": PROJECT_ID,
-            "repo_name": repo_name,
+            "repo_name": repo_name, # This must match the repo on GitHub
             "branch_name": "main"
         }
     }
@@ -2968,16 +3030,20 @@ def trigger_cloud_build(repo_name: str, idea_id: str):
 
 @app.route('/develop', methods=['POST'])
 def develop_app():
-    data = request.get_json()
-    idea_id = data.get("idea_id")
-    ceo_feedback = data.get("feedback", "No specific feedback provided.")
-    
-    if not idea_id:
-        return jsonify({"status": "error", "message": "Missing 'idea_id'."}), 400
-
-    logger.info(f"AI Developer Agent received request for idea: {idea_id}")
-
+    """
+    Endpoint to generate, commit, and build a new application.
+    Expects JSON: { "idea_id": "string", "feedback": "string" (optional) }
+    """
+    idea_id = "" # Initialize for error logging
     try:
+        data = request.get_json()
+        if not data or "idea_id" not in data:
+            raise ValueError("Missing 'idea_id' in request data.")
+        
+        idea_id = data["idea_id"]
+        ceo_feedback = data.get("feedback", "No specific feedback provided.")
+        logger.info(f"AI Developer Agent received request for idea: {idea_id}")
+
         app_idea = get_from_firestore("app_ideas", idea_id)
         if not app_idea or "product_spec_and_swot" not in app_idea:
             raise ValueError("Product specification not found in Firestore document.")
@@ -3000,7 +3066,6 @@ def develop_app():
             description=app_idea.get("description", "An AI-generated mobile application.")
         )
         
-        # This is the new, critical step to start the build
         trigger_cloud_build(repo_name, idea_id)
         
         apk_download_url = f"https://storage.googleapis.com/{APK_BUCKET_NAME}/{idea_id}/app-release.apk"
@@ -3008,15 +3073,16 @@ def develop_app():
         update_data = {
             "status": "PENDING_CEO_TESTING",
             "repo_url": repo_url,
-            "apk_download_url": apk_download_url
+            "apk_download_url": apk_download_url,
+            "error": None # Clear any previous errors
         }
         save_to_firestore("app_ideas", idea_id, update_data)
         
-        logger.info(f"Successfully developed, committed, and triggered build for '{idea_id}'.")
+        logger.info(f"Successfully developed and committed code for '{idea_id}'. Repo at: {repo_url}")
         return jsonify({"status": "success", "message": f"Development and build started for {idea_id}.", "repo_url": repo_url}), 200
 
     except Exception as e:
-        logger.error(f"Development failed for '{idea_id}': {e}")
+        logger.exception(f"Development failed for '{idea_id}'. Stacktrace: {traceback.format_exc()}")
         save_to_firestore("app_ideas", idea_id, {"status": "DEVELOPMENT_FAILED", "error": str(e)})
         return jsonify({"status": "error", "message": f"Development failed: {e}"}), 500
 
@@ -3063,6 +3129,7 @@ CMD ["gunicorn", "--bind", "0.0.0.0:8080", "main:app"]
 --- File: backend/services/cpo_analysis/main.py ---
 
 import os
+import traceback
 from flask import Flask, request, jsonify
 from shared.utils import get_logger
 from shared.gcp_client import get_from_firestore, save_to_firestore, make_internal_request
@@ -3071,30 +3138,38 @@ import google.generativeai as genai
 app = Flask(__name__)
 logger = get_logger(__name__)
 
+# --- Configuration ---
 AI_DEVELOPER_AGENT_SERVICE_URL = os.environ.get("AI_DEVELOPER_AGENT_SERVICE_URL")
-
 genai.configure()
 
 @app.route("/")
 def health_check():
+    """Provides a simple health check endpoint for monitoring."""
     return "OK", 200
 
 @app.route('/analyze', methods=['POST'])
 def analyze_idea():
-    logger.info("CPO Analysis Service received a request.")
-    data = request.get_json()
-    idea_id = data.get("idea_id")
-
-    if not idea_id:
-        return jsonify({"status": "error", "message": "Missing 'idea_id' in request body."}), 400
-
-    logger.info(f"Starting product analysis for app idea: {idea_id}")
-
+    """
+    Receives a vetted idea, generates a product spec and SWOT analysis using the Gemini API,
+    and updates its status to 'PENDING_CEO_APPROVAL'.
+    Expects JSON: { "idea_id": "string" }
+    """
+    idea_id = "" # Initialize for error logging
     try:
+        data = request.get_json()
+        # --- INPUT VALIDATION ---
+        if not data or "idea_id" not in data:
+            logger.error("Request body missing 'idea_id'.")
+            return jsonify({"status": "error", "message": "Missing 'idea_id' in request body."}), 400
+
+        idea_id = data["idea_id"]
+        logger.info(f"Starting product analysis for app idea: {idea_id}")
+
         app_idea = get_from_firestore("app_ideas", idea_id)
         if not app_idea:
             return jsonify({"status": "error", "message": f"App idea '{idea_id}' not found."}), 404
 
+        # --- CORE LOGIC: Generate Product Spec and SWOT Analysis ---
         logger.info(f"Generating product spec and SWOT for: {app_idea.get('description')}")
         model = genai.GenerativeModel('gemini-pro')
         
@@ -3123,20 +3198,18 @@ def analyze_idea():
         response = model.generate_content(prompt)
         product_spec_and_swot = response.text
 
-        # --- UPDATED LINE ---
-        # Set status to PENDING_CEO_APPROVAL to make it visible on the dashboard
         updated_data = {
             "status": "PENDING_CEO_APPROVAL",
-            "product_spec_and_swot": product_spec_and_swot
+            "product_spec_and_swot": product_spec_and_swot,
+            "error": None # Clear any previous errors
         }
         save_to_firestore("app_ideas", idea_id, updated_data)
         logger.info(f"Successfully generated spec and SWOT for '{idea_id}'. Status set to PENDING_CEO_APPROVAL.")
         
-        # This service no longer triggers the next step. The CEO's approval will.
         return jsonify({"status": "success", "message": f"Analysis complete for '{idea_id}'. Ready for CEO review."})
 
     except Exception as e:
-        logger.error(f"An error occurred during analysis for '{idea_id}': {e}")
+        logger.exception(f"An error occurred during analysis for '{idea_id}'. Stacktrace: {traceback.format_exc()}")
         save_to_firestore("app_ideas", idea_id, {"status": "ANALYSIS_FAILED", "error": str(e)})
         return jsonify({"status": "error", "message": "An internal error occurred."}), 500
 
@@ -3180,6 +3253,7 @@ CMD ["gunicorn", "--bind", "0.0.0.0:8080", "main:app"]
 --- File: backend/services/cmo_publishing/main.py ---
 
 import os
+import traceback
 from flask import Flask, request, jsonify
 from shared.utils import get_logger
 from shared.gcp_client import get_from_firestore, save_to_firestore
@@ -3188,41 +3262,44 @@ from google.cloud import run_v2
 app = Flask(__name__)
 logger = get_logger(__name__)
 
+# --- Configuration ---
 PROJECT_ID = os.environ.get("GCP_PROJECT", "app-factory-v2")
 REGION = "us-central1"
+PUBLISHER_JOB_NAME = f"projects/{PROJECT_ID}/locations/{REGION}/jobs/play-publisher-tool"
+
 
 @app.route("/")
 def health_check():
-    """Provides a simple health check endpoint."""
+    """Provides a simple health check endpoint for monitoring."""
     return "OK", 200
 
 @app.route('/publish', methods=['POST'])
 def publish_app():
     """
     Receives a completed app and triggers the play-publisher-tool Cloud Run Job.
+    Expects JSON: { "idea_id": "string" }
     """
-    logger.info("CMO Publishing Agent received a request.")
-    data = request.get_json()
-
-    if not data or "idea_id" not in data:
-        logger.warning("Request missing 'idea_id'.")
-        return jsonify({"status": "error", "message": "Missing 'idea_id' in request body."}), 400
-
-    idea_id = data["idea_id"]
-    logger.info(f"Starting publishing process for app idea: {idea_id}")
-
+    idea_id = "" # Initialize for error logging
     try:
+        data = request.get_json()
+        # --- INPUT VALIDATION ---
+        if not data or "idea_id" not in data:
+            logger.error("Request body missing 'idea_id'.")
+            return jsonify({"status": "error", "message": "Missing 'idea_id' in request body."}), 400
+
+        idea_id = data["idea_id"]
+        logger.info(f"Starting publishing process for app idea: {idea_id}")
+
         app_idea = get_from_firestore("app_ideas", idea_id)
         if not app_idea:
             return jsonify({"status": "error", "message": f"App idea '{idea_id}' not found."}), 404
 
-        # 1. Trigger the play-publisher-tool Cloud Run Job
+        # --- CORE LOGIC: Trigger the play-publisher-tool Cloud Run Job ---
         logger.info(f"Triggering play-publisher-tool job for idea: {idea_id}")
         run_client = run_v2.JobsClient()
-        job_name = f"projects/{PROJECT_ID}/locations/{REGION}/jobs/play-publisher-tool"
         
         request_body = run_v2.RunJobRequest(
-            name=job_name,
+            name=PUBLISHER_JOB_NAME,
             overrides={
                 "container_overrides": [
                     {
@@ -3235,13 +3312,13 @@ def publish_app():
         operation = run_client.run_job(request=request_body)
         logger.info(f"Successfully triggered job. Operation: {operation.metadata.name}")
 
-        # 2. Update the status in Firestore.
+        # Update the status in Firestore.
         save_to_firestore("app_ideas", idea_id, {"status": "PUBLISHING_STARTED"})
 
         return jsonify({"status": "success", "message": f"Publishing workflow started for '{idea_id}'."})
 
     except Exception as e:
-        logger.error(f"An error occurred during publishing for '{idea_id}': {e}")
+        logger.exception(f"An error occurred during publishing for '{idea_id}'. Stacktrace: {traceback.format_exc()}")
         save_to_firestore("app_ideas", idea_id, {"status": "PUBLISHING_FAILED", "error": str(e)})
         return jsonify({"status": "error", "message": "An internal error occurred."}), 500
 

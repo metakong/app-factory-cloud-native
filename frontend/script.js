@@ -1,54 +1,41 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const loadDataBtn = document.getElementById('load-data-btn');
-    loadDataBtn.addEventListener('click', loadAllData);
+    // Initial setup
+    document.getElementById('load-data-btn').addEventListener('click', loadAllData);
+    document.getElementById('start-discovery-btn').addEventListener('click', startDiscovery);
+
+    // Modal setup
+    const modal = document.getElementById('swot-modal');
+    const closeBtn = document.querySelector('.close-button');
+    closeBtn.onclick = () => modal.style.display = "none";
+    window.onclick = (event) => {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    };
     
-    // --- NEW EVENT LISTENER ---
-    const startDiscoveryBtn = document.getElementById('start-discovery-btn');
-    startDiscoveryBtn.addEventListener('click', startDiscovery);
+    // Auto-refresh data every 30 seconds
+    setInterval(loadAllData, 30000);
 });
 
-// --- NEW FUNCTION ---
-async function startDiscovery() {
-    if (!confirm('This will start the automated discovery pipeline. This may take several minutes. Proceed?')) return;
-    setStatus('Starting discovery cycle...', false);
-    try {
-        await apiFetch('/start-discovery', { method: 'POST' });
-        setStatus('Discovery cycle started successfully. Data will appear in the review queue once processed.', false);
-    } catch (error) {
-        setStatus('Failed to start discovery cycle.', true);
-        console.error('Error starting discovery cycle:', error);
-    }
-}
+// --- API & State Management ---
 
-function openTab(evt, tabName) {
-    let i, tabcontent, tablinks;
-    tabcontent = document.getElementsByClassName("tab-content");
-    for (i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "none";
-    }
-    tablinks = document.getElementsByClassName("tab-link");
-    for (i = 0; i < tablinks.length; i++) {
-        tablinks[i].className = tablinks[i].className.replace(" active", "");
-    }
-    document.getElementById(tabName).style.display = "block";
-    evt.currentTarget.className += " active";
-}
-
-function setStatus(message, isError = false) {
+function setStatus(message, isError = false, duration = 5000) {
     const statusEl = document.getElementById('status-message');
     statusEl.textContent = message;
     statusEl.className = isError ? 'status-message error' : 'status-message success';
-    statusEl.style.display = 'block';
+    
+    setTimeout(() => {
+        statusEl.textContent = '';
+        statusEl.className = 'status-message';
+    }, duration);
 }
 
 async function apiFetch(path, options = {}) {
-     const baseUrl = document.getElementById('api-gateway-url').value.trim();
+    const baseUrl = document.getElementById('api-gateway-url').value.trim();
     const apiKey = document.getElementById('api-key').value.trim();
 
     if (!baseUrl || !apiKey) {
-        const message = 'Please provide API Gateway URL and API Key.';
-        setStatus(message, true);
-        throw new Error(message);
+        throw new Error('API Gateway URL and API Key are required.');
     }
 
     const headers = {
@@ -57,122 +44,200 @@ async function apiFetch(path, options = {}) {
         ...options.headers,
     };
 
+    const response = await fetch(`${baseUrl}${path}`, { ...options, headers });
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API Error: ${response.status} - ${errorText}`);
+    }
+    const contentType = response.headers.get("content-type");
+    return contentType?.includes("application/json") ? response.json() : null;
+}
+
+// --- CORE ACTIONS ---
+
+async function startDiscovery() {
+    if (!confirm('This will start the automated discovery pipeline. Proceed?')) return;
+    setStatus('Starting discovery cycle...');
     try {
-        const response = await fetch(`${baseUrl}${path}`, { ...options, headers });
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`Request failed: ${response.status} ${response.statusText} - ${errorText}`);
-        }
-        const contentType = response.headers.get("content-type");
-        if (contentType && contentType.includes("application/json")) {
-            return response.json();
-        }
-        return; 
+        await apiFetch('/start-discovery', { method: 'POST' });
+        setStatus('Discovery cycle started successfully. New ideas will appear shortly.');
     } catch (error) {
-        console.error('API Fetch Error:', error);
         setStatus(error.message, true);
-        throw error;
+        console.error('Error starting discovery cycle:', error);
     }
 }
 
 async function loadAllData() {
-    setStatus('Loading data...', false);
-    await fetchVettedIdeas();
-    await fetchDevelopedApks();
-    setStatus('Data loaded successfully.', false);
+    const baseUrl = document.getElementById('api-gateway-url').value;
+    if (!baseUrl) return; // Don't run if config is missing
+
+    console.log("Refreshing dashboard data...");
+    try {
+        const [ideasData, apksData] = await Promise.all([
+            apiFetch('/vetted-ideas'),
+            apiFetch('/developed-apks')
+        ]);
+
+        const allIdeas = (ideasData?.ideas || []).concat(apksData?.apks || []);
+        
+        updateKpiOverview(allIdeas);
+        renderIdeasTable(ideasData?.ideas || []);
+        renderApksTable(apksData?.apks || []);
+        
+    } catch (error) {
+        setStatus(error.message, true);
+        console.error('Error loading data:', error);
+    }
 }
 
-async function fetchVettedIdeas() {
-    try {
-        const data = await apiFetch('/vetted-ideas');
-        const ideas = data.ideas || [];
-        const tableBody = document.querySelector('#ideas-table tbody');
-        tableBody.innerHTML = '';
-        if (ideas.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="5">No ideas are currently awaiting review.</td></tr>';
-            return;
+// --- UI RENDERING ---
+
+function openTab(evt, tabName) {
+    document.querySelectorAll(".tab-content").forEach(tc => tc.style.display = "none");
+    document.querySelectorAll(".tab-link").forEach(tl => tl.classList.remove("active"));
+    document.getElementById(tabName).style.display = "block";
+    evt.currentTarget.classList.add("active");
+}
+
+function updateKpiOverview(allIdeas) {
+    const funnelData = {
+        'PENDING_VETTING': 0,
+        'PENDING_CEO_APPROVAL': 0,
+        'PENDING_BUILD': 0,
+        'PUBLISHED': 0,
+    };
+
+    allIdeas.forEach(idea => {
+        if (funnelData.hasOwnProperty(idea.status)) {
+            funnelData[idea.status]++;
         }
-        ideas.forEach(idea => {
-            const encodedSwot = btoa(idea.product_spec_and_swot || 'No SWOT analysis available.');
-            const row = `<tr>
-                <td>${idea.idea_id}</td>
+    });
+
+    const chartOptions = {
+        chart: { type: 'bar', height: 350, toolbar: { show: false } },
+        series: [{ name: 'Ideas', data: Object.values(funnelData) }],
+        xaxis: { categories: Object.keys(funnelData), labels: { style: { colors: '#e0e0e0' }}},
+        yaxis: { labels: { style: { colors: '#e0e0e0' }}},
+        grid: { borderColor: '#38383a' },
+        plotOptions: { bar: { horizontal: false, columnWidth: '50%', distributed: true } },
+        legend: { show: false }
+    };
+    
+    const chartContainer = document.querySelector("#funnel-chart");
+    chartContainer.innerHTML = ''; // Clear previous chart
+    const chart = new ApexCharts(chartContainer, chartOptions);
+    chart.render();
+}
+
+function renderIdeasTable(ideas) {
+    const tableBody = document.querySelector('#ideas-table tbody');
+    tableBody.innerHTML = '';
+    if (ideas.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="7">No ideas are currently awaiting review.</td></tr>';
+        return;
+    }
+    ideas.forEach(idea => {
+        const encodedSwot = btoa(idea.product_spec_and_swot || 'No product brief available.');
+        tableBody.innerHTML += `
+            <tr>
+                <td><span class="status-indicator status-${idea.status}"></span>${idea.status}</td>
                 <td>${idea.description}</td>
-                <td>${idea.competition_score !== undefined ? idea.competition_score.toFixed(2) : 'N/A'} / 10.00</td>
-                <td><button onclick="showSwot('${encodedSwot}')">View SWOT</button></td>
+                <td>${idea.source_subreddit || 'N/A'}</td>
+                <td>${idea.community_validation_score || 'N/A'}</td>
+                <td>${(idea.competition_score !== undefined ? idea.competition_score.toFixed(2) : 'N/A')} / 10</td>
+                <td><button onclick="showSwotModal('${encodedSwot}')">View Brief</button></td>
                 <td class="actions">
                     <button onclick="approveIdea('${idea.idea_id}')">Approve</button>
                     <button class="reject" onclick="rejectIdea('${idea.idea_id}')">Reject</button>
                 </td>
             </tr>`;
-            tableBody.innerHTML += row;
-        });
-    } catch (error) {
-        console.error('Error fetching vetted ideas:', error);
+    });
+}
+
+function renderApksTable(apks) {
+    const tableBody = document.querySelector('#apks-table tbody');
+    tableBody.innerHTML = '';
+    if (apks.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="7">No apps are published or in development.</td></tr>';
+        return;
     }
-}
-
-function showSwot(encodedSwot) {
-    const swotText = atob(encodedSwot);
-    alert(swotText);
-}
-
-async function fetchDevelopedApks() {
-    try {
-        const data = await apiFetch('/developed-apks');
-        const apks = data.apks || [];
-        const tableBody = document.querySelector('#apks-table tbody');
-        tableBody.innerHTML = '';
-        if (apks.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="4">No APKs are currently awaiting review.</td></tr>';
-            return;
-        }
-        apks.forEach(apk => {
-            const row = `<tr>
-                <td>${apk.idea_id}</td>
-                <td>${apk.ceo_feedback || 'N/A'}</td>
-                <td><a href="${apk.apk_download_url}" target="_blank" rel="noopener noreferrer">Download APK</a></td>
+    apks.forEach(apk => {
+        tableBody.innerHTML += `
+            <tr>
+                <td><span class="status-indicator status-${apk.status}"></span>${apk.status}</td>
+                <td>${apk.description || apk.idea_id}</td>
+                <td>${apk.downloads || 'N/A'}</td>
+                <td>${apk.rating || 'N/A'}</td>
+                <td>${apk.revenue || '$0.00'}</td>
                 <td class="actions">
-                    <button onclick="publishApk('${apk.idea_id}')">Publish</button>
-                    <button class="revise" onclick="reviseApk('${apk.idea_id}')">Revise</button>
+                    ${apk.apk_download_url ? `<a href="${apk.apk_download_url}" target="_blank" class="button-link">Test APK</a>` : ''}
+                    ${apk.repo_url ? `<a href="${apk.repo_url}" target="_blank" class="button-link">Repo</a>` : ''}
+                </td>
+                <td class="actions">
+                    ${apk.status === 'PENDING_CEO_TESTING' ? `
+                        <button onclick="publishApk('${apk.idea_id}')">Publish</button>
+                        <button class="revise" onclick="reviseApk('${apk.idea_id}')">Revise</button>
+                    ` : 'No actions'}
                 </td>
             </tr>`;
-            tableBody.innerHTML += row;
-        });
-    } catch (error) {
-        console.error('Error fetching developed APKs:', error);
-    }
+    });
 }
 
+function showSwotModal(encodedSwot) {
+    const swotText = atob(encodedSwot);
+    document.getElementById('swot-text').textContent = swotText;
+    document.getElementById('swot-modal').style.display = 'block';
+}
+
+
+// --- BUTTON ACTIONS (APPROVE, REJECT, ETC.) ---
+
 async function approveIdea(ideaId) {
-    if (!confirm(`Are you sure you want to approve idea ${ideaId} for development?`)) return;
-    setStatus(`Approving ${ideaId}...`, false);
-    await apiFetch('/approve-idea', { method: 'POST', body: JSON.stringify({ idea_id: ideaId }) });
-    setStatus(`Idea ${ideaId} approved and sent for development.`, false);
-    fetchVettedIdeas();
+    if (!confirm(`Approve idea ${ideaId} for development?`)) return;
+    setStatus(`Approving ${ideaId}...`);
+    try {
+        await apiFetch('/approve-idea', { method: 'POST', body: JSON.stringify({ idea_id: ideaId }) });
+        setStatus(`Idea ${ideaId} approved and sent for development.`);
+        loadAllData();
+    } catch (error) {
+        setStatus(error.message, true);
+    }
 }
 
 async function rejectIdea(ideaId) {
     if (!confirm(`Are you sure you want to reject idea ${ideaId}?`)) return;
-    setStatus(`Rejecting ${ideaId}...`, false);
-    await apiFetch('/reject-idea', { method: 'POST', body: JSON.stringify({ idea_id: ideaId }) });
-    setStatus(`Idea ${ideaId} rejected.`, false);
-    fetchVettedIdeas();
+    setStatus(`Rejecting ${ideaId}...`);
+    try {
+        await apiFetch('/reject-idea', { method: 'POST', body: JSON.stringify({ idea_id: ideaId }) });
+        setStatus(`Idea ${ideaId} rejected.`);
+        loadAllData();
+    } catch (error) {
+        setStatus(error.message, true);
+    }
 }
 
 async function publishApk(ideaId) {
-    if (!confirm(`Are you sure you want to publish the app for idea ${ideaId}?`)) return;
-    setStatus(`Publishing app for ${ideaId}...`, false);
-    await apiFetch('/publish-app', { method: 'POST', body: JSON.stringify({ idea_id: ideaId }) });
-    setStatus(`App for idea ${ideaId} sent for publishing.`, false);
-    fetchDevelopedApks();
+    if (!confirm(`Publish the app for idea ${ideaId}? This will send it to the internal test track on the Play Store.`)) return;
+    setStatus(`Publishing app for ${ideaId}...`);
+    try {
+        await apiFetch('/publish-app', { method: 'POST', body: JSON.stringify({ idea_id: ideaId }) });
+        setStatus(`App for idea ${ideaId} sent for publishing.`);
+        loadAllData();
+    } catch (error) {
+        setStatus(error.message, true);
+    }
 }
 
 async function reviseApk(ideaId) {
-    const feedback = prompt(`Please provide revision feedback for app ${ideaId}:`);
-    if (feedback && feedback.trim() !== '') {
-        setStatus(`Requesting revision for ${ideaId}...`, false);
-        await apiFetch('/revise-apk', { method: 'POST', body: JSON.stringify({ idea_id: ideaId, feedback: feedback }) });
-        setStatus(`Revision requested for app ${ideaId}.`, false);
-        fetchDevelopedApks();
+    const feedback = prompt(`Please provide concise revision feedback for app ${ideaId}:`);
+    if (feedback?.trim()) {
+        setStatus(`Requesting revision for ${ideaId}...`);
+        try {
+            await apiFetch('/revise-apk', { method: 'POST', body: JSON.stringify({ idea_id: ideaId, feedback: feedback }) });
+            setStatus(`Revision requested for app ${ideaId}.`);
+            loadAllData();
+        } catch(error) {
+            setStatus(error.message, true);
+        }
     }
 }

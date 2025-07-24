@@ -1,0 +1,86 @@
+swagger: '2.0'
+info:
+  title: app-factory-gateway
+  description: API Gateway for the App Factory CEO Dashboard
+  version: 1.0.0
+schemes:
+  - https
+produces:
+  - application/json
+securityDefinitions:
+  api_key:
+    type: "apiKey"
+    name: "x-api-key"
+    in: "header"
+
+paths:
+  /start-discovery:
+    post:
+      summary: Starts the automated discovery and vetting pipeline
+      operationId: startDiscovery
+      security:
+        - api_key: []
+      x-google-backend:
+        address: ${discovery_cycle_service_url}/start-discovery
+      responses:
+        '200': { description: Discovery job started successfully. }
+  /vetted-ideas:
+    get:
+      summary: Get app ideas that are ready for CEO review
+      operationId: getVettedIdeas
+      security:
+        - api_key: []
+      x-google-backend:
+        address: ${discovery_cycle_service_url}/vetted-ideas
+      responses:
+        '200': { description: A list of app ideas. }
+  /approve-idea:
+    post:
+      summary: Approve an idea for development
+      operationId: approveIdea
+      security:
+        - api_key: []
+      x-google-backend:
+        address: ${ai_developer_agent_service_url}/develop
+      responses:
+        '200': { description: Idea approved and sent for development. }
+  /reject-idea:
+    post:
+      summary: Reject an idea
+      operationId: rejectIdea
+      security:
+        - api_key: []
+      x-google-backend:
+        address: ${discovery_cycle_service_url}/reject-idea
+      responses:
+        '200': { description: Idea rejected. }
+  /developed-apks:
+    get:
+      summary: Get developed APKs ready for review
+      operationId: getDevelopedApks
+      security:
+        - api_key: []
+      x-google-backend:
+        address: ${ai_developer_agent_service_url}/developed-apks
+      responses:
+        '200': { description: A list of developed APKs. }
+  /publish-app:
+    post:
+      summary: Publish an app
+      operationId: publishApp
+      security:
+        - api_key: []
+      x-google-backend:
+        address: ${cmo_publishing_agent_url}/publish
+      responses:
+        '200': { description: App sent for publishing. }
+  /revise-apk:
+    post:
+      summary: Request revision for an APK
+      operationId: reviseApk
+      security:
+        - api_key: []
+      x-google-backend:
+        address: ${ai_developer_agent_service_url}/revise
+      responses:
+        '200': { description: Revision requested. }

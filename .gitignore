@@ -14,6 +14,7 @@ venv/
 *.tfstate.*
 crash.log
 *.tfvars
+*.tfplan
 
 # Mac
 .DS_Store

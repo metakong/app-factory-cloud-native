@@ -3,62 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CEO Dashboard - App Factory</title>
+    <title>CEO Dashboard - App Factory V2</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <h1>App Factory - CEO Dashboard</h1>
-
-        <div class="config-section">
-            <h2>Configuration & Actions</h2>
-            <div class="config-inputs">
-                 <input type="text" id="api-gateway-url" placeholder="API Gateway URL (e.g., https://my-gateway-xxxx.a.run.app)">
+        <header>
+            <h1>App Factory - CEO Dashboard</h1>
+            <div class="config-section">
+                <input type="text" id="api-gateway-url" placeholder="API Gateway URL">
                 <input type="password" id="api-key" placeholder="API Key">
                 <button id="load-data-btn">Load Data</button>
-                <button id="start-discovery-btn">Start Discovery Cycle</button> </div>
-             <p class="status-message" id="status-message"></p>
+                <button id="start-discovery-btn">Start Discovery Cycle</button>
+            </div>
+        </header>
+
+        <p class="status-message" id="status-message"></p>
+
+        <div class="kpi-overview">
+            <h2>Factory Overview</h2>
+            <div class="kpi-cards">
+                <div class="kpi-card">
+                    <h3>Production Funnel</h3>
+                    <div id="funnel-chart"></div>
+                </div>
+                <div class="kpi-card">
+                    <h3>Financials</h3>
+                    <p><strong>Total Investment:</strong> <span id="total-investment">$0.00</span></p>
+                    <p><strong>Potential Revenue:</strong> <span id="potential-revenue">$0.00</span></p>
+                    <p><strong>Estimated ROI:</strong> <span id="estimated-roi">0%</span></p>
+                </div>
+            </div>
         </div>
 
         <div class="tabs">
             <button class="tab-link active" onclick="openTab(event, 'idea-review')">Idea Review</button>
-            <button class="tab-link" onclick="openTab(event, 'apk-review')">APK Review</button>
+            <button class="tab-link" onclick="openTab(event, 'published-apps')">Published Apps</button>
         </div>
 
         <div id="idea-review" class="tab-content" style="display: block;">
             <h2>Ideas Awaiting Approval</h2>
-            <table id="ideas-table">
-                <thead>
-                    <tr>
-                        <th>Idea ID</th>
-                        <th>AI Summary</th>
-                        <th>Competition Score</th>
-                        <th>SWOT Analysis</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
+            <div class="table-container">
+                <table id="ideas-table">
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>Idea Summary</th>
+                            <th>Source</th>
+                            <th>Community Score</th>
+                            <th>Competition Score</th>
+                            <th>Brief</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+            </div>
         </div>
 
-        <div id="apk-review" class="tab-content">
-            <h2>APKs Awaiting Review</h2>
-            <table id="apks-table">
-                <thead>
-                    <tr>
-                        <th>Idea ID</th>
-                        <th>CEO Feedback</th>
-                        <th>Download</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
+        <div id="published-apps" class="tab-content">
+            <h2>Published & In-Progress Apps</h2>
+             <div class="table-container">
+                <table id="apks-table">
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>App Name</th>
+                            <th>Downloads</th>
+                            <th>User Rating</th>
+                            <th>Revenue</th>
+                            <th>Links</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
+    <div id="swot-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>Product Brief</h2>
+            <pre id="swot-text"></pre>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script src="script.js"></script>
 </body>
 </html>

@@ -1,85 +1,112 @@
+:root {
+    --bg-color: #1a1a1a;
+    --container-bg: #242424;
+    --header-bg: #2c2c2e;
+    --border-color: #38383a;
+    --text-color: #e0e0e0;
+    --text-muted: #a0a0a0;
+    --accent-blue: #6e9eff;
+    --hover-blue: #8ab4f8;
+    --red: #ff453a;
+    --green: #7dcea0;
+    --yellow: #f1c40f;
+}
+
 body {
-    font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-    background-color: #121212; /* Very dark gray background */
-    color: #E0E0E0; /* Light gray text for readability */
+    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
     margin: 0;
     padding: 20px;
+    font-size: 14px;
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
-    background-color: #1E1E1E; /* Slightly lighter gray for the main container */
+    background-color: var(--container-bg);
     padding: 20px 40px;
-    border-radius: 12px; /* Slightly more rounded corners */
-    border: 1px solid #2C2C2E;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
 }
 
 h1 {
-    text-align: center;
-    color: #6E9EFF; /* Samsung-style accent blue */
-    margin-bottom: 30px;
+    color: var(--accent-blue);
     font-weight: 500;
+    margin: 0;
 }
 
 h2 {
-    border-bottom: 1px solid #38383A; /* Softer, darker border */
     padding-bottom: 10px;
-    margin-top: 40px;
+    margin-top: 20px;
+    margin-bottom: 20px;
     color: #F5F5F5;
     font-weight: 500;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .config-section {
-    background-color: #2C2C2E; /* A distinct dark shade for the section */
-    border: 1px solid #444;
-    border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 30px;
-}
-
-.config-inputs {
     display: flex;
     gap: 15px;
     align-items: center;
 }
 
-.config-inputs input {
-    flex-grow: 1;
-    padding: 12px;
+.config-section input {
+    padding: 10px;
     border: 1px solid #555;
     border-radius: 6px;
     font-size: 14px;
     background-color: #333;
-    color: #E0E0E0;
-}
-
-.config-inputs input::placeholder {
-    color: #888;
+    color: var(--text-color);
+    width: 250px;
 }
 
 .status-message {
-    margin-top: 15px;
+    margin-bottom: 20px;
     padding: 12px;
     border-radius: 6px;
     text-align: center;
     font-weight: 500;
-    display: none; /* Hidden by default, shown via JS */
+    display: none;
 }
-.status-message.success {
-    background-color: #304034;
-    color: #7DCEA0;
-    display: block;
-}
-.status-message.error {
-    background-color: #442B2B;
-    color: #F1948A;
-    display: block;
+.status-message.success { background-color: #304034; color: var(--green); display: block; }
+.status-message.error { background-color: #442B2B; color: var(--red); display: block; }
+
+/* KPI Overview */
+.kpi-overview {
+    margin-bottom: 30px;
 }
 
+.kpi-cards {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+}
+
+.kpi-card {
+    background-color: var(--header-bg);
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.kpi-card h3 {
+    margin-top: 0;
+    color: var(--text-muted);
+}
+
+/* Tabs */
 .tabs {
     overflow: hidden;
-    border-bottom: 1px solid #38383A;
+    border-bottom: 1px solid var(--border-color);
     margin-bottom: 20px;
 }
 
@@ -91,24 +118,20 @@ h2 {
     cursor: pointer;
     padding: 14px 16px;
     transition: 0.3s;
-    font-size: 17px;
-    color: #A0A0A0; /* Dimmer color for inactive tabs */
+    font-size: 16px;
+    color: var(--text-muted);
     border-bottom: 3px solid transparent;
 }
 
-.tab-link:hover {
-    background-color: #2C2C2E;
-}
-
+.tab-link:hover { background-color: var(--header-bg); }
 .tab-link.active {
-    border-bottom: 3px solid #6E9EFF;
-    color: #6E9EFF;
+    border-bottom: 3px solid var(--accent-blue);
+    color: var(--accent-blue);
     font-weight: 600;
 }
 
-.tab-content {
-    display: none;
-}
+.tab-content { display: none; }
+.table-container { overflow-x: auto; }
 
 table {
     width: 100%;
@@ -117,55 +140,88 @@ table {
 }
 
 th, td {
-    border: 1px solid #38383A; /* Darker, subtle borders */
-    padding: 14px;
+    border: 1px solid var(--border-color);
+    padding: 12px 15px;
     text-align: left;
+    vertical-align: middle;
 }
 
 th {
-    background-color: #2C2C2E;
+    background-color: var(--header-bg);
     font-weight: 600;
-    color: #F5F5F5;
 }
 
-tr:nth-child(even) {
-    background-color: #252525; /* Subtle zebra striping */
-}
+tr:nth-child(even) { background-color: #2a2a2a; }
 
-td a {
-    color: #6E9EFF;
-    text-decoration: none;
+/* Status Indicators */
+.status-indicator {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 8px;
 }
+.status-PENDING_VETTING { background-color: #a0a0a0; }
+.status-PENDING_CEO_APPROVAL { background-color: var(--yellow); }
+.status-PENDING_BUILD { background-color: var(--accent-blue); }
+.status-PUBLISHED { background-color: var(--green); }
+.status-REJECTED, .status-FAILED { background-color: var(--red); }
 
-td a:hover {
-    text-decoration: underline;
-}
 
-button {
-    padding: 10px 16px;
+button, .button-link {
+    padding: 8px 14px;
     border: none;
     border-radius: 6px;
     cursor: pointer;
     font-weight: 500;
-    background-color: #6E9EFF; /* Accent blue */
-    color: #121212; /* Dark text for contrast on blue button */
+    background-color: var(--accent-blue);
+    color: var(--bg-color);
     transition: background-color 0.2s;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 12px;
 }
 
-button:hover {
-    background-color: #8AB4F8;
-}
+button:hover { background-color: var(--hover-blue); }
+button.reject, button.revise { background-color: var(--red); color: #fff; }
+button.reject:hover, button.revise:hover { background-color: #e57373; }
+.actions { display: flex; flex-direction: column; gap: 8px; }
 
-button.reject, button.revise {
-    background-color: #FF453A; /* Muted, dark-theme friendly red */
-    color: #FFFFFF;
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.7);
 }
-
-button.reject:hover, button.revise:hover {
-    background-color: #E57373;
+.modal-content {
+    background-color: var(--container-bg);
+    margin: 10% auto;
+    padding: 20px;
+    border: 1px solid var(--border-color);
+    width: 80%;
+    max-width: 800px;
+    border-radius: 8px;
+    position: relative;
 }
-
-.actions {
-    display: flex;
-    gap: 10px;
+.close-button {
+    color: #aaa;
+    position: absolute;
+    top: 10px; right: 25px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+.close-button:hover { color: white; }
+#swot-text {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    max-height: 60vh;
+    overflow-y: auto;
+    background-color: var(--bg-color);
+    padding: 15px;
+    border-radius: 4px;
 }

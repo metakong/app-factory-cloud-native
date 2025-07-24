@@ -1,105 +1,128 @@
 import os
-import datetime
-import subprocess
+from datetime import datetime
+from google.cloud import secretmanager_v1
+from google.cloud import storage
+from google.cloud import run_v2
+from google.api_core import exceptions
 
-# --- Configuration ---
-OUTPUT_FILENAME_TEMPLATE = "holistic_context-{date}-{time}.txt"
-# Directories to completely ignore.
-DIRECTORIES_TO_IGNORE = {
-    ".git", ".vscode", ".idea", "__pycache__", "env", "venv", ".venv", "node_modules",
-}
-# Specific files to ignore.
-FILES_TO_IGNORE = {
-    ".DS_Store", "tfplan", ".terraform.lock.hcl", "create_context_file.py", "create_holistic_context.py"
-}
-# --- End Configuration ---
-
-def should_ignore(path: str, is_dir: bool) -> bool:
-    """Checks if a given file or directory should be ignored."""
-    basename = os.path.basename(path)
-    if is_dir:
-        return basename in DIRECTORIES_TO_IGNORE
-    return basename in FILES_TO_IGNORE
-
-def get_latest_cloud_build_log() -> str:
-    """Fetches the log for the most recent Google Cloud Build."""
-    print("\nFetching latest Google Cloud Build log...")
+def get_gcp_context(project_id: str) -> str:
+    """
+    Fetches and formats information about key GCP resources for the holistic context file.
+    """
+    context_parts = []
+    
+    # --- 1. Fetch Secrets ---
     try:
-        # Command to get the ID of the most recent build
-        get_id_command = "gcloud builds list --limit=1 --format='value(id)'"
-        build_id = subprocess.check_output(get_id_command, shell=True, text=True, stderr=subprocess.PIPE).strip()
+        secrets_output = "--- GCP Secret Manager Secrets ---\n\n"
+        secrets_client = secretmanager_v1.SecretManagerServiceClient()
+        parent = f"projects/{project_id}"
+        secrets_output += "{:<60} {:<25} {:<25}\n".format("NAME", "LOCATION", "CREATED")
+        secrets_output += "-" * 110 + "\n"
+        for secret in secrets_client.list_secrets(request={"parent": parent}):
+            secret_name = secret.name.split('/')[-1]
+            # Location is derived from the replication policy
+            location = "Automatically replicated"
+            if secret.replication.user_managed:
+                location = ",".join([r.location for r in secret.replication.user_managed.replicas])
+            
+            create_time = secret.create_time.strftime("%-m/%-d/%y, %-I:%M %p")
+            secrets_output += "{:<60} {:<25} {:<25}\n".format(secret_name, location, create_time)
+        context_parts.append(secrets_output)
+    except exceptions.PermissionDenied as e:
+        context_parts.append(f"--- GCP Secret Manager Secrets ---\n\nError: Permission denied. Ensure Secret Manager API is enabled and the user has 'secretmanager.secrets.list' permission.\nDetails: {e}\n")
+    except Exception as e:
+        context_parts.append(f"--- GCP Secret Manager Secrets ---\n\nError fetching secrets: {e}\n")
 
-        if not build_id:
-            print("  ! No build ID found.")
-            return "No Google Cloud Build logs found or gcloud CLI is not configured.\n"
+    # --- 2. Fetch GCS Buckets ---
+    try:
+        buckets_output = "\n--- GCP Storage Buckets ---\n\n"
+        storage_client = storage.Client(project=project_id)
+        buckets_output += "{:<40} {:<15} {:<15} {:<15}\n".format("NAME", "LOCATION", "PUBLIC ACCESS", "ACCESS CONTROL")
+        buckets_output += "-" * 90 + "\n"
+        for bucket in storage_client.list_buckets():
+            public_access = "Not public" if bucket.iam_configuration.public_access_prevention == "enforced" else "Public"
+            access_control = "Uniform" if bucket.iam_configuration.uniform_bucket_level_access_enabled else "Fine-grained"
+            buckets_output += "{:<40} {:<15} {:<15} {:<15}\n".format(bucket.name, bucket.location, public_access, access_control)
+        context_parts.append(buckets_output)
+    except Exception as e:
+        context_parts.append(f"\n--- GCP Storage Buckets ---\n\nError fetching buckets: {e}\n")
 
-        print(f"  + Found latest build ID: {build_id}")
+    # --- 3. Fetch Cloud Run Services ---
+    try:
+        run_output = "\n--- GCP Cloud Run Services ---\n\n"
+        run_client = run_v2.ServicesClient()
+        region = "us-central1" # Or loop through all supported regions
+        parent = f"projects/{project_id}/locations/{region}"
+        run_output += "{:<40} {:<15} {:<80}\n".format("NAME", "REGION", "URL")
+        run_output += "-" * 135 + "\n"
+        services_found = False
+        for service in run_client.list_services(parent=parent):
+            services_found = True
+            service_name = service.name.split('/')[-1]
+            run_output += "{:<40} {:<15} {:<80}\n".format(service_name, region, service.uri)
+        if not services_found:
+            run_output += "No Cloud Run services found in this region.\n"
+        context_parts.append(run_output)
+    except exceptions.PermissionDenied as e:
+        context_parts.append(f"\n--- GCP Cloud Run Services ---\n\nError: Permission denied. Ensure Cloud Run Admin API is enabled and the user has 'run.services.list' permission.\nDetails: {e}\n")
+    except Exception as e:
+        context_parts.append(f"\n--- GCP Cloud Run Services ---\n\nError fetching Cloud Run services: {e}\n")
+        
+    return "\n".join(context_parts)
 
-        # Command to get the log for that build ID
-        get_log_command = f"gcloud builds log {build_id}"
-        log_content = subprocess.check_output(get_log_command, shell=True, text=True, stderr=subprocess.PIPE)
-        print("  + Successfully fetched build log.")
-        return log_content
+def get_local_file_context():
+    """
+    Reads all relevant local project files and concatenates them into a single string.
+    """
+    local_context = []
+    files_to_include = [
+        '.gitignore', 'README.md', 'api-spec.yaml', 'cloudbuild.yaml', 
+        'deploy.sh', 'iam_setup.sh', 'most-recent-build-attempt-07202025-1929',
+        'project_description.txt', 'substitutions.yaml',
+        'backend/.env.example', 'backend/compose.yaml',
+        'backend/shared/gcp_client.py', 'backend/shared/utils.py',
+        'backend/services/discovery_cycle/Dockerfile', 'backend/services/discovery_cycle/main.py', 'backend/services/discovery_cycle/requirements.txt',
+        'backend/services/cso_vetting/Dockerfile', 'backend/services/cso_vetting/main.py', 'backend/services/cso_vetting/requirements.txt',
+        'backend/services/cpo_analysis/Dockerfile', 'backend/services/cpo_analysis/main.py', 'backend/services/cpo_analysis/requirements.txt',
+        'backend/services/ai_developer/Dockerfile', 'backend/services/ai_developer/main.py', 'backend/services/ai_developer/requirements.txt',
+        'backend/services/cmo_publishing/Dockerfile', 'backend/services/cmo_publishing/main.py', 'backend/services/cmo_publishing/requirements.txt',
+        'backend/tools/robust_web_scraper/Dockerfile', 'backend/tools/robust_web_scraper/main.py', 'backend/tools/robust_web_scraper/requirements.txt',
+        'backend/tools/google_play_publisher/Dockerfile', 'backend/tools/google_play_publisher/main.py', 'backend/tools/google_play_publisher/requirements.txt',
+        'frontend/Dockerfile', 'frontend/index.html', 'frontend/script.js', 'frontend/style.css'
+    ]
+    
+    for file_path in files_to_include:
+        try:
+            with open(file_path, 'r') as f:
+                content = f.read()
+                local_context.append(f"--- File: {file_path} ---\n\n{content}\n")
+        except FileNotFoundError:
+            local_context.append(f"--- File: {file_path} ---\n\n[File not found]\n")
+        except Exception as e:
+            local_context.append(f"--- File: {file_path} ---\n\n[Error reading file: {e}]\n")
+            
+    return "\n".join(local_context)
 
-    except subprocess.CalledProcessError as e:
-        error_message = f"  ! Error fetching Cloud Build logs: {e.stderr}\n"
-        print(error_message)
-        return error_message
-    except FileNotFoundError:
-        error_message = "  ! 'gcloud' command not found. Is the Google Cloud SDK installed and in your PATH?\n"
-        print(error_message)
-        return error_message
+if __name__ == '__main__':
+    gcp_project_id = os.environ.get("GCP_PROJECT", "app-factory-v2")
+    
+    timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    filename = f"holistic_context-{timestamp}.txt"
+    
+    print(f"Generating context file: {filename}...")
 
-def generate_context_file():
-    """Walks the project directory and writes file contents and logs to a single output file."""
-    project_root = os.getcwd()
-    now = datetime.datetime.now()
-    output_filename = now.strftime(OUTPUT_FILENAME_TEMPLATE.format(date="%Y%m%d", time="%H%M%S"))
-
-    # Add the dynamic output filename to the ignore list for this run
-    current_files_to_ignore = FILES_TO_IGNORE.union({output_filename})
-
-    file_count = 0
-    print(f"Starting context generation in root directory: {project_root}")
-
-    with open(output_filename, "w", encoding="utf-8") as outfile:
-        outfile.write(f"Project Context for app-factory-v2\n")
-        outfile.write(f"Generated on: {now.isoformat()}\n")
-        outfile.write("=" * 80 + "\n\n")
-
-        # --- Append Cloud Build Log ---
-        outfile.write("--- Google Cloud Build Log (Latest) ---\n\n")
-        log_data = get_latest_cloud_build_log()
-        outfile.write(log_data)
-        outfile.write("\n\n" + "=" * 80 + "\n\n")
-
-        # --- Append File Contents ---
-        print("\nWalking project directory to add file contents...")
-        for root, dirs, files in os.walk(project_root, topdown=True):
-            dirs[:] = [d for d in dirs if not should_ignore(os.path.join(root, d), True)]
-
-            for filename in sorted(files):
-                file_path = os.path.join(root, filename)
-                relative_path = os.path.relpath(file_path, project_root)
-
-                if os.path.basename(relative_path) in current_files_to_ignore:
-                    continue
-
-                try:
-                    with open(file_path, "r", encoding="utf-8", errors='strict') as infile:
-                        content = infile.read()
-                    outfile.write(f"--- File: {relative_path} ---\n\n")
-                    outfile.write(content)
-                    outfile.write("\n\n" + "=" * 80 + "\n\n")
-                    file_count += 1
-                    print(f"  + Added: {relative_path}")
-                except UnicodeDecodeError:
-                    print(f"  ! Skipped (binary file): {relative_path}")
-                except Exception as e:
-                    print(f"  ! Error reading {relative_path}: {e}")
-
-    print(f"\nContext generation complete.")
-    print(f"Added {file_count} files and the latest build log to '{output_filename}'.")
-
-if __name__ == "__main__":
-    generate_context_file()
+    with open(filename, 'w') as f:
+        f.write(f"Project Context for {gcp_project_id}\n")
+        f.write(f"Generated on: {datetime.now().isoformat()}\n")
+        f.write("================================================================================\n\n")
+        
+        # Fetch and write GCP context first
+        gcp_context = get_gcp_context(gcp_project_id)
+        f.write(gcp_context)
+        f.write("\n================================================================================\n")
+        
+        # Fetch and write local file context
+        local_context = get_local_file_context()
+        f.write(local_context)
+    
+    print(f"Successfully created {filename}.")

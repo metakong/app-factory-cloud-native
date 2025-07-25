@@ -1,24 +1,27 @@
-# [cite_start]IAM bindings based on the definitive matrix in the readiness report. [cite: 29, 116]
-# This ensures each service has only the permissions it absolutely needs.
-
 locals {
   project_number = data.google_project.project.number
   cloud_build_sa = "serviceAccount:${local.project_number}@cloudbuild.gserviceaccount.com"
 
-  # List of secrets each service needs access to
   secrets_map = {
-    discovery_cycle_sa      = []
-    cso_vetting_sa          = []
-    cpo_analysis_sa         = ["gemini-api-key"]
-    ai_developer_agent_sa   = ["gemini-api-key", "github-token"]
-    cmo_publishing_agent_sa = ["google-play-api-key"]
+    "discovery_cycle_sa"      = ["reddit-app-credentials"],
+    "cpo_analysis_sa"         = ["gemini-api-key"],
+    "ai_developer_agent_sa"   = ["gemini-api-key", "github-token"],
+    "cmo_publishing_agent_sa" = ["google-play-api-key"]
   }
+
+  # Flatten the map of secrets into a list of objects for easier iteration
+  flat_secret_bindings = flatten([
+    for sa_name, secret_list in local.secrets_map : [
+      for secret_id in secret_list : {
+        sa_email  = google_service_account[sa_name].email
+        secret_id = secret_id
+      }
+    ]
+  ])
 }
 
-data "google_project" "project" {}
+# --- 1. Cloud Build Service Account Permissions (Least Privilege) ---
 
-# [cite_start]1. Cloud Build Service Account Permissions (Least Privilege) [cite: 83]
-# --------------------------------------------------------------------
 # Allows Cloud Build to manage its own builds
 resource "google_project_iam_member" "cloudbuild_builds_editor" {
   project = var.project_id
@@ -42,42 +45,40 @@ resource "google_storage_bucket_iam_member" "cloudbuild_tfstate_admin" {
 
 # Allows Cloud Build to impersonate microservice SAs for deployment
 resource "google_service_account_iam_member" "cloudbuild_impersonator" {
-  for_each = {
-    "discovery-cycle"      = google_service_account.discovery_cycle_sa.email
-    "cso-vetting"          = google_service_account.cso_vetting_sa.email
-    "cpo-analysis"         = google_service_account.cpo_analysis_sa.email
-    "ai-developer-agent"   = google_service_account.ai_developer_agent_sa.email
-    "cmo-publishing-agent" = google_service_account.cmo_publishing_agent_sa.email
-    "ceo-dashboard"        = google_service_account.ceo_dashboard_sa.email
-  }
-  service_account_id = "projects/${var.project_id}/serviceAccounts/${each.value}"
-  [cite_start]role               = "roles/iam.serviceAccountUser" # Can impersonate, not manage SAs [cite: 86]
+  for_each = toset([
+    google_service_account.discovery_cycle_sa.name,
+    google_service_account.cso_vetting_sa.name,
+    google_service_account.cpo_analysis_sa.name,
+    google_service_account.ai_developer_agent_sa.name,
+    google_service_account.cmo_publishing_agent_sa.name,
+    google_service_account.ceo_dashboard_sa.name
+  ])
+  service_account_id = each.value
+  role               = "roles/iam.serviceAccountUser"
   member             = local.cloud_build_sa
 }
 
+# --- 2. Microservice Permissions ---
 
-# 2. Microservice Permissions
-# --------------------------------------------------------------------
-
-# Common roles: Firestore access for all services
+# Common role: Firestore access for all backend services
 resource "google_project_iam_member" "datastore_user" {
-  for_each = {
-    "discovery-cycle"      = google_service_account.discovery_cycle_sa.email
-    "cso-vetting"          = google_service_account.cso_vetting_sa.email
-    "cpo-analysis"         = google_service_account.cpo_analysis_sa.email
-    "ai-developer-agent"   = google_service_account.ai_developer_agent_sa.email
-    "cmo-publishing-agent" = google_service_account.cmo_publishing_agent_sa.email
-  }
+  for_each = toset([
+    google_service_account.discovery_cycle_sa.email,
+    google_service_account.cso_vetting_sa.email,
+    google_service_account.cpo_analysis_sa.email,
+    google_service_account.ai_developer_agent_sa.email,
+    google_service_account.cmo_publishing_agent_sa.email
+  ])
   project = var.project_id
   role    = "roles/datastore.user"
   member  = "serviceAccount:${each.value}"
 }
 
-# Common roles: Secret Manager access for specified secrets
+# Common role: Secret Manager access for specified secrets
 resource "google_secret_manager_secret_iam_member" "secret_accessor" {
-  for_each = { for sa, secrets in local.secrets_map :
-    for secret in secrets :
-  "${sa}-${secret}" => { sa_email = google_service_account[sa].email, secret_id = secret } }
+  for_each = {
+    for binding in local.flat_secret_bindings : "${binding.sa_email}-${binding.secret_id}" => binding
+  }
 
   project   = var.project_id
   secret_id = each.value.secret_id
@@ -124,19 +125,19 @@ resource "google_cloud_run_v2_service_iam_member" "cpo_analysis_invoker" {
 # AI Developer Agent specific permissions
 resource "google_storage_bucket_iam_member" "ai_dev_apk_bucket_admin" {
   bucket = google_storage_bucket.apks.name
-  role   = "roles/storage.objectAdmin" # To write APKs
+  role   = "roles/storage.objectAdmin"
   member = "serviceAccount:${google_service_account.ai_developer_agent_sa.email}"
 }
 
 resource "google_project_iam_member" "ai_dev_builds_editor" {
   project = var.project_id
-  role    = "roles/cloudbuild.builds.editor" # To trigger app-specific builds
+  role    = "roles/cloudbuild.builds.editor"
   member  = "serviceAccount:${google_service_account.ai_developer_agent_sa.email}"
 }
 
 resource "google_service_account_iam_member" "ai_dev_self_token_creator" {
   service_account_id = google_service_account.ai_developer_agent_sa.name
-  [cite_start]role               = "roles/iam.serviceAccountTokenCreator" # To create signed URLs [cite: 106]
+  role               = "roles/iam.serviceAccountTokenCreator"
   member             = "serviceAccount:${google_service_account.ai_developer_agent_sa.email}"
 }
 

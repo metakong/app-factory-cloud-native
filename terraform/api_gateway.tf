@@ -1,5 +1,3 @@
-# [cite_start]Deploys the API Gateway using a templated OpenAPI spec [cite: 55]
-
 resource "google_project_service" "apigateway" {
   service            = "apigateway.googleapis.com"
   disable_on_destroy = false
@@ -27,7 +25,7 @@ resource "google_api_gateway_api_config" "app_factory_config" {
         discovery_cycle_service_url    = module.services["discovery-cycle-service"].service.uri
         ai_developer_agent_service_url = module.services["ai-developer-agent-service"].service.uri
         cmo_publishing_agent_url       = module.services["cmo-publishing-agent"].service.uri
-      [cite_start]})) # [cite: 56]
+      }))
     }
   }
   lifecycle {
@@ -42,9 +40,4 @@ resource "google_api_gateway_gateway" "gateway" {
   gateway_id    = "app-factory-gateway-${terraform.workspace}"
   api_config    = google_api_gateway_api_config.app_factory_config.id
   display_name  = "App Factory Gateway (${terraform.workspace})"
-}
-
-module "api_gateway" {
-  source = "./" # Assuming the files are in the same directory.
-  # Add necessary variables here.
 }

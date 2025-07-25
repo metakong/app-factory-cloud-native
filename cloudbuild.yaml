@@ -24,12 +24,12 @@ steps:
   - name: 'hashicorp/terraform:1.5.7'
     id: 'Terraform Init'
     dir: 'terraform'
-    entrypoint: 'bash'
+    entrypoint: 'sh' # CORRECTED: Use 'sh' instead of 'bash'
     args:
-      - '-c' # This argument is now quoted
+      - '-c'
       - |
         # If workspace select failed, create the new workspace
-        if [ $? -ne 0 ]; then
+        if ! terraform workspace list | grep -q "${_ENV_SUFFIX}"; then
           terraform workspace new ${_ENV_SUFFIX}
         fi
         terraform init -reconfigure -backend-config=bucket=${_TERRAFORM_STATE_BUCKET}
@@ -51,12 +51,12 @@ steps:
   # Halt for a manual approval before deploying to production
   - name: 'gcr.io/cloud-builders/gcloud'
     id: 'Manual Approval'
-    waitFor: ['-'] # Creates a manual approval gate
-    entrypoint: 'bash'
+    waitFor: ['-']
+    entrypoint: 'sh'
     args:
-      - '-c' # This argument is now quoted
+      - '-c'
       - |
-        if [[ "${_ENV_SUFFIX}" == "prod" ]]; then
+        if [ "${_ENV_SUFFIX}" = "prod" ]; then
           echo "Production deployment requires manual approval in the Cloud Build UI."
         else
           echo "Skipping manual approval for non-prod environment."

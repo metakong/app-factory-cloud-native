@@ -6,4 +6,4 @@ google-generativeai==0.7.1
 PyGithub==2.3.0
 google-cloud-storage==2.16.0
 google-cloud-build==3.22.0
-[cite_start]google-cloud-logging==3.9.0 # Added for structured logging [cite: 91]
+google-cloud-logging==3.9.0

@@ -30,7 +30,7 @@ locals {
       service_account = google_service_account.ceo_dashboard_sa.email
       container_port  = 80
       ingress         = "INGRESS_TRAFFIC_INTERNAL_AND_CLOUD_LOAD_BALANCING"
-      is_public       = true # Handled by IAP
+      is_public       = true # Special case handled by IAP
       env_vars        = {}
     },
     "discovery-cycle-service" = {

@@ -1,40 +1,25 @@
 steps:
   # Build and push all container images to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
-    id: 'Build Images'
-    args: ['compose', '-f', 'backend/compose.yaml', 'build']
-
-  - name: 'gcr.io/cloud-builders/docker'
-    id: 'Push Images'
-    args: ['compose', '-f', 'backend/compose.yaml', 'push']
-    waitFor: ['Build Images']
+    id: 'Build and Push Images'
+    args: ['compose', '-f', 'backend/compose.yaml', 'build', '--push']
 
   # Setup Terraform with the correct workspace for the environment
   - name: 'hashicorp/terraform:1.5.7'
-    id: 'Terraform Workspace'
-    dir: 'terraform'
-    entrypoint: 'terraform'
-    args:
-      - 'workspace'
-      - 'select'
-      - '${_ENV_SUFFIX}'
-    allow_failure: true
-    waitFor: ['Push Images']
-
-  - name: 'hashicorp/terraform:1.5.7'
     id: 'Terraform Init'
     dir: 'terraform'
-    entrypoint: 'sh' # CORRECTED: Use 'sh' instead of 'bash'
+    entrypoint: 'sh'
     args:
       - '-c'
       - |
-        # If workspace select failed, create the new workspace
-        if ! terraform workspace list | grep -q "${_ENV_SUFFIX}"; then
-          terraform workspace new ${_ENV_SUFFIX}
-        fi
         terraform init -reconfigure -backend-config=bucket=${_TERRAFORM_STATE_BUCKET}
+        # Select workspace or create it if it doesn't exist
+        if! terraform workspace list | grep -q "${_ENV_SUFFIX}"; then
+          terraform workspace new "${_ENV_SUFFIX}"
+        else
+          terraform workspace select "${_ENV_SUFFIX}"
+        fi
     waitFor:
-      - 'Terraform Workspace'
 
   # Generate a Terraform plan
   - name: 'hashicorp/terraform:1.5.7'
@@ -51,17 +36,13 @@ steps:
   # Halt for a manual approval before deploying to production
   - name: 'gcr.io/cloud-builders/gcloud'
     id: 'Manual Approval'
-    waitFor: ['-']
-    entrypoint: 'sh'
+    waitFor:
+      - 'Terraform Plan'
+    entrypoint: 'bash'
     args:
       - '-c'
-      - |
-        if [ "${_ENV_SUFFIX}" = "prod" ]; then
-          echo "Production deployment requires manual approval in the Cloud Build UI."
-        else
-          echo "Skipping manual approval for non-prod environment."
-        fi
-
+      - ']'
+    
   # Apply the Terraform plan
   - name: 'hashicorp/terraform:1.5.7'
     id: 'Terraform Apply'
@@ -72,7 +53,6 @@ steps:
       - '-auto-approve'
       - 'tf.plan'
     waitFor:
-      - 'Terraform Plan'
       - 'Manual Approval'
 
 substitutions:

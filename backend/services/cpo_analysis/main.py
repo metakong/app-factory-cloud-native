@@ -2,28 +2,37 @@ import os
 import traceback
 from flask import Flask, request, jsonify
 from shared.utils import get_logger
-from shared.gcp_client import get_from_firestore, save_to_firestore
+from shared.gcp_client import get_from_firestore, save_to_firestore, get_secret
 import google.generativeai as genai
 
 app = Flask(__name__)
 logger = get_logger(__name__)
 
 # --- Configuration ---
-# Service URL is now injected via Terraform into the calling service (CSO Vetting)
-genai.configure()
+# Configure the Gemini client at startup
+try:
+    gemini_api_key = get_secret("gemini-api-key")
+    if gemini_api_key:
+        genai.configure(api_key=gemini_api_key)
+    else:
+        logger.critical("GEMINI_API_KEY secret not found. CPO analysis will fail.")
+except Exception as e:
+    logger.critical(f"Failed to configure Gemini client: {e}")
+
 
 @app.route("/")
 def health_check():
     """Provides a simple health check endpoint."""
     return "OK", 200
 
-@app.route('/analyze', methods=['POST'])
+
+@app.route('/analyze', methods=)
 def analyze_idea():
     """
     Receives a vetted idea, generates a product spec and SWOT analysis using the Gemini API,
     and updates its status to 'PENDING_CEO_APPROVAL'.
     """
-    idea_id = "" # Initialize for error logging
+    idea_id = ""  # Initialize for error logging
     try:
         data = request.get_json()
         if not data or "idea_id" not in data:
@@ -40,10 +49,14 @@ def analyze_idea():
 
         # --- CORE LOGIC: Generate Product Spec and SWOT Analysis ---
         logger.info(f"Generating product spec and SWOT for: {app_idea.get('description')}")
-        model = genai.GenerativeModel('gemini-pro')
         
+        model = genai.GenerativeModel('gemini-pro')
         prompt = f"""
-        Act as a world-class Chief Product Officer for a consumer mobile app startup. Your primary goal is to design products for the "average, non-technical consumer." Based on the following app idea, which was sourced from public online discussions, generate a detailed product specification document. The document must contain these two main sections: "Product Specification" and "SWOT Analysis".
+        Act as a world-class Chief Product Officer for a consumer mobile app startup.
+        Your primary goal is to design products for the "average, non-technical consumer."
+        Based on the following app idea, which was sourced from public online discussions, generate a detailed product specification document.
+        The document must contain these two main sections: "Product Specification" and "SWOT Analysis".
+
         Under "Product Specification", include:
         1. **Target User Persona**: Describe the ideal user. Focus on their daily life, motivations, and frustrations.
         2. **Problem Statement**: Clearly articulate the core consumer pain point this app solves.
@@ -67,13 +80,15 @@ def analyze_idea():
             "error": None
         }
         save_to_firestore("app_ideas", idea_id, updated_data)
+
         logger.info(f"Successfully generated spec and SWOT for '{idea_id}'. Status set to PENDING_CEO_APPROVAL.")
-        
         return jsonify({"status": "success", "message": f"Analysis complete for '{idea_id}'. Ready for CEO review."})
 
     except Exception as e:
         logger.exception(f"An error occurred during analysis for '{idea_id}'.")
-        save_to_firestore("app_ideas", idea_id, {"status": "ANALYSIS_FAILED", "error": str(e)})
+        # Save error state to Firestore for visibility
+        if idea_id:
+            save_to_firestore("app_ideas", idea_id, {"status": "ANALYSIS_FAILED", "error": str(e)})
         return jsonify({"status": "error", "message": "An internal error occurred."}), 500
 
 if __name__ == "__main__":

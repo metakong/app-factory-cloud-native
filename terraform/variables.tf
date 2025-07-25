@@ -1,10 +1,11 @@
 variable "project_id" {
-  description = "The Google Cloud project ID."
+  description = "The GCP project ID."
   type        = string
+  default     = "app-factory-v2"
 }
 
 variable "region" {
-  description = "The Google Cloud region for deploying resources."
+  description = "The GCP region for resources."
   type        = string
   default     = "us-central1"
 }
@@ -16,12 +17,15 @@ variable "artifact_repo_name" {
 }
 
 variable "ceo_email" {
-  description = "The email address of the CEO for IAP access."
+  description = "The email address of the CEO for IAP access. Must be prefixed with 'user:'."
   type        = string
-  default     = "ceo@example.com"
+  # Placeholder: Replace with the actual CEO's email address in a.tfvars file.
+  default = "user:ceo@example.com"
 }
 
-variable "iap_domain" {
-  description = "The domain name to use for the IAP-protected CEO Dashboard."
+variable "domain" {
+  description = "The domain name for the CEO dashboard SSL certificate."
   type        = string
+  # Placeholder: Replace with the actual domain in a.tfvars file.
+  default = "ceo-dashboard.app-factory.com"
 }

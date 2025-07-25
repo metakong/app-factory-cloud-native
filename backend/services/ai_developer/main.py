@@ -44,7 +44,7 @@ steps:
   args:
     - '-c'
     - |
-      gcloud secrets versions access latest --secret="flutter-key-properties" --project="${PROJECT_ID}" > android/key.properties
+      gcloud secrets versions access latest --secret="flutter-key-properties" --project="${PROJECT_ID}" --out-file="android/key.properties"
 # 3. Setup Flutter and Build APK
 - name: 'cirrusci/flutter:stable'
   args: ['flutter', 'build', 'apk', '--release']
@@ -62,7 +62,7 @@ steps:
     - |
       set -e
       ACCESS_TOKEN=$(gcloud auth print-identity-token --audiences="{developer_service_url}")
-      curl -X POST "{developer_service_url}/build-complete" -H "Authorization: Bearer $$ACCESS_TOKEN" -H "Content-Type: application/json" -d '{ "idea_id": "{idea_id}", "build_status": "$BUILD_STATUS" }'
+      curl -X POST "{developer_service_url}/build-complete" -H "Authorization: Bearer \\$$ACCESS_TOKEN" -H "Content-Type: application/json" -d '{ "idea_id": "{idea_id}", "build_status": "$$BUILD_STATUS" }'
 options:
   logging: CLOUD_LOGGING_ONLY
   machineType: 'E2_HIGHCPU_8'

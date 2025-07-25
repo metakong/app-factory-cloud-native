@@ -1,22 +1,24 @@
-variable "project_id" {
-  description = "The Google Cloud project ID."
-  type        = string
+resource "google_storage_bucket" "tf_state" {
+  name          = "${var.project_id}-tf-state"
+  location      = "US"
+  force_destroy = false
+
+  uniform_bucket_level_access = true
+  public_access_prevention    = "enforced"
+
+  versioning {
+    enabled = true
+  }
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
-variable "region" {
-  description = "The Google Cloud region for deploying resources."
-  type        = string
-  default     = "us-central1"
-}
-
-variable "artifact_repo_name" {
-  description = "The name of the Artifact Registry repository."
-  type        = string
-  default     = "app-factory-repo"
-}
-
-variable "ceo_email" {
-  description = "The email address of the CEO for IAP access."
-  type        = string
-  default     = "ceo@example.com" # Replace with actual email
+resource "google_storage_bucket" "apks" {
+  name                        = "${var.project_id}-apks"
+  location                    = "US-CENTRAL1"
+  force_destroy               = false
+  uniform_bucket_level_access = true
+  public_access_prevention    = "enforced"
 }

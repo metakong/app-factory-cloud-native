@@ -20,6 +20,7 @@ steps:
           terraform workspace select "${_ENV_SUFFIX}"
         fi
     waitFor:
+      - 'Build and Push Images'
 
   # Generate a Terraform plan
   - name: 'hashicorp/terraform:1.5.7'
@@ -33,7 +34,8 @@ steps:
     waitFor:
       - 'Terraform Init'
 
-  # Halt for a manual approval before deploying to production
+  # Halt for a manual approval before deploying to production.
+  # This step's ID is referenced in the Cloud Build trigger settings.
   - name: 'gcr.io/cloud-builders/gcloud'
     id: 'Manual Approval'
     waitFor:
@@ -41,7 +43,7 @@ steps:
     entrypoint: 'bash'
     args:
       - '-c'
-      - ']'
+      - 'echo "Waiting for manual approval for prod deployment..."'
     
   # Apply the Terraform plan
   - name: 'hashicorp/terraform:1.5.7'

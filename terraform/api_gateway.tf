@@ -11,16 +11,6 @@ resource "google_project_service" "apigateway_apis" {
   disable_dependency_handling = false
 }
 
-# Template the OpenAPI spec to inject the correct service URLs
-data "template_file" "api_spec" {
-  template = file("${path.module}/../api-spec.yaml")
-  vars = {
-    discovery_cycle_service_url = module.services["discovery-cycle-service"].service.uri
-    ai_developer_agent_url      = module.services["ai-developer-agent-service"].service.uri
-    cmo_publishing_agent_url    = module.services["cmo-publishing-agent"].service.uri
-  }
-}
-
 resource "google_api_gateway_api_config" "api_config" {
   provider      = google-beta
   project       = var.project_id
@@ -30,7 +20,11 @@ resource "google_api_gateway_api_config" "api_config" {
   openapi_documents {
     document {
       path     = "spec.yaml"
-      contents = base64encode(data.template_file.api_spec.rendered)
+      contents = base64encode(templatefile("${path.module}/../api-spec.yaml", {
+        discovery_cycle_service_url = module.services["discovery-cycle-service"].service.uri
+        ai_developer_agent_url      = module.services["ai-developer-agent-service"].service.uri
+        cmo_publishing_agent_url    = module.services["cmo-publishing-agent"].service.uri
+      }))
     }
   }
 

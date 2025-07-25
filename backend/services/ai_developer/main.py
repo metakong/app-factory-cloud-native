@@ -27,8 +27,10 @@ try:
 except Exception as e:
     logger.critical(f"Failed to initialize GCP clients: {e}")
 
+#... (imports and app setup remain the same)
+
 # --- Secure Internal CI/CD Template ---
-# [cite_start]The public access step has been removed. [cite: 104]
+# The public access step has been removed.
 GENERATED_APP_CLOUDBUILD_TEMPLATE = """
 steps:
 # 1. Access Keystore from Secret Manager
@@ -67,6 +69,8 @@ options:
   logging: CLOUD_LOGGING_ONLY
   machineType: 'E2_HIGHCPU_8'
 """
+
+#... (rest of the file remains the same)
 # (The rest of ai_developer/main.py remains largely the same, but with all `print` calls
 # replaced by `logger` calls and the following change in the `build_complete` function)
 

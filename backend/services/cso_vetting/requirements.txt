@@ -4,3 +4,4 @@ google-cloud-firestore==2.16.0
 google-cloud-secret-manager==2.19.0
 requests==2.32.3
 google-play-scraper==1.2.4
+[cite_start]google-cloud-logging==3.9.0 # Added for structured logging [cite: 91]

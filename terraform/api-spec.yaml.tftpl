@@ -1,0 +1,68 @@
+# openapi2-gateway.yaml
+swagger: '2.0'
+info:
+  title: app-factory-gateway
+  description: API Gateway for the App Factory CEO Dashboard
+  version: 1.0.0
+schemes:
+  - https
+produces:
+  - application/json
+
+paths:
+  /start-discovery:
+    post:
+      summary: Starts the automated discovery and vetting pipeline
+      operationId: startDiscovery
+      x-google-backend:
+        [cite_start]address: ${discovery_cycle_service_url}/start-discovery # Dynamic URL [cite: 54]
+      responses:
+        '200': { description: Discovery job started successfully. }
+  /vetted-ideas:
+    get:
+      summary: Get app ideas that are ready for CEO review
+      operationId: getVettedIdeas
+      x-google-backend:
+        [cite_start]address: ${discovery_cycle_service_url}/vetted-ideas # Dynamic URL [cite: 54]
+      responses:
+        '200': { description: A list of app ideas. }
+  /approve-idea:
+    post:
+      summary: Approve an idea for development
+      operationId: approveIdea
+      x-google-backend:
+        [cite_start]address: ${ai_developer_agent_service_url}/develop # Dynamic URL [cite: 54]
+      responses:
+        '200': { description: Idea approved and sent for development. }
+  /reject-idea:
+    post:
+      summary: Reject an idea
+      operationId: rejectIdea
+      x-google-backend:
+        [cite_start]address: ${discovery_cycle_service_url}/reject-idea # Dynamic URL [cite: 54]
+      responses:
+        '200': { description: Idea rejected. }
+  /developed-apks:
+    get:
+      summary: Get developed APKs ready for review
+      operationId: getDevelopedApks
+      x-google-backend:
+        [cite_start]address: ${ai_developer_agent_service_url}/developed-apks # Dynamic URL [cite: 54]
+      responses:
+        '200': { description: A list of developed APKs. }
+  /publish-app:
+    post:
+      summary: Publish an app
+      operationId: publishApp
+      x-google-backend:
+        [cite_start]address: ${cmo_publishing_agent_url}/publish # Dynamic URL [cite: 54]
+      responses:
+        '200': { description: App sent for publishing. }
+  /revise-apk:
+    post:
+      summary: Request revision for an APK
+      operationId: reviseApk
+      x-google-backend:
+        [cite_start]address: ${ai_developer_agent_service_url}/revise # Dynamic URL [cite: 54]
+      responses:
+        '200': { description: Revision requested. }

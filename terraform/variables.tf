@@ -1,39 +1,22 @@
 variable "project_id" {
-  description = "The GCP project ID."
+  description = "The Google Cloud project ID."
   type        = string
 }
 
 variable "region" {
-  description = "The GCP region for resources."
+  description = "The Google Cloud region for deploying resources."
   type        = string
   default     = "us-central1"
 }
 
-variable "env_suffix" {
-  description = "The environment suffix (e.g., 'dev', 'prod')."
+variable "artifact_repo_name" {
+  description = "The name of the Artifact Registry repository."
   type        = string
+  default     = "app-factory-repo"
 }
 
-variable "service_account_names" {
-  description = "A list of service account short names to create."
-  type        = list(string)
-  default = [
-    "discovery-cycle-sa",
-    "cso-vetting-sa",
-    "cpo-analysis-sa",
-    "ai-developer-agent-sa",
-    "cmo-publishing-agent-sa"
-  ]
-}
-
-variable "secret_names" {
-  description = "A list of secret IDs that the Cloud Build SA needs to access."
-  type        = list(string)
-  default = [
-    "gemini-api-key",
-    "github-token",
-    "google-play-api-key",
-    "flutter-keystore-jks",
-    "flutter-key-properties"
-  ]
+variable "ceo_email" {
+  description = "The email address of the CEO for IAP access."
+  type        = string
+  [cite_start]default     = "ceo@example.com" # Replace with actual email [cite: 50]
 }

@@ -1,68 +1,85 @@
 steps:
-  # Step 0: Build all container images using Docker Compose
+  # Build and push all container images to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
-    id: 'Build Images'
     args: ['compose', '-f', 'backend/compose.yaml', 'build']
+    id: 'Build Images'
 
-  # Step 1: Push the built images to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
-    id: 'Push Images'
     args: ['compose', '-f', 'backend/compose.yaml', 'push']
+    id: 'Push Images'
     waitFor: ['Build Images']
 
-  # Step 2: Initialize Terraform in the 'terraform' subdirectory
+  # Setup Terraform with the correct workspace for the environment
   - name: 'hashicorp/terraform:1.5.7'
-    id: 'Terraform Init'
+    id: 'Terraform Workspace'
+    dir: 'terraform'
     entrypoint: 'terraform'
     args:
-      - '-chdir=terraform'
-      - 'init'
-      - '-reconfigure'
-      - '-backend-config=bucket=${_TERRAFORM_STATE_BUCKET}'
-      - '-backend-config=prefix=terraform/state/${_ENV_SUFFIX}'
+      - 'workspace'
+      - 'select'
+      - '${_ENV_SUFFIX}'
+    # This step is allowed to fail if the workspace doesn't exist yet
+    allow_failure: true
     waitFor: ['Push Images']
 
-  # Step 3: Terraform Plan
+  - name: 'hashicorp/terraform:1.5.7'
+    id: 'Terraform Init'
+    dir: 'terraform'
+    entrypoint: 'bash'
+    args:
+      - -c
+      - |
+        # If workspace select failed, create the new workspace
+        if [ $? -ne 0 ]; then
+          terraform workspace new ${_ENV_SUFFIX}
+        fi
+        terraform init -reconfigure -backend-config=bucket=${_TERRAFORM_STATE_BUCKET}
+    waitFor:
+      - 'Terraform Workspace'
+
+  # Generate a Terraform plan
   - name: 'hashicorp/terraform:1.5.7'
     id: 'Terraform Plan'
+    dir: 'terraform'
     entrypoint: 'terraform'
     args:
-      - '-chdir=terraform'
       - 'plan'
       - '-out=tf.plan'
       - '-var-file=environments/${_ENV_SUFFIX}.tfvars'
-    waitFor: ['Terraform Init']
+    waitFor:
+      - 'Terraform Init'
 
-  # Step 4: Manual Approval for Production Environment
+  # Halt for a manual approval before deploying to production
   - name: 'gcr.io/cloud-builders/gcloud'
     id: 'Manual Approval'
+    # The 'waitFor: ["-"]' creates a step that must be manually approved in the UI
+    waitFor: ['-']
     entrypoint: 'bash'
     args:
       - '-c'
       - |
-        if [[ "${_ENV_SUFFIX}" == "prod" ]]; then
-          echo "Production deployment requires manual approval."
-        else
+        if [[ "${_ENV_SUFFIX}" != "prod" ]]; then
           echo "Skipping manual approval for non-prod environment."
+        else
+          echo "Production deployment requires manual approval in the Cloud Build UI."
         fi
-    waitFor:
-      - 'Terraform Plan'
 
-  # Step 5: Terraform Apply
+  # Apply the Terraform plan
   - name: 'hashicorp/terraform:1.5.7'
     id: 'Terraform Apply'
+    dir: 'terraform'
     entrypoint: 'terraform'
     args:
-      - '-chdir=terraform'
       - 'apply'
       - '-auto-approve'
       - 'tf.plan'
     waitFor:
-      - 'Manual Approval'
+      - 'Terraform Plan'
+      - [cite_start]'Manual Approval' # This makes the apply step wait for the approval [cite: 68]
 
 substitutions:
-  _ENV_SUFFIX: 'dev'
-  _TERRAFORM_STATE_BUCKET: 'app-factory-v2-tf-state'
+  [cite_start]_ENV_SUFFIX: 'dev' # Default value; can be 'dev' or 'prod' [cite: 259]
+  _TERRAFORM_STATE_BUCKET: 'app-factory-v2-tf-state' # CHANGE THIS to your chosen state bucket name
 
 options:
   logging: CLOUD_LOGGING_ONLY

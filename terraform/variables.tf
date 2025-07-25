@@ -18,5 +18,5 @@ variable "artifact_repo_name" {
 variable "ceo_email" {
   description = "The email address of the CEO for IAP access."
   type        = string
-  [cite_start]default     = "ceo@example.com" # Replace with actual email [cite: 50]
+  default     = "ceo@example.com" # Replace with actual email
 }

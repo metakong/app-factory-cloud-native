@@ -1,15 +1,20 @@
-resource "google_cloud_run_v2_job" "job" {
-  for_each = var.jobs
+resource "google_cloud_run_v2_job" "default" {
+  name     = "${var.name}-${terraform.workspace}"
+  location = var.location
   project  = var.project_id
-  name     = "${each.key}-${var.env_suffix}"
-  location = var.region
 
   template {
     template {
-      service_account = "${each.value.service_account_name}-${var.env_suffix}@${var.project_id}.iam.gserviceaccount.com"
-      timeout         = each.value.timeout
+      service_account = var.service_account
       containers {
-        image = "us-central1-docker.pkg.dev/${var.project_id}/${var.repo_name}/${each.key}"
+        image = var.image_url
+        dynamic "env" {
+          for_each = var.env_vars
+          content {
+            name  = env.key
+            value = env.value
+          }
+        }
       }
     }
   }

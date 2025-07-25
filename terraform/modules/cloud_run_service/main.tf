@@ -31,21 +31,18 @@ resource "google_cloud_run_v2_service" "default" {
 
   ingress = var.ingress_setting
 
-  # Only create the public access policy if explicitly set to public
-  # [cite_start]This avoids using allUsers by default, enforcing security. [cite: 41, 42]
   lifecycle {
     ignore_changes = [
-      # Ignore changes to annotations, they are often managed by Google.
-      "template.annotations",
+      template.annotations,
     ]
   }
 }
 
 resource "google_cloud_run_service_iam_policy" "public_access" {
-  count    = var.is_public ? 1 : 0
-  project  = var.project_id
-  location = var.location
-  service  = google_cloud_run_v2_service.default.name
+  count       = var.is_public ? 1 : 0
+  project     = var.project_id
+  location    = var.location
+  service     = google_cloud_run_v2_service.default.name
   policy_data = data.google_iam_policy.public.policy_data
 }
 

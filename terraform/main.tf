@@ -22,7 +22,6 @@ provider "google-beta" {
   region  = var.region
 }
 
-
 data "google_project" "project" {}
 
 locals {
@@ -33,7 +32,7 @@ locals {
       ingress         = "INGRESS_TRAFFIC_INTERNAL_AND_CLOUD_LOAD_BALANCING"
       is_public       = true # Handled by IAP
       env_vars        = {}
-    }
+    },
     "discovery-cycle-service" = {
       service_account = google_service_account.discovery_cycle_sa.email
       container_port  = 8080
@@ -43,8 +42,46 @@ locals {
         GCP_PROJECT          = var.project_id
         WEB_SCRAPER_JOB_NAME = module.jobs["web-scraper-tool"].job.id
       }
+    },
+    "cso-vetting-service" = {
+      service_account = google_service_account.cso_vetting_sa.email
+      container_port  = 8080
+      ingress         = "INGRESS_TRAFFIC_INTERNAL_ONLY"
+      is_public       = false
+      env_vars = {
+        GCP_PROJECT              = var.project_id
+        CPO_ANALYSIS_SERVICE_URL = module.services["cpo-analysis-service"].service.uri
+      }
+    },
+    "cpo-analysis-service" = {
+      service_account = google_service_account.cpo_analysis_sa.email
+      container_port  = 8080
+      ingress         = "INGRESS_TRAFFIC_INTERNAL_ONLY"
+      is_public       = false
+      env_vars = {
+        GCP_PROJECT = var.project_id
+      }
+    },
+    "ai-developer-agent-service" = {
+      service_account = google_service_account.ai_developer_agent_sa.email
+      container_port  = 8080
+      ingress         = "INGRESS_TRAFFIC_INTERNAL_ONLY"
+      is_public       = false
+      env_vars = {
+        GCP_PROJECT     = var.project_id
+        APK_BUCKET_NAME = google_storage_bucket.apks.name
+      }
+    },
+    "cmo-publishing-agent" = {
+      service_account = google_service_account.cmo_publishing_agent_sa.email
+      container_port  = 8080
+      ingress         = "INGRESS_TRAFFIC_INTERNAL_ONLY"
+      is_public       = false
+      env_vars = {
+        GCP_PROJECT        = var.project_id
+        PUBLISHER_JOB_NAME = module.jobs["play-publisher-tool"].job.id
+      }
     }
-    # ... (other service definitions remain the same as previous correct versions) ...
   }
 
   jobs = {
@@ -53,7 +90,7 @@ locals {
       env_vars = {
         GCP_PROJECT = var.project_id
       }
-    }
+    },
     "play-publisher-tool" = {
       service_account = google_service_account.cmo_publishing_agent_sa.email
       env_vars = {

@@ -1,12 +1,12 @@
 steps:
   # Build and push all container images to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['compose', '-f', 'backend/compose.yaml', 'build']
     id: 'Build Images'
+    args: ['compose', '-f', 'backend/compose.yaml', 'build']
 
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['compose', '-f', 'backend/compose.yaml', 'push']
     id: 'Push Images'
+    args: ['compose', '-f', 'backend/compose.yaml', 'push']
     waitFor: ['Build Images']
 
   # Setup Terraform with the correct workspace for the environment
@@ -18,7 +18,6 @@ steps:
       - 'workspace'
       - 'select'
       - '${_ENV_SUFFIX}'
-    # This step is allowed to fail if the workspace doesn't exist yet
     allow_failure: true
     waitFor: ['Push Images']
 
@@ -27,7 +26,7 @@ steps:
     dir: 'terraform'
     entrypoint: 'bash'
     args:
-      - -c
+      - '-c' # This argument is now quoted
       - |
         # If workspace select failed, create the new workspace
         if [ $? -ne 0 ]; then
@@ -52,16 +51,15 @@ steps:
   # Halt for a manual approval before deploying to production
   - name: 'gcr.io/cloud-builders/gcloud'
     id: 'Manual Approval'
-    # The 'waitFor: ["-"]' creates a step that must be manually approved in the UI
-    waitFor: ['-']
+    waitFor: ['-'] # Creates a manual approval gate
     entrypoint: 'bash'
     args:
-      - '-c'
+      - '-c' # This argument is now quoted
       - |
-        if [[ "${_ENV_SUFFIX}" != "prod" ]]; then
-          echo "Skipping manual approval for non-prod environment."
-        else
+        if [[ "${_ENV_SUFFIX}" == "prod" ]]; then
           echo "Production deployment requires manual approval in the Cloud Build UI."
+        else
+          echo "Skipping manual approval for non-prod environment."
         fi
 
   # Apply the Terraform plan
@@ -75,11 +73,11 @@ steps:
       - 'tf.plan'
     waitFor:
       - 'Terraform Plan'
-      - [cite_start]'Manual Approval' # This makes the apply step wait for the approval [cite: 68]
+      - 'Manual Approval'
 
 substitutions:
-  [cite_start]_ENV_SUFFIX: 'dev' # Default value; can be 'dev' or 'prod' [cite: 259]
-  _TERRAFORM_STATE_BUCKET: 'app-factory-v2-tf-state' # CHANGE THIS to your chosen state bucket name
+  _ENV_SUFFIX: 'dev'
+  _TERRAFORM_STATE_BUCKET: 'app-factory-v2-tf-state'
 
 options:
   logging: CLOUD_LOGGING_ONLY

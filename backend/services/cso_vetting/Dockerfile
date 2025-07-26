@@ -1,4 +1,4 @@
-# Use an official lightweight Python image.
+# [cite_start]Use an official lightweight Python image. [cite: 90]
 FROM python:3.9-slim
 
 # Set the working directory in the container
@@ -12,5 +12,5 @@ COPY ./services/cso_vetting/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 COPY ./services/cso_vetting/main.py .
 
-# Command to run the application using Gunicorn
+# [cite_start]Command to run the application using Gunicorn [cite: 91]
 CMD ["gunicorn", "--bind", "0.0.0.0:8080", "main:app"]

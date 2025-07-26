@@ -4,7 +4,20 @@ steps:
     id: 'Build and Push Images'
     args: ['compose', '-f', 'backend/compose.yaml', 'build', '--push']
 
-  # 2. Initialize Terraform and configure the workspace
+  # 2. Prepare API Gateway spec
+  - name: 'gcr.io/cloud-builders/gcloud'
+    id: 'Prepare API Spec'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        export _ENV_SUFFIX=${_ENV_SUFFIX}
+        export PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format='value(projectNumber)')
+        envsubst < api-spec.template.yaml > terraform/api-spec.yaml
+    waitFor:
+      - 'Build and Push Images'
+
+  # 3. Initialize Terraform
   - name: 'hashicorp/terraform:1.5.7'
     id: 'Terraform Init'
     dir: 'terraform'
@@ -12,19 +25,17 @@ steps:
     args:
       - '-c'
       - |
-        # Ensure we exit on any error
         set -e
         terraform init -reconfigure -backend-config=bucket=${_TERRAFORM_STATE_BUCKET}
-        # Select workspace or create it if it doesn't exist
-        if! terraform workspace list | grep -q "${_ENV_SUFFIX}"; then
+        if ! terraform workspace list | grep -q "${_ENV_SUFFIX}"; then 
           terraform workspace new "${_ENV_SUFFIX}"
         else
           terraform workspace select "${_ENV_SUFFIX}"
-        fi
+        fi 
     waitFor:
-      - 'Build and Push Images'
+      - 'Prepare API Spec'
 
-  # 3. Generate a Terraform plan
+  # 4. Generate a Terraform plan
   - name: 'hashicorp/terraform:1.5.7'
     id: 'Terraform Plan'
     dir: 'terraform'
@@ -36,7 +47,7 @@ steps:
     waitFor:
       - 'Terraform Init'
 
-  # 4. Halt for a manual approval before deploying to production
+  # 5. Manual approval for production
   - name: 'gcr.io/cloud-builders/gcloud'
     id: 'Manual Approval'
     waitFor:
@@ -46,7 +57,7 @@ steps:
       - '-c'
       - 'echo "This step is reserved for manual approval in production triggers."'
 
-  # 5. Apply the Terraform plan
+  # 6. Apply the Terraform plan
   - name: 'hashicorp/terraform:1.5.7'
     id: 'Terraform Apply'
     dir: 'terraform'

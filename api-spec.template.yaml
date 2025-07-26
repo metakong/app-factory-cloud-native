@@ -1,0 +1,30 @@
+swagger: '2.0'
+info:
+  title: 'App Factory API Gateway'
+  description: 'Single entry point for all App Factory services.'
+  version: '1.0.0'
+schemes:
+  - 'https'
+produces:
+  - 'application/json'
+x-google-backend:
+  address: https://ceo-dashboard-gk4nywjifq-uc.a.run.app # Default backend
+paths:
+  /start-discovery:
+    post:
+      summary: 'Starts the discovery cycle job.'
+      operationId: 'startDiscovery'
+      x-google-backend:
+        address: https://discovery-cycle-service-gk4nywjifq-uc.a.run.app
+      responses:
+        '200':
+          description: 'Discovery cycle started successfully.'
+  /vetted-ideas:
+    get:
+      summary: 'Returns a list of app ideas ready for CEO approval.'
+      operationId: 'getVettedIdeas'
+      x-google-backend:
+        address: https://discovery-cycle-service-gk4nywjifq-uc.a.run.app
+      responses:
+        '200':
+          description: 'A list of vetted ideas.'

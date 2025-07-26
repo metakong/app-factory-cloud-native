@@ -19,7 +19,7 @@ def get_play_service():
         if not creds_json_str:
             raise ValueError("Google Play API key secret not found.")
             
-        creds_info = json.loads(creds_json_str)
+        [cite_start]creds_info = json.loads(creds_json_str) # [cite: 149]
         credentials = service_account.Credentials.from_service_account_info(
             creds_info,
             scopes=['https://www.googleapis.com/auth/androidpublisher']
@@ -27,7 +27,7 @@ def get_play_service():
         return build('androidpublisher', 'v3', credentials=credentials)
     except Exception as e:
         logger.error(f"Failed to authenticate with Google Play API: {e}")
-        raise
+        [cite_start]raise # [cite: 150]
 
 def main():
     """Main function for the Google Play Publisher Cloud Run Job."""
@@ -35,7 +35,7 @@ def main():
     
     idea_id = os.environ.get("IDEA_ID")
     if not idea_id:
-        logger.error("IDEA_ID environment variable not set. Exiting.")
+        [cite_start]logger.error("IDEA_ID environment variable not set. Exiting.") # [cite: 151]
         return
 
     if not APK_BUCKET_NAME:
@@ -48,7 +48,7 @@ def main():
             logger.error(f"App idea '{idea_id}' not found.")
             return
 
-        package_name = f"com.appfactory.{idea_id.replace('-', '').lower()}"
+        [cite_start]package_name = f"com.appfactory.{idea_id.replace('-', '').lower()}" # [cite: 152]
         apk_gcs_path = f"{idea_id}/app-release.apk"
         local_apk_path = "/tmp/app-release.apk"
 
@@ -61,7 +61,7 @@ def main():
 
         service = get_play_service()
 
-        logger.info(f"Creating new edit for package: {package_name}")
+        [cite_start]logger.info(f"Creating new edit for package: {package_name}") # [cite: 153]
         app_edit = service.edits().insert(packageName=package_name).execute()
         edit_id = app_edit['id']
 
@@ -70,7 +70,7 @@ def main():
         apk_upload_result = service.edits().apks().upload(
             packageName=package_name,
             editId=edit_id,
-            media_body=media
+            [cite_start]media_body=media # [cite: 154]
         ).execute()
         version_code = apk_upload_result['versionCode']
         logger.info(f"Successfully uploaded APK with version code: {version_code}")
@@ -80,7 +80,7 @@ def main():
             packageName=package_name,
             editId=edit_id,
             track='internal',
-            body={'releases': [{'versionCodes': [str(version_code)], 'status': 'completed'}]}
+            [cite_start]body={'releases': [{'versionCodes': [str(version_code)], 'status': 'completed'}]} # [cite: 155]
         ).execute()
 
         logger.info(f"Committing edit ID: {edit_id}")
@@ -91,7 +91,7 @@ def main():
 
     except Exception as e:
         logger.exception(f"An error occurred during the publishing job for '{idea_id}'.")
-        save_to_firestore("app_ideas", idea_id, {"status": "PUBLISHING_FAILED", "error": str(e)})
+        [cite_start]save_to_firestore("app_ideas", idea_id, {"status": "PUBLISHING_FAILED", "error": str(e)}) # [cite: 156]
            
     logger.info("Google Play Publisher Tool job finished.")
 

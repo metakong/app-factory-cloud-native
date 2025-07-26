@@ -13,7 +13,7 @@ from datetime import timedelta
 app = Flask(__name__)
 logger = get_logger(__name__)
 
-# [cite_start]--- Constants & Configuration from Environment Variables [cite: 110] ---
+# --- Constants & Configuration from Environment Variables ---
 METAKONG_GITHUB_USER = "metakong"
 GITHUB_SECRET_NAME = "github-token"
 GEMINI_SECRET_NAME = "gemini-api-key"
@@ -25,9 +25,7 @@ try:
     build_client = cloudbuild_v1.CloudBuildClient()
     storage_client = storage.Client()
 except Exception as e:
-    logger.critical(f"Failed to initialize GCP clients: {e}")
-
-#... (imports and app setup remain the same)
+    logger.critical(f"Failed to initialize GCP clients: {e}") #
 
 # --- Secure Internal CI/CD Template ---
 # The public access step has been removed.
@@ -70,40 +68,35 @@ options:
   machineType: 'E2_HIGHCPU_8'
 """
 
-#... (rest of the file remains the same)
-# (The rest of ai_developer/main.py remains largely the same, but with all `print` calls
-# replaced by `logger` calls and the following change in the `build_complete` function)
-
 @app.route('/build-complete', methods=['POST'])
 def build_complete():
     """Callback endpoint for the generated app's Cloud Build pipeline."""
     data = request.get_json()
     idea_id = data.get("idea_id")
-    build_status = data.get("build_status")
+    build_status = data.get("build_status") #
 
     if not all([idea_id, build_status]):
         logger.error("Invalid build-complete callback payload.", extra={"json_fields": data})
-        return jsonify({"status": "error", "message": "Invalid payload. 'idea_id' and 'build_status' are required."}), 400
+        return jsonify({"status": "error", "message": "Invalid payload. 'idea_id' and 'build_status' are required."}), 400 #
 
     logger.info(f"Received build completion for idea '{idea_id}' with status '{build_status}'.")
 
     try:
         if build_status == "SUCCESS":
-            # [cite_start]Generate a secure, time-limited signed URL instead of a public link [cite: 104, 105]
             bucket = storage_client.bucket(APK_BUCKET_NAME)
             blob = bucket.blob(f"{idea_id}/app-release.apk")
 
-            signed_url = blob.generate_v4_signed_url(
+            signed_url = blob.generate_v4_signed_url( #
                 version="v4",
-                expiration=timedelta(hours=24), # URL is valid for 24 hours
+                expiration=timedelta(hours=24), 
                 method="GET",
-            [cite_start]) # [cite: 107]
+            )
             
             update_data = {
-                "status": "PENDING_CEO_TESTING",
-                "apk_download_url": signed_url # Use the secure URL
+                "status": "PENDING_CEO_TESTING", #
+                "apk_download_url": signed_url 
             }
-            message = f"Build for {idea_id} succeeded. APK is ready for testing."
+            message = f"Build for {idea_id} succeeded. APK is ready for testing." #
         else:
             update_data = {
                 "status": "BUILD_FAILED",
@@ -111,7 +104,7 @@ def build_complete():
             }
             message = f"Build for {idea_id} failed."
 
-        save_to_firestore("app_ideas", idea_id, update_data)
+        save_to_firestore("app_ideas", idea_id, update_data) #
         logger.info(message)
         return jsonify({"status": "success", "message": message}), 200
 

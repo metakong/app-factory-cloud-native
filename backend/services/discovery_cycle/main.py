@@ -22,14 +22,14 @@ def start_discovery_job():
     logger.info("Received request to start discovery cycle job.")
     try:
         if not WEB_SCRAPER_JOB_NAME:
-            logger.critical("WEB_SCRAPER_JOB_NAME environment variable is not set. Cannot trigger job.")
+            [cite_start]logger.critical("WEB_SCRAPER_JOB_NAME environment variable is not set. Cannot trigger job.") # [cite: 87]
             return jsonify({"status": "error", "message": "Discovery service is not configured."}), 500
 
         run_client = run_v2.JobsClient()
         request_body = run_v2.RunJobRequest(name=WEB_SCRAPER_JOB_NAME)
         operation = run_client.run_job(request=request_body)
         
-        logger.info(f"Successfully triggered job '{WEB_SCRAPER_JOB_NAME}'. Operation: {operation.metadata.name}")
+        [cite_start]logger.info(f"Successfully triggered job '{WEB_SCRAPER_JOB_NAME}'. Operation: {operation.metadata.name}") # [cite: 88]
         return jsonify({"status": "success", "message": "Discovery cycle job started successfully."}), 200
     except Exception as e:
         logger.exception("Failed to trigger 'web-scraper-tool' job.")
@@ -41,7 +41,7 @@ def get_ideas_for_approval():
     logger.info("Request received for ideas awaiting CEO approval.")
     try:
         ideas_ref = db.collection("app_ideas").where("status", "==", "PENDING_CEO_APPROVAL").stream()
-        ideas = [idea.to_dict() for idea in ideas_ref]
+        [cite_start]ideas = [idea.to_dict() for idea in ideas_ref] # [cite: 89]
         return jsonify({"ideas": ideas}), 200
     except Exception as e:
         logger.exception("Failed to fetch ideas for approval.")

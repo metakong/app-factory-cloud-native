@@ -16,7 +16,7 @@ SUBREDDIT_PORTFOLIO = [
     {"name": "howto", "tier": 1}, {"name": "IWantToLearn", "tier": 1},
     {"name": "solvethis", "tier": 1}, {"name": "GetMotivated", "tier": 2},
     {"name": "GetDisciplined", "tier": 2}, {"name": "selfimprovement", "tier": 2},
-    {"name": "productivity", "tier": 2}, {"name": "ZenHabits", "tier": 2},
+    [cite_start]{"name": "productivity", "tier": 2}, {"name": "ZenHabits", "tier": 2}, # [cite: 133]
     {"name": "personalfinance", "tier": 2}, {"name": "financialindependence", "tier": 2},
     {"name": "Frugal", "tier": 2}, {"name": "povertyfinance", "tier": 2},
     {"name": "careerguidance", "tier": 2}, {"name": "jobs", "tier": 2},
@@ -25,7 +25,7 @@ SUBREDDIT_PORTFOLIO = [
     {"name": "shutupandtakemymoney", "tier": 2}, {"name": "HomeImprovement", "tier": 2},
     {"name": "DIY", "tier": 2}, {"name": "homemaking", "tier": 2},
     {"name": "organization", "tier": 2}, {"name": "declutter", "tier": 2},
-    {"name": "Parenting", "tier": 2}, {"name": "daddit", "tier": 2},
+    [cite_start]{"name": "Parenting", "tier": 2}, {"name": "daddit", "tier": 2}, # [cite: 134]
     {"name": "mommit", "tier": 2}, {"name": "relationships", "tier": 2},
     {"name": "relationship_advice", "tier": 2}, {"name": "travel", "tier": 2},
     {"name": "Fitness", "tier": 2}, {"name": "EatCheapAndHealthy", "tier": 2},
@@ -34,7 +34,7 @@ SUBREDDIT_PORTFOLIO = [
     {"name": "hobbies", "tier": 2}, {"name": "mildlyinfuriating", "tier": 2},
     {"name": "CrappyDesign", "tier": 2}, {"name": "rant", "tier": 2},
     {"name": "offmychest", "tier": 2}, {"name": "talesfromretail", "tier": 2},
-    {"name": "firstworldproblems", "tier": 2}, {"name": "Showerthoughts", "tier": 1},
+    [cite_start]{"name": "firstworldproblems", "tier": 2}, {"name": "Showerthoughts", "tier": 1}, # [cite: 135]
     {"name": "CrazyIdeas", "tier": 1}, {"name": "SomebodyMakeThis", "tier": 1},
     {"name": "Lightbulb", "tier": 1}
 ]
@@ -50,11 +50,10 @@ SEARCH_TERMS = [
 genai.configure()
 SUMMARIZATION_MODEL = genai.GenerativeModel('gemini-pro')
 SUMMARIZATION_PROMPT = """
-Summarize the core problem, unmet need, or product idea from the following text, which was extracted from a public online forum.
-The summary should be a single, concise sentence.
+[cite_start]Summarize the core problem, unmet need, or product idea from the following text, which was extracted from a public online forum. [cite: 136]
+[cite_start]The summary should be a single, concise sentence. [cite: 137]
 Focus only on the abstract concept.
-CRITICALLY IMPORTANT: Do not include any personal details, names, locations, or conversational filler from the original text.
-
+[cite_start]CRITICALLY IMPORTANT: Do not include any personal details, names, locations, or conversational filler from the original text. [cite: 138]
 TEXT TO SUMMARIZE:
 ---
 {text_content}
@@ -70,7 +69,7 @@ def get_reddit_client():
             return None
         creds = json.loads(creds_json)
         return praw.Reddit(
-            client_id=creds["client_id"],
+            [cite_start]client_id=creds["client_id"], # [cite: 140]
             client_secret=creds["client_secret"],
             password=creds["password"],
             user_agent=creds["user_agent"],
@@ -81,7 +80,7 @@ def get_reddit_client():
         return None
 
 def summarize_content(title: str, body: str) -> str:
-    """Uses Gemini to summarize the user content into a single-sentence idea."""
+    [cite_start]"""Uses Gemini to summarize the user content into a single-sentence idea.""" # [cite: 141]
     full_text = f"Title: {title}\n\nBody: {body}"
     prompt = SUMMARIZATION_PROMPT.format(text_content=full_text)
     try:
@@ -94,7 +93,7 @@ def summarize_content(title: str, body: str) -> str:
 def is_previously_rejected(summary: str) -> bool:
     """Checks if an idea with the same summary exists in the rejected collection."""
     try:
-        rejected_ref = db.collection("rejected_app_ideas").where("description", "==", summary).limit(1).stream()
+        [cite_start]rejected_ref = db.collection("rejected_app_ideas").where("description", "==", summary).limit(1).stream() # [cite: 142]
         return any(rejected_ref) # Returns True if the iterator is not empty
     except Exception as e:
         logger.error(f"Error checking for rejected ideas: {e}")
@@ -106,7 +105,7 @@ def scrape_subreddit(reddit, subreddit_name):
     subreddit = reddit.subreddit(subreddit_name)
     found_ideas = 0
     
-    query = " OR ".join(f'"{term}"' for term in SEARCH_TERMS)
+    [cite_start]query = " OR ".join(f'"{term}"' for term in SEARCH_TERMS) # [cite: 143]
     
     for submission in subreddit.search(query, sort="new", time_filter="month", limit=50):
         if submission.score < 3 or not submission.selftext:
@@ -116,7 +115,7 @@ def scrape_subreddit(reddit, subreddit_name):
 
         # --- START: NEW REJECTION CHECK ---
         if is_previously_rejected(summary):
-            logger.info(f"Skipping previously rejected idea: {summary}")
+            [cite_start]logger.info(f"Skipping previously rejected idea: {summary}") # [cite: 144]
             continue
         # --- END: NEW REJECTION CHECK ---
 
@@ -126,7 +125,7 @@ def scrape_subreddit(reddit, subreddit_name):
             "status": "PENDING_VETTING",
             "source_url": f"https://www.reddit.com{submission.permalink}",
             "description": summary,
-            "community_validation_score": submission.score,
+            [cite_start]"community_validation_score": submission.score, # [cite: 145]
             "community_validation_comments": submission.num_comments,
             "source_subreddit": subreddit_name,
             "created_at": datetime.utcnow().isoformat()
@@ -134,7 +133,7 @@ def scrape_subreddit(reddit, subreddit_name):
         
         try:
             save_to_firestore("app_ideas", idea_id, app_idea_data)
-            logger.info(f"Saved summarized idea from r/{subreddit_name}: {summary}")
+            [cite_start]logger.info(f"Saved summarized idea from r/{subreddit_name}: {summary}") # [cite: 146]
             found_ideas += 1
         except Exception as e:
             logger.error(f"Failed to save idea {idea_id} to Firestore: {e}")
@@ -144,7 +143,7 @@ def scrape_subreddit(reddit, subreddit_name):
 def main():
     """Main function for the web scraper Cloud Run Job."""
     logger.info("Robust Web Scraper Tool job started.")
-    reddit_client = get_reddit_client()
+    [cite_start]reddit_client = get_reddit_client() # [cite: 147]
     if not reddit_client:
         return
 

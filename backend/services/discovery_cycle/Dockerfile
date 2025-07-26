@@ -12,5 +12,5 @@ COPY ./services/discovery_cycle/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 COPY ./services/discovery_cycle/main.py .
 
-# Command to run the application using Gunicorn
+# [cite_start]Command to run the application using Gunicorn [cite: 86]
 CMD ["gunicorn", "--bind", "0.0.0.0:8080", "main:app"]

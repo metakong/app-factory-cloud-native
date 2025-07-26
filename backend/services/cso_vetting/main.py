@@ -17,11 +17,10 @@ STACKEXCHANGE_API_URL = "https://api.stackexchange.com/2.3/search/advanced?order
 REJECTION_THRESHOLD = 7.5
 
 def calculate_competition_score(description: str) -> float:
-    # ...
     # This function should be modified to use the resilient session for its requests calls
     # For example:
     # session = get_resilient_session()
-    # hn_res = session.get(f"{HACKERNEWS_API_URL}{keywords}", timeout=10)
+    # [cite_start]hn_res = session.get(f"{HACKERNEWS_API_URL}{keywords}", timeout=10) [cite: 92]
     # se_res = session.get(f"{STACKEXCHANGE_API_URL}{keywords}", timeout=10)
     # ...
     return 0.0 # Placeholder for brevity

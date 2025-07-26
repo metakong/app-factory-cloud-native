@@ -23,14 +23,14 @@ def publish_app():
     """
     idea_id = "" # Initialize for error logging
     try:
-        if not PUBLISHER_JOB_NAME:
+        [cite_start]if not PUBLISHER_JOB_NAME: # [cite: 126]
             logger.critical("PUBLISHER_JOB_NAME environment variable is not set. Cannot trigger job.")
             return jsonify({"status": "error", "message": "Publishing service is not configured."}), 500
 
         data = request.get_json()
         if not data or "idea_id" not in data:
             logger.error("Request body missing 'idea_id'.", extra={"json_fields": data})
-            return jsonify({"status": "error", "message": "Missing 'idea_id' in request body."}), 400
+            [cite_start]return jsonify({"status": "error", "message": "Missing 'idea_id' in request body."}), 400 # [cite: 127]
 
         idea_id = data["idea_id"]
         logger.info(f"Starting publishing process for app idea: {idea_id}")
@@ -40,7 +40,7 @@ def publish_app():
             logger.error(f"App idea '{idea_id}' not found in Firestore.")
             return jsonify({"status": "error", "message": f"App idea '{idea_id}' not found."}), 404
 
-        logger.info(f"Triggering play-publisher-tool job '{PUBLISHER_JOB_NAME}' for idea: {idea_id}")
+        [cite_start]logger.info(f"Triggering play-publisher-tool job '{PUBLISHER_JOB_NAME}' for idea: {idea_id}") # [cite: 128]
         run_client = run_v2.JobsClient()
         
         request_body = run_v2.RunJobRequest(
@@ -48,16 +48,16 @@ def publish_app():
             overrides={
                 "container_overrides": [
                     {
-                        "name": "play-publisher-tool",
+                        [cite_start]"name": "play-publisher-tool", # [cite: 129]
                         "env": [
                             {"name": "IDEA_ID", "value": idea_id}
-                        ],
+                        [cite_start]], # [cite: 130]
                     }
                 ]
             },
         )
         operation = run_client.run_job(request=request_body)
-        logger.info(f"Successfully triggered job. Operation: {operation.metadata.name}")
+        [cite_start]logger.info(f"Successfully triggered job. Operation: {operation.metadata.name}") # [cite: 131]
 
         save_to_firestore("app_ideas", idea_id, {"status": "PUBLISHING_STARTED"})
 

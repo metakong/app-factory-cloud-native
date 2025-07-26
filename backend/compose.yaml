@@ -1,5 +1,4 @@
-# This file is used by Cloud Build to build and push all images.
-# It can also be used for local development with `docker compose up`.
+# Used by Cloud Build to build and push all images and for local development. [cite: 2313, 2314]
 services:
   ceo-dashboard:
     build:
@@ -10,31 +9,31 @@ services:
     build:
       context: .
       dockerfile: ./services/discovery_cycle/Dockerfile
-    image: us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/discovery-cycle-service
+    [cite_start]image: us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/discovery-cycle-service [cite: 2315]
 
   cso-vetting-service:
     build:
       context: .
       dockerfile: ./services/cso_vetting/Dockerfile
-    image: us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service
+    [cite_start]image: us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cso-vetting-service [cite: 2316]
 
   cpo-analysis-service:
     build:
       context: .
       dockerfile: ./services/cpo_analysis/Dockerfile
-    image: us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service
+    [cite_start]image: us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cpo-analysis-service [cite: 2317]
 
   ai-developer-agent-service:
     build:
       context: .
       dockerfile: ./services/ai_developer/Dockerfile
-    image: us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/ai-developer-agent-service
+    [cite_start]image: us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/ai-developer-agent-service [cite: 2318]
 
   cmo-publishing-agent:
     build:
       context: .
       dockerfile: ./services/cmo_publishing/Dockerfile
-    image: us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent
+    [cite_start]image: us-central1-docker.pkg.dev/app-factory-v2/app-factory-repo/cmo-publishing-agent [cite: 2319]
 
   web-scraper-tool:
     build:

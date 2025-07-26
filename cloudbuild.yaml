@@ -1,10 +1,10 @@
 steps:
-  # Build and push all container images to Artifact Registry
+  # 1. Build and push all container images to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
     id: 'Build and Push Images'
     args: ['compose', '-f', 'backend/compose.yaml', 'build', '--push']
 
-  # Setup Terraform with the correct workspace for the environment
+  # 2. Initialize Terraform and configure the workspace
   - name: 'hashicorp/terraform:1.5.7'
     id: 'Terraform Init'
     dir: 'terraform'
@@ -12,6 +12,8 @@ steps:
     args:
       - '-c'
       - |
+        # Ensure we exit on any error
+        set -e
         terraform init -reconfigure -backend-config=bucket=${_TERRAFORM_STATE_BUCKET}
         # Select workspace or create it if it doesn't exist
         if! terraform workspace list | grep -q "${_ENV_SUFFIX}"; then
@@ -22,7 +24,7 @@ steps:
     waitFor:
       - 'Build and Push Images'
 
-  # Generate a Terraform plan
+  # 3. Generate a Terraform plan
   - name: 'hashicorp/terraform:1.5.7'
     id: 'Terraform Plan'
     dir: 'terraform'
@@ -34,8 +36,7 @@ steps:
     waitFor:
       - 'Terraform Init'
 
-  # Halt for a manual approval before deploying to production.
-  # This step's ID is referenced in the Cloud Build trigger settings.
+  # 4. Halt for a manual approval before deploying to production
   - name: 'gcr.io/cloud-builders/gcloud'
     id: 'Manual Approval'
     waitFor:
@@ -43,9 +44,9 @@ steps:
     entrypoint: 'bash'
     args:
       - '-c'
-      - 'echo "This step will be used for manual approval in production triggers."'
-    
-  # Apply the Terraform plan
+      - 'echo "This step is reserved for manual approval in production triggers."'
+
+  # 5. Apply the Terraform plan
   - name: 'hashicorp/terraform:1.5.7'
     id: 'Terraform Apply'
     dir: 'terraform'

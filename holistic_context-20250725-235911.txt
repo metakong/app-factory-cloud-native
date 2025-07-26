@@ -1,5 +1,5 @@
 Project Context for app-factory-v2
-Generated on: 2025-07-25T22:47:38.611069
+Generated on: 2025-07-25T23:59:11.274922
 ================================================================================
 
 --- GCP Secret Manager Secrets ---
@@ -229,40 +229,26 @@ paths:
 steps:
   # Build and push all container images to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
-    id: 'Build Images'
-    args: ['compose', '-f', 'backend/compose.yaml', 'build']
-
-  - name: 'gcr.io/cloud-builders/docker'
-    id: 'Push Images'
-    args: ['compose', '-f', 'backend/compose.yaml', 'push']
-    waitFor: ['Build Images']
+    id: 'Build and Push Images'
+    args: ['compose', '-f', 'backend/compose.yaml', 'build', '--push']
 
   # Setup Terraform with the correct workspace for the environment
   - name: 'hashicorp/terraform:1.5.7'
-    id: 'Terraform Workspace'
-    dir: 'terraform'
-    entrypoint: 'terraform'
-    args:
-      - 'workspace'
-      - 'select'
-      - '${_ENV_SUFFIX}'
-    allow_failure: true
-    waitFor: ['Push Images']
-
-  - name: 'hashicorp/terraform:1.5.7'
     id: 'Terraform Init'
     dir: 'terraform'
-    entrypoint: 'sh' # CORRECTED: Use 'sh' instead of 'bash'
+    entrypoint: 'sh'
     args:
       - '-c'
       - |
-        # If workspace select failed, create the new workspace
-        if ! terraform workspace list | grep -q "${_ENV_SUFFIX}"; then
-          terraform workspace new ${_ENV_SUFFIX}
-        fi
         terraform init -reconfigure -backend-config=bucket=${_TERRAFORM_STATE_BUCKET}
+        # Select workspace or create it if it doesn't exist
+        if! terraform workspace list | grep -q "${_ENV_SUFFIX}"; then
+          terraform workspace new "${_ENV_SUFFIX}"
+        else
+          terraform workspace select "${_ENV_SUFFIX}"
+        fi
     waitFor:
-      - 'Terraform Workspace'
+      - 'Build and Push Images'
 
   # Generate a Terraform plan
   - name: 'hashicorp/terraform:1.5.7'
@@ -276,20 +262,17 @@ steps:
     waitFor:
       - 'Terraform Init'
 
-  # Halt for a manual approval before deploying to production
+  # Halt for a manual approval before deploying to production.
+  # This step's ID is referenced in the Cloud Build trigger settings.
   - name: 'gcr.io/cloud-builders/gcloud'
     id: 'Manual Approval'
-    waitFor: ['-']
-    entrypoint: 'sh'
+    waitFor:
+      - 'Terraform Plan'
+    entrypoint: 'bash'
     args:
       - '-c'
-      - |
-        if [ "${_ENV_SUFFIX}" = "prod" ]; then
-          echo "Production deployment requires manual approval in the Cloud Build UI."
-        else
-          echo "Skipping manual approval for non-prod environment."
-        fi
-
+      - 'echo "This step will be used for manual approval in production triggers."'
+    
   # Apply the Terraform plan
   - name: 'hashicorp/terraform:1.5.7'
     id: 'Terraform Apply'
@@ -300,7 +283,6 @@ steps:
       - '-auto-approve'
       - 'tf.plan'
     waitFor:
-      - 'Terraform Plan'
       - 'Manual Approval'
 
 substitutions:
@@ -312,163 +294,11 @@ options:
 
 --- File: deploy.sh ---
 
-#!/bin/bash
-set -euo pipefail # Exit on error, unset variable, pipe failure
-
-# --- Configuration ---
-ENV_SUFFIX="$1"
-REGION="us-central1"
-PROJECT_ID="app-factory-v2"
-REPO="app-factory-repo"
-
-# --- Check for required arguments ---
-if [ -z "$ENV_SUFFIX" ]; then
-  echo "Error: Environment suffix is required. Usage: ./deploy.sh <dev|prod>"
-  exit 1
-fi
-
-# --- Construct service image URLs ---
-CEO_DASHBOARD_IMAGE="us-central1-docker.pkg.dev/$PROJECT_ID/$REPO/ceo-dashboard"
-CSO_VETTING_SERVICE_IMAGE="us-central1-docker.pkg.dev/$PROJECT_ID/$REPO/cso-vetting-service"
-AI_DEVELOPER_AGENT_SERVICE_IMAGE="us-central1-docker.pkg.dev/$PROJECT_ID/$REPO/ai-developer-agent-service"
-CMO_PUBLISHING_AGENT_SERVICE_IMAGE="us-central1-docker.pkg.dev/$PROJECT_ID/$REPO/cmo-publishing-agent"
-CPO_ANALYSIS_SERVICE_IMAGE="us-central1-docker.pkg.dev/$PROJECT_ID/$REPO/cpo-analysis-service"
-DISCOVERY_CYCLE_SERVICE_IMAGE="us-central1-docker.pkg.dev/$PROJECT_ID/$REPO/discovery-cycle-service"
-WEB_SCRAPER_TOOL_IMAGE="us-central1-docker.pkg.dev/$PROJECT_ID/$REPO/web-scraper-tool"
-PLAY_PUBLISHER_TOOL_IMAGE="us-central1-docker.pkg.dev/$PROJECT_ID/$REPO/play-publisher-tool"
-
-# --- Construct environment variables ---
-# All backend services need to know the GCP_PROJECT for the gcp_client.
-ENV_VARS="GCP_PROJECT=$PROJECT_ID"
-
-echo "--- Starting Deployment for environment: $ENV_SUFFIX ---"
-
-echo "Deploying CEO Dashboard..."
-gcloud run deploy ceo-dashboard \
-    --image="$CEO_DASHBOARD_IMAGE" \
-    --region="$REGION" \
-    --platform=managed \
-    --ingress=all \
-    --port=80 \
-    --allow-unauthenticated \
-    --quiet
-
-echo "Deploying internal services..."
-gcloud run deploy cso-vetting-service --image="$CSO_VETTING_SERVICE_IMAGE" --region="$REGION" --platform=managed --ingress=internal --set-env-vars="$ENV_VARS" --quiet
-gcloud run deploy ai-developer-agent-service --image="$AI_DEVELOPER_AGENT_SERVICE_IMAGE" --region="$REGION" --platform=managed --ingress=all --set-env-vars="$ENV_VARS" --quiet
-gcloud run deploy cmo-publishing-agent --image="$CMO_PUBLISHING_AGENT_SERVICE_IMAGE" --region="$REGION" --platform=managed --ingress=all --set-env-vars="$ENV_VARS" --quiet
-gcloud run deploy cpo-analysis-service --image="$CPO_ANALYSIS_SERVICE_IMAGE" --region="$REGION" --platform=managed --ingress=all --set-env-vars="$ENV_VARS" --quiet
-
-echo "Deploying gateway-accessible service..."
-gcloud run deploy discovery-cycle-service --image="$DISCOVERY_CYCLE_SERVICE_IMAGE" --region="$REGION" --platform=managed --ingress=all --set-env-vars="$ENV_VARS" --quiet
-
-echo "Deploying jobs..."
-gcloud run jobs deploy web-scraper-tool --image="$WEB_SCRAPER_TOOL_IMAGE" --region="$REGION" --quiet
-gcloud run jobs deploy play-publisher-tool --image="$PLAY_PUBLISHER_TOOL_IMAGE" --region="$REGION" --quiet
-
-echo "--- Deployment finished successfully. ---"
+[File not found]
 
 --- File: iam_setup.sh ---
 
-#!/bin/bash
-# This script sets up the necessary IAM permissions for the App Factory services.
-set -euo pipefail # Exit on error, unset variable, pipe failure
-
-PROJECT_ID="app-factory-v2"
-REGION="us-central1"
-PROJECT_NUMBER=$(gcloud projects describe "$PROJECT_ID" --format="value(projectNumber)")
-
-echo "Enabling necessary Google Cloud APIs for project: $PROJECT_ID..."
-gcloud services enable \
-    run.googleapis.com \
-    iam.googleapis.com \
-    cloudbuild.googleapis.com \
-    secretmanager.googleapis.com \
-    firestore.googleapis.com \
-    artifactregistry.googleapis.com \
-    aiplatform.googleapis.com \
-    --project="$PROJECT_ID"
-
-echo "Creating Artifact Registry repository 'app-factory-repo'..."
-gcloud artifacts repositories create app-factory-repo \
-    --repository-format=docker \
-    --location="$REGION" \
-    --description="Docker repository for App Factory V2" \
-    --project="$PROJECT_ID" || echo "Repository 'app-factory-repo' already exists."
-
-echo "Granting Cloud Build service account permissions..."
-CLOUD_BUILD_SA="$PROJECT_NUMBER@cloudbuild.gserviceaccount.com"
-
-gcloud projects add-iam-policy-binding "$PROJECT_ID" \
-    --member="serviceAccount:$CLOUD_BUILD_SA" \
-    --role="roles/run.admin" \
-    --condition=None
-gcloud projects add-iam-policy-binding "$PROJECT_ID" \
-    --member="serviceAccount:$CLOUD_BUILD_SA" \
-    --role="roles/iam.serviceAccountUser" \
-    --condition=None
-gcloud projects add-iam-policy-binding "$PROJECT_ID" \
-    --member="serviceAccount:$CLOUD_BUILD_SA" \
-    --role="roles/artifactregistry.writer" \
-    --condition=None
-
-echo "Configuring IAM permissions for each microservice..."
-
-SERVICE_ACCOUNTS=(
-    "discovery-cycle-sa"
-    "cso-vetting-sa"
-    "cpo-analysis-sa"
-    "ai-developer-agent-sa"
-    "cmo-publishing-agent-sa"
-    "mcp-gateway-sa"
-)
-
-echo "Creating service accounts if they do not exist..."
-for SA_NAME in "${SERVICE_ACCOUNTS[@]}"; do
-    gcloud iam service-accounts create "$SA_NAME" \
-        --display-name="$SA_NAME" \
-        --project="$PROJECT_ID" || echo "Service account $SA_NAME already exists."
-done
-
-# Grant common permissions
-for SA_NAME in "${SERVICE_ACCOUNTS[@]}"; do
-    SA_EMAIL="$SA_NAME@$PROJECT_ID.iam.gserviceaccount.com"
-    echo "Granting common permissions to $SA_EMAIL..."
-
-    # Permission to access secrets
-    gcloud projects add-iam-policy-binding "$PROJECT_ID" --member="serviceAccount:$SA_EMAIL" --role="roles/secretmanager.secretAccessor" --condition=None
-    # Permission to read/write to Firestore
-    gcloud projects add-iam-policy-binding "$PROJECT_ID" --member="serviceAccount:$SA_EMAIL" --role="roles/datastore.user" --condition=None
-done
-
-# Grant specific permissions for services that use the Gemini API
-echo "Granting AI Platform User role to CPO and AI Developer services..."
-gcloud projects add-iam-policy-binding "$PROJECT_ID" \
-    --member="serviceAccount:cpo-analysis-sa@$PROJECT_ID.iam.gserviceaccount.com" \
-    --role="roles/aiplatform.user" --condition=None
-gcloud projects add-iam-policy-binding "$PROJECT_ID" \
-    --member="serviceAccount:ai-developer-agent-sa@$PROJECT_ID.iam.gserviceaccount.com" \
-    --role="roles/aiplatform.user" --condition=None
-
-# Grant specific permissions for services that trigger other services/jobs
-echo "Granting invoker and runner permissions..."
-gcloud run jobs add-iam-policy-binding web-scraper-tool \
-    --region="$REGION" \
-    --project="$PROJECT_ID" \
-    --member="serviceAccount:discovery-cycle-sa@$PROJECT_ID.iam.gserviceaccount.com" \
-    --role="roles/run.invoker"
-
-gcloud run jobs add-iam-policy-binding play-publisher-tool \
-    --region="$REGION" \
-    --project="$PROJECT_ID" \
-    --member="serviceAccount:cmo-publishing-agent-sa@$PROJECT_ID.iam.gserviceaccount.com" \
-    --role="roles/run.invoker"
-
-gcloud projects add-iam-policy-binding "$PROJECT_ID" \
-    --member="serviceAccount:ai-developer-agent-sa@$PROJECT_ID.iam.gserviceaccount.com" \
-    --role="roles/cloudbuild.builds.editor" --condition=None
-
-echo "IAM setup complete."
+[File not found]
 
 --- File: most-recent-build-attempt-07202025-1929 ---
 
@@ -836,28 +666,37 @@ import os
 import traceback
 from flask import Flask, request, jsonify
 from shared.utils import get_logger
-from shared.gcp_client import get_from_firestore, save_to_firestore
+from shared.gcp_client import get_from_firestore, save_to_firestore, get_secret
 import google.generativeai as genai
 
 app = Flask(__name__)
 logger = get_logger(__name__)
 
 # --- Configuration ---
-# Service URL is now injected via Terraform into the calling service (CSO Vetting)
-genai.configure()
+# Configure the Gemini client at startup
+try:
+    gemini_api_key = get_secret("gemini-api-key")
+    if gemini_api_key:
+        genai.configure(api_key=gemini_api_key)
+    else:
+        logger.critical("GEMINI_API_KEY secret not found. CPO analysis will fail.")
+except Exception as e:
+    logger.critical(f"Failed to configure Gemini client: {e}")
+
 
 @app.route("/")
 def health_check():
     """Provides a simple health check endpoint."""
     return "OK", 200
 
-@app.route('/analyze', methods=['POST'])
+
+@app.route('/analyze', methods=)
 def analyze_idea():
     """
     Receives a vetted idea, generates a product spec and SWOT analysis using the Gemini API,
     and updates its status to 'PENDING_CEO_APPROVAL'.
     """
-    idea_id = "" # Initialize for error logging
+    idea_id = ""  # Initialize for error logging
     try:
         data = request.get_json()
         if not data or "idea_id" not in data:
@@ -874,10 +713,14 @@ def analyze_idea():
 
         # --- CORE LOGIC: Generate Product Spec and SWOT Analysis ---
         logger.info(f"Generating product spec and SWOT for: {app_idea.get('description')}")
-        model = genai.GenerativeModel('gemini-pro')
         
+        model = genai.GenerativeModel('gemini-pro')
         prompt = f"""
-        Act as a world-class Chief Product Officer for a consumer mobile app startup. Your primary goal is to design products for the "average, non-technical consumer." Based on the following app idea, which was sourced from public online discussions, generate a detailed product specification document. The document must contain these two main sections: "Product Specification" and "SWOT Analysis".
+        Act as a world-class Chief Product Officer for a consumer mobile app startup.
+        Your primary goal is to design products for the "average, non-technical consumer."
+        Based on the following app idea, which was sourced from public online discussions, generate a detailed product specification document.
+        The document must contain these two main sections: "Product Specification" and "SWOT Analysis".
+
         Under "Product Specification", include:
         1. **Target User Persona**: Describe the ideal user. Focus on their daily life, motivations, and frustrations.
         2. **Problem Statement**: Clearly articulate the core consumer pain point this app solves.
@@ -901,13 +744,15 @@ def analyze_idea():
             "error": None
         }
         save_to_firestore("app_ideas", idea_id, updated_data)
+
         logger.info(f"Successfully generated spec and SWOT for '{idea_id}'. Status set to PENDING_CEO_APPROVAL.")
-        
         return jsonify({"status": "success", "message": f"Analysis complete for '{idea_id}'. Ready for CEO review."})
 
     except Exception as e:
         logger.exception(f"An error occurred during analysis for '{idea_id}'.")
-        save_to_firestore("app_ideas", idea_id, {"status": "ANALYSIS_FAILED", "error": str(e)})
+        # Save error state to Firestore for visibility
+        if idea_id:
+            save_to_firestore("app_ideas", idea_id, {"status": "ANALYSIS_FAILED", "error": str(e)})
         return jsonify({"status": "error", "message": "An internal error occurred."}), 500
 
 if __name__ == "__main__":
@@ -972,8 +817,10 @@ try:
 except Exception as e:
     logger.critical(f"Failed to initialize GCP clients: {e}")
 
+#... (imports and app setup remain the same)
+
 # --- Secure Internal CI/CD Template ---
-# [cite_start]The public access step has been removed. [cite: 104]
+# The public access step has been removed.
 GENERATED_APP_CLOUDBUILD_TEMPLATE = """
 steps:
 # 1. Access Keystore from Secret Manager
@@ -989,7 +836,7 @@ steps:
   args:
     - '-c'
     - |
-      gcloud secrets versions access latest --secret="flutter-key-properties" --project="${PROJECT_ID}" > android/key.properties
+      gcloud secrets versions access latest --secret="flutter-key-properties" --project="${PROJECT_ID}" --out-file="android/key.properties"
 # 3. Setup Flutter and Build APK
 - name: 'cirrusci/flutter:stable'
   args: ['flutter', 'build', 'apk', '--release']
@@ -1007,11 +854,13 @@ steps:
     - |
       set -e
       ACCESS_TOKEN=$(gcloud auth print-identity-token --audiences="{developer_service_url}")
-      curl -X POST "{developer_service_url}/build-complete" -H "Authorization: Bearer $$ACCESS_TOKEN" -H "Content-Type: application/json" -d '{ "idea_id": "{idea_id}", "build_status": "$BUILD_STATUS" }'
+      curl -X POST "{developer_service_url}/build-complete" -H "Authorization: Bearer \\$$ACCESS_TOKEN" -H "Content-Type: application/json" -d '{ "idea_id": "{idea_id}", "build_status": "$$BUILD_STATUS" }'
 options:
   logging: CLOUD_LOGGING_ONLY
   machineType: 'E2_HIGHCPU_8'
 """
+
+#... (rest of the file remains the same)
 # (The rest of ai_developer/main.py remains largely the same, but with all `print` calls
 # replaced by `logger` calls and the following change in the `build_complete` function)
 

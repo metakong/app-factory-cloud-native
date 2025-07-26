@@ -43,7 +43,7 @@ steps:
     entrypoint: 'bash'
     args:
       - '-c'
-      - 'echo "Waiting for manual approval for prod deployment..."'
+      - 'echo "This step will be used for manual approval in production triggers."'
     
   # Apply the Terraform plan
   - name: 'hashicorp/terraform:1.5.7'

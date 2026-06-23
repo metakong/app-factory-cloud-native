@@ -1,3 +1,15 @@
+> **Transparency Notice:** This documentation was authored by Claude Sonnet 4.6 (Anthropic) under direct human oversight — the same iterative, human-in-the-loop AI partnership methodology used to architect and build every system in this portfolio.
+
+> **Portfolio Context** | **Sean Deardorff** — Strategic Operations & Business Development
+>
+> This repository is an artifact of high-velocity, AI-partnered process engineering. It demonstrates how the author builds resilient, automated business machinery — translating the same decoupled logic, governance, and defensive optimization used to manage open sales territories and corporate operations into working code.
+>
+> **Career Connection:** This production-grade IaC deployment mirrors the same consultancy pattern Sean executed across eight independent client portfolios at MetaKong LLC — assess a messy infrastructure, design a clean architecture with proper governance, deploy it, and measure the revenue impact. The tooling shifted from Salesforce and Zoho to Terraform and Cloud Build, but the methodology of translating chaos into repeatable, documented systems is identical.
+>
+> [View Full Portfolio →](https://github.com/metakong/sean-deardorff)
+
+---
+
 # App Factory V2 - Cloud Native (Production Ready)
 
 This repository contains the complete infrastructure-as-code and application source for the App Factory V2 project. [cite_start]This version has been refactored for production-readiness, security, and scalability using Terraform and Google Cloud best practices. [cite: 2257]
